@@ -127,3 +127,10 @@ xcodebuild -project QingkongPhonePreview.xcodeproj -scheme Qingkong \
 - iPhone、Watch、组件完整真机 Debug 构建成功：`artifacts/build-relaxation-reminders.log`。构建号统一为 4；工程生成器已同步。沿用既有公司签名及包含手表的描述文件，最终产物 `build/RelaxationRemindersFinal/Qingkong.app` 逐层重新签名且严格验证通过，证据：`artifacts/relaxation-reminders-sign.log`、`relaxation-reminders-profiles-check.json`。
 - 最终完整包已成功覆盖安装到 iPhone 17：`artifacts/iphone17-install-relaxation-reminders.json`。自动启动因手机锁屏而失败：`artifacts/iphone17-launch-relaxation-reminders.json`；需解锁后手动打开并选择系统通知授权。未代替用户批准通知。
 - 本轮未使用模拟器。尚未实测真实后台健康更新触发、系统授权弹窗、通知点击／静音／专注及 Watch 镜像，也未确认手表新版同步完成；不把测试、构建或手机安装成功视为这些体验已通过。
+
+## 上传校验缺少健康用途说明（2026-11-19）
+
+- 用户提供的上传日志报 90683：iPhone 和 Watch 两个 App 均缺少 `NSHealthUpdateUsageDescription`。检查实际源配置确认仅有 `NSHealthShareUsageDescription`；健康授权代码仍为 `toShare: []`，不申请健康写入权限。
+- 在 `Config/iOS-Info.plist` 和 `Config/Watch-Info.plist` 补齐缺失用途说明，明确当前版本只读、不写入或修改 Apple 健康。未改动健康读写代码、权限或既有本地 Xcode 名称／分类设置。工程已引用这些源 plist，无需修改目标配置或重新生成工程。
+- 完整 Release Archive 成功：`artifacts/archive-health-privacy-fix.log`；新归档为 `build/HealthPrivacyFix/Qingkong.xcarchive`。实际读取归档内 iPhone 与 Watch 的 Info.plist，确认两个包均有非空读取与写入用途说明；整包严格签名验证通过，检查记录 `artifacts/archive-health-privacy-fix-check.json`。
+- 本轮仅改用途配置并检查实际归档，未重新运行业务逻辑测试，未使用模拟器，也未上传应用或声称 App Store 校验已通过。用户需选择新归档重新上传；旧归档不会随源配置修改更新。截图中的 SDK 要求为自 2027 年 4 月起生效的警告，未作为本次缺键错误处理。
