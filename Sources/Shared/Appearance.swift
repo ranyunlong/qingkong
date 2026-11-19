@@ -21,8 +21,20 @@ extension SceneTheme {
 
 struct HealthTrendChart: View {
     let buckets: [TrendBucket]
+    let metric: HealthMetric
     var color: Color = .primary
     var compact = false
+    var period: TrendPeriod = .week
+    var selectionEnabled = true
+    #if os(iOS)
+    @State private var selectedDate: Date?
+
+    private var selectedBucket: TrendBucket? {
+        guard let selectedDate else { return nil }
+        // Include empty buckets: dragging across a gap must never show a nearby day's value.
+        return buckets.min { abs($0.date.timeIntervalSince(selectedDate)) < abs($1.date.timeIntervalSince(selectedDate)) }
+    }
+    #endif
     var body: some View {
         let points = buckets.filter { $0.value != nil }
         if points.isEmpty {
@@ -30,7 +42,25 @@ struct HealthTrendChart: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .accessibilityLabel("暂无趋势记录")
         } else {
+            #if os(iOS)
+            if selectionEnabled {
             chart(points)
+                .chartXSelection(value: $selectedDate)
+                .chartGesture { proxy in
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { proxy.selectXValue(at: $0.location.x) }
+                        .onEnded { _ in selectedDate = nil }
+                }
+                .onChange(of: buckets) { _, _ in selectedDate = nil }
+                .onChange(of: metric) { _, _ in selectedDate = nil }
+                .accessibilityHint("在图表上拖动，查看时间和\(metric.name)数值")
+                .accessibilityIdentifier("health-trend-\(metric.rawValue)")
+            } else {
+                chart(points)
+            }
+            #else
+            chart(points)
+            #endif
         }
     }
     private func chart(_ points: [TrendBucket]) -> some View {
@@ -46,15 +76,59 @@ struct HealthTrendChart: View {
                         .symbolSize(compact ? 9 : 24)
                 }
             }
+            #if os(iOS)
+            if let selected = selectedBucket {
+                RuleMark(x: .value("选中时间", selected.date))
+                    .foregroundStyle(color.opacity(0.65))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                    .annotation(position: .top, spacing: 4, overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))) {
+                        ChartReadingLabel(
+                            heading: period == .day ? selected.date.formatted(.dateTime.month().day().hour()) : selected.date.formatted(.dateTime.month().day()),
+                            reading: selected.value.map { "\($0.formatted(.number.precision(.fractionLength(0...1)))) \(metric.unit)" } ?? "暂无记录",
+                            color: color
+                        )
+                    }
+                if let value = selected.value {
+                    RuleMark(y: .value("选中数值", value))
+                        .foregroundStyle(color.opacity(0.3))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                    PointMark(x: .value("选中时间", selected.date), y: .value("选中数值", value))
+                        .foregroundStyle(color)
+                        .symbolSize(compact ? 45 : 85)
+                }
+            }
+            #endif
         }
         .chartXScale(domain: (buckets.first?.date ?? .now)...max(buckets.last?.date ?? .now, (buckets.first?.date ?? .now).addingTimeInterval(3600)))
         .chartYScale(domain: .automatic(includesZero: false))
         .chartXAxis(compact ? .hidden : .automatic)
         .chartYAxis(compact ? .hidden : .automatic)
         .chartLegend(.hidden)
-        .accessibilityLabel("健康趋势，\(points.count) 个有效时间段")
+        .accessibilityLabel("\(metric.name)趋势，\(points.count) 个有效时间段，单位\(metric.unit)")
     }
 }
+
+#if os(iOS)
+struct ChartReadingLabel: View {
+    let heading: String
+    let reading: String
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Text(heading).foregroundStyle(Color.readableSecondary)
+            Text(reading).fontWeight(.semibold).foregroundStyle(color)
+        }
+        .font(.caption2)
+        .monospacedDigit()
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("chart-selected-reading")
+    }
+}
+#endif
 
 struct RecoveryView: View {
     let retry: () -> Void

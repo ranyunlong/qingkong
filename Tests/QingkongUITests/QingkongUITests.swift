@@ -2,6 +2,85 @@ import XCTest
 
 final class QingkongUITests: XCTestCase {
     @MainActor
+    func testHomeHRVChartAllowsPageScrolling() {
+        let app = launch(demo: true)
+        let chart = app.descendants(matching: .any)["today-hrv-chart"].firstMatch
+        for _ in 0..<4 {
+            if chart.isHittable { break }
+            app.swipeUp()
+        }
+        XCTAssertTrue(chart.isHittable)
+        let originalY = chart.frame.midY
+        chart.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .press(forDuration: 0.1, thenDragTo: chart.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: -1.5)))
+        XCTAssertLessThan(chart.frame.midY, originalY - 20)
+        XCTAssertFalse(app.descendants(matching: .any)["chart-selected-reading"].exists)
+    }
+
+    @MainActor
+    func testFirstHealthIntroductionCanBeDeferredWithoutRepeating() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing", "--ui-reset", "--ui-health-introduction"]
+        app.launch()
+        XCTAssertTrue(app.buttons["initial-connect-health"].waitForExistence(timeout: 15))
+        let skip = app.buttons["skip-initial-health"]
+        if !skip.isHittable { app.swipeUp() }
+        skip.tap()
+        XCTAssertFalse(app.buttons["initial-connect-health"].exists)
+        app.terminate()
+        app.launchArguments = ["--ui-testing", "--ui-health-introduction"]
+        app.launch()
+        XCTAssertTrue(app.tabBars.buttons["心情"].waitForExistence(timeout: 15))
+        XCTAssertFalse(app.buttons["initial-connect-health"].exists)
+        app.buttons["open-settings"].tap()
+        for _ in 0..<8 {
+            if app.buttons["检查 Apple 健康连接"].isHittable { break }
+            app.swipeUp()
+        }
+        XCTAssertTrue(app.buttons["检查 Apple 健康连接"].isHittable)
+    }
+
+    @MainActor
+    func testHealthReminderSettingsAndDiagnostics() {
+        let app = launch()
+        app.buttons["open-settings"].tap()
+        for kind in ["highHeartRate", "lowHeartRate", "lowOxygen"] {
+            let toggle = app.switches["reminder-\(kind)"].firstMatch
+            for _ in 0..<6 {
+                if toggle.isHittable { break }
+                app.swipeUp()
+            }
+            XCTAssertEqual(toggle.value as? String, "1")
+            XCTAssertTrue(app.steppers["threshold-\(kind)"].exists)
+        }
+        let diagnostics = app.buttons["notification-diagnostics"]
+        for _ in 0..<4 {
+            if diagnostics.isHittable { break }
+            app.swipeUp()
+        }
+        diagnostics.tap()
+        XCTAssertTrue(app.buttons["send-test-notification"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["尚未完成健康数据检查"].exists)
+    }
+
+    @MainActor
+    func testTrendChartSelectionGesture() {
+        let app = launch(demo: true)
+        app.tabBars.buttons["趋势"].tap()
+        for metric in ["HRV", "心率", "血氧"] {
+            app.segmentedControls["trend-metric"].buttons[metric].tap()
+            let id = metric == "HRV" ? "hrv" : metric == "心率" ? "heartRate" : "oxygen"
+            let chart = app.descendants(matching: .any)["health-trend-\(id)"].firstMatch
+            if !chart.isHittable { app.swipeUp() }
+            XCTAssertTrue(chart.isHittable)
+            print("CHART_GESTURE_BEGIN_\(id)")
+            chart.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5))
+                .press(forDuration: 0.3, thenDragTo: chart.coordinate(withNormalizedOffset: CGVector(dx: 0.65, dy: 0.5)), withVelocity: .slow, thenHoldForDuration: 4)
+            XCTAssertFalse(app.descendants(matching: .any)["chart-selected-reading"].exists)
+        }
+    }
+
+    @MainActor
     func launch(reset: Bool = true, demo: Bool = false, largeType: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing"]

@@ -1,4 +1,5 @@
 import SwiftUI
+import QingkongCore
 
 struct RelaxationReminderSettingsSection: View {
     @Environment(AppServices.self) private var app
@@ -9,7 +10,7 @@ struct RelaxationReminderSettingsSection: View {
             })).accessibilityIdentifier("relaxation-reminders-enabled")
             LabeledContent("通知", value: app.reminders.permissionText)
                 .font(.subheadline)
-            if app.reminders.enabled && !app.reminders.authorized {
+            if app.reminders.anyEnabled && !app.reminders.authorized {
                 if app.reminders.authorization == .notDetermined {
                     Button("允许通知") { Task { await app.reminders.requestPermissionIfNeeded() } }.buttonStyle(.automatic)
                 } else {
@@ -30,6 +31,73 @@ struct RelaxationReminderSettingsSection: View {
         } header: { Text("给自己一点松弛") } footer: {
             Text("默认开启。仅在近期 HRV 持续明显低于个人基线时提醒，每天最多 2 次、间隔至少 4 小时。通知声音和展示遵循系统专注设置；不代表心理压力诊断，也不保证实时检测。")
         }
+    }
+}
+
+struct VitalReminderSettingsSection: View {
+    @Environment(AppServices.self) private var app
+
+    var body: some View {
+        Section {
+            ForEach(VitalReminderKind.allCases) { kind in
+                VStack(alignment: .leading, spacing: 10) {
+                    Toggle(kind.title, isOn: Binding(get: { app.reminders.vitalRules[kind]?.delivery.enabled ?? true }, set: { enabled in
+                        Task { await app.reminders.setVitalEnabled(kind, enabled) }
+                    })).accessibilityIdentifier("reminder-\(kind.rawValue)")
+                    if let rule = app.reminders.vitalRules[kind], rule.delivery.enabled {
+                        Stepper(value: Binding(get: { rule.threshold }, set: { app.reminders.setVitalThreshold(kind, $0) }), in: kind.thresholdRange, step: kind.thresholdStep) {
+                            Text("\(kind == .highHeartRate ? "高于" : "低于") \(Int(rule.threshold)) \(kind == .lowOxygen ? "%" : "次/分")")
+                                .font(.subheadline)
+                        }.accessibilityIdentifier("threshold-\(kind.rawValue)")
+                        Text(kind == .lowOxygen ? "至少两条偏低读数，相隔 1 分钟以上。" : "仅使用明确标记为静息的记录，连续异常记录跨度至少 10 分钟。")
+                            .font(.caption).foregroundStyle(Color.readableSecondary)
+                        if rule.delivery.mutedUntil.map({ $0 > .now }) ?? false {
+                            Button("恢复今天的\(kind.title)提醒") { app.reminders.resumeVitalToday(kind) }.buttonStyle(.automatic)
+                        }
+                    }
+                }.padding(.vertical, 4)
+            }
+            NavigationLink("通知检查与测试") { NotificationDiagnosticsView() }
+                .accessibilityIdentifier("notification-diagnostics")
+        } header: { Text("健康变化提醒") } footer: {
+            Text("默认开启，各类每天最多 2 次、间隔至少 4 小时。阈值是可调整的产品规则，不是医疗标准或实时报警；没有足够的新记录时不会提醒。如有不适，请及时就医，不要等待应用通知。")
+        }
+    }
+}
+
+struct NotificationDiagnosticsView: View {
+    @Environment(AppServices.self) private var app
+    @State private var testing = false
+    var body: some View {
+        List {
+            Section("系统通知") {
+                Text(app.reminders.permissionText)
+                Text(app.reminders.deliveryText).font(.footnote).foregroundStyle(Color.readableSecondary)
+                Button("打开系统通知设置") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
+                }.buttonStyle(.automatic)
+                Button("发送测试通知") {
+                    Task { testing = true; await app.reminders.sendTestNotification(); testing = false }
+                }.buttonStyle(.automatic).disabled(testing).accessibilityIdentifier("send-test-notification")
+                if let status = app.reminders.testStatus { Text(status).font(.footnote) }
+            }
+            Section("最近一次数据检查") {
+                if let date = app.reminders.lastCheckedAt {
+                    Text(date, format: .dateTime.month().day().hour().minute().second())
+                } else { Text("尚未完成健康数据检查") }
+                LabeledContent("HRV", value: app.reminders.checkResults["hrv"] ?? "等待可读取的健康记录")
+                ForEach(VitalReminderKind.allCases) { kind in
+                    LabeledContent(kind.title, value: app.reminders.checkResults[kind.rawValue] ?? "等待可读取的健康记录")
+                }
+                if let warning = app.health.backgroundDeliveryWarning { Text(warning).font(.footnote) }
+                if let error = app.reminders.error { Text(error).font(.footnote) }
+                Button("刷新检查") { Task { await app.health.refresh() } }.buttonStyle(.automatic)
+            }
+            Section {
+                Text("测试通知用于检查系统送达，不代表健康异常。健康提醒只根据新记录判断；授权成功也不表示健康库中一定有数据。后台更新、通知展示及手表镜像由系统安排。")
+            }.font(.footnote)
+        }.navigationTitle("通知检查").navigationBarTitleDisplayMode(.inline)
+            .task { await app.reminders.refreshAuthorization() }
     }
 }
 
@@ -56,7 +124,7 @@ struct RelaxationAdviceView: View {
             }
             Section("什么情况下会提醒？") {
                 Text("使用同一来源此前 7 天的日均 HRV 作为个人基线，至少需要 3 个有效日。")
-                Text("最近一小时内，连续两次 HRV 均比基线低至少 30%，两次间隔至少 10 分钟，且最新读数不超过 15 分钟，才会考虑提醒。")
+                Text("最近一小时内，连续偏低的 HRV 均比基线低至少 30%，记录跨度至少 10 分钟，且最新读数不超过 15 分钟，才会考虑提醒。中途恢复会重新确认。")
                 Text("30% 是首版的产品参考规则，未经临床验证，不能判断你是否有心理压力。活动、呼吸和睡眠等也会影响 HRV。")
                 Text("每天最多两次，至少间隔四小时。后台更新由系统安排；没有足够的新记录时不会提醒，不补发旧提醒。")
                 Text("通知按 iPhone 的系统规则显示在手机或配对手表上，遵循专注模式与通知设置。无需两端各发一次。")

@@ -32,7 +32,7 @@ final class HealthService {
     private(set) var readings: [HealthReading] = []
     private(set) var ecgs: [ECGRecord] = []
     private(set) var loading = false
-    private(set) var requested = UserDefaults.standard.bool(forKey: "health.authorizationRequested")
+    private(set) var requested: Bool
     private(set) var error: String?
     private(set) var isDemo = false
     private(set) var backgroundDeliveryWarning: String?
@@ -42,9 +42,16 @@ final class HealthService {
     @ObservationIgnored private var observers: [HKObserverQuery] = []
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
     @ObservationIgnored private let testing: Bool
+    @ObservationIgnored private let defaults: UserDefaults
 
     init(testing: Bool = false, demo: Bool = false) {
         self.testing = testing
+        defaults = testing ? UserDefaults(suiteName: "qingkong.health.testing")! : .standard
+        if testing && ProcessInfo.processInfo.arguments.contains("--ui-reset") {
+            defaults.removeObject(forKey: "health.authorizationRequested")
+            defaults.removeObject(forKey: "health.connectionIntroductionShown")
+        }
+        requested = defaults.bool(forKey: "health.authorizationRequested")
         #if DEBUG
         isDemo = demo
         #endif
@@ -56,6 +63,10 @@ final class HealthService {
     }
     var dailyHRV: Double? { HealthMath.dailyMean(readings, metric: .hrv, day: .now) }
     var baseline: Double? { HealthMath.hrvBaseline(readings) }
+    var needsConnectionIntroduction: Bool {
+        available && !requested && !defaults.bool(forKey: "health.connectionIntroductionShown")
+    }
+    func completeConnectionIntroduction() { defaults.set(true, forKey: "health.connectionIntroductionShown") }
 
     func authorize() async {
         guard available && !testing && !isDemo else { return }
@@ -64,7 +75,7 @@ final class HealthService {
         do {
             try await store.requestAuthorization(toShare: [], read: types)
             requested = true
-            UserDefaults.standard.set(true, forKey: "health.authorizationRequested")
+            defaults.set(true, forKey: "health.authorizationRequested")
             await refresh()
             installObservers()
         } catch { self.error = "健康数据连接未完成，请稍后重试。" }
@@ -93,7 +104,9 @@ final class HealthService {
                 let samples = try await query(type: quantityType(metric), since: since)
                 for case let sample as HKQuantitySample in samples {
                     let value = sample.quantity.doubleValue(for: unit(metric))
-                    let reading = HealthReading(id: sample.uuid, metric: metric, date: sample.startDate, value: metric == .oxygen ? value * 100 : value, source: sample.sourceRevision.source.name, sourceIdentifier: sample.sourceRevision.source.bundleIdentifier, wasUserEntered: sample.metadata?[HKMetadataKeyWasUserEntered] as? Bool)
+                    let motion = (sample.metadata?[HKMetadataKeyHeartRateMotionContext] as? NSNumber).flatMap { HKHeartRateMotionContext(rawValue: $0.intValue) }
+                    let resting: Bool? = motion == .sedentary ? true : motion == .active ? false : nil
+                    let reading = HealthReading(id: sample.uuid, metric: metric, date: sample.startDate, value: metric == .oxygen ? value * 100 : value, source: sample.sourceRevision.source.name, sourceIdentifier: sample.sourceRevision.source.bundleIdentifier, wasUserEntered: sample.metadata?[HKMetadataKeyWasUserEntered] as? Bool, isAtRest: resting)
                     if reading.isValid { collected.append(reading) }
                 }
             }
@@ -161,9 +174,9 @@ final class HealthService {
             }
             observers.append(query)
             store.execute(query)
-            store.enableBackgroundDelivery(for: type, frequency: metric == .hrv ? .immediate : .hourly) { [weak self] success, _ in
-                guard metric == .hrv, !success else { return }
-                Task { @MainActor in self?.backgroundDeliveryWarning = "后台健康更新暂未启用，放松提醒可能仅在打开应用刷新后判断。" }
+            store.enableBackgroundDelivery(for: type, frequency: .immediate) { [weak self] success, _ in
+                guard !success else { return }
+                Task { @MainActor in self?.backgroundDeliveryWarning = "后台健康更新暂未启用，健康提醒可能仅在打开应用刷新后判断。" }
             }
         }
     }

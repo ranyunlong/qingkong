@@ -34,7 +34,7 @@ struct WatchRootView: View {
                                 Text(metric.unit).font(.caption2).foregroundStyle(.secondary)
                             }
                             if app.health.latest(metric) != nil {
-                                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: .week), color: .white, compact: true).frame(height: 28)
+                                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: .week), metric: metric, color: .white, compact: true).frame(height: 28)
                             }
                         }.padding(.vertical, 4)
                     }
@@ -79,7 +79,7 @@ struct WatchTrendView: View {
                 .pickerStyle(.navigationLink)
                 .frame(maxWidth: .infinity, minHeight: 48)
                 .accessibilityIdentifier("watch-trend-period")
-                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: period), color: .white, compact: true).frame(height: 80)
+                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: period), metric: metric, color: .white, compact: true, period: period).frame(height: 80)
                 if metric == .hrv {
                     Text(app.health.baseline.map { "个人基线 \($0.formatted(.number.precision(.fractionLength(0)))) ms" } ?? "基线积累中").font(.caption)
                     Text("SDNN · 此前 7 日至少 3 个有效日的日均值平均。 ").font(.caption2).foregroundStyle(.secondary)

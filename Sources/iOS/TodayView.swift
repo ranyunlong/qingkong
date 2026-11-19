@@ -70,7 +70,8 @@ struct TodayView: View {
                         .font(.system(size: hrvFontSize, weight: .light, design: .rounded)).monospacedDigit()
                     Text("ms").font(.subheadline).foregroundStyle(Color.readableSecondary)
                 }.foregroundStyle(app.scene.accent)
-                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: .hrv, period: .week), color: app.scene.accent, compact: true).frame(height: 66)
+                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: .hrv, period: .week), metric: .hrv, color: app.scene.accent, compact: true, selectionEnabled: false).frame(height: 66)
+                    .accessibilityIdentifier("today-hrv-chart")
                 if let baseline = app.health.baseline {
                     Text("个人基线 \(baseline.formatted(.number.precision(.fractionLength(0)))) ms · 此前 7 天的有效日均").font(.caption).foregroundStyle(Color.readableSecondary)
                 } else {

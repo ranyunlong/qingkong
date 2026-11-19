@@ -78,7 +78,7 @@ struct MetricWidgetView: View {
                         Text(metric.unit).font(.system(size: 9))
                     }
                     if entry.configuration.showTrend && preferences.showComplicationTrend {
-                        HealthTrendChart(buckets: entry.snapshot?.trends[metric] ?? [], color: .primary, compact: true).frame(height: 20)
+                        HealthTrendChart(buckets: entry.snapshot?.trends[metric] ?? [], metric: metric, color: .primary, compact: true).frame(height: 20)
                     }
                     if let reading {
                         Text("采样 \(reading.date.formatted(.dateTime.month().day().hour().minute()))").font(.system(size: 9)).foregroundStyle(.secondary)

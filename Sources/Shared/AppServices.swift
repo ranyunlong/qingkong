@@ -13,6 +13,10 @@ final class AppServices {
     let link: Connectivity
     #if os(iOS)
     let reminders: RelaxationReminderService
+    var healthIntroductionActive = false
+    var needsHealthIntroduction: Bool {
+        (!testing || ProcessInfo.processInfo.arguments.contains("--ui-health-introduction")) && !health.isDemo && health.needsConnectionIntroduction
+    }
     #endif
     var snapshotError: String?
     private(set) var today = Date.now
@@ -56,7 +60,7 @@ final class AppServices {
         today = .now
         #if os(iOS)
         await reminders.refreshAuthorization()
-        await reminders.requestPermissionIfNeeded()
+        if !needsHealthIntroduction && !healthIntroductionActive { await reminders.requestPermissionIfNeeded() }
         #endif
         player.reconcileDeadline()
         if !testing { link.flush() }

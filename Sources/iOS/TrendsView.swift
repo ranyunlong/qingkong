@@ -6,7 +6,7 @@ import QingkongCore
 struct TrendsView: View {
     @Environment(AppServices.self) private var app
     @ScaledMetric(relativeTo: .largeTitle) private var readingFontSize = 44.0
-    @State private var metric: HealthMetric = .hrv
+    @Binding var metric: HealthMetric
     @State private var period: TrendPeriod = .week
     var body: some View {
         ScrollView {
@@ -15,7 +15,7 @@ struct TrendsView: View {
                 HealthAccessNote()
                 Picker("健康指标", selection: $metric) {
                     ForEach(HealthMetric.allCases) { Text($0.name).tag($0) }
-                }.pickerStyle(.segmented)
+                }.pickerStyle(.segmented).accessibilityIdentifier("trend-metric")
                 Surface {
                     VStack(alignment: .leading, spacing: 20) {
                         HStack(alignment: .firstTextBaseline) {
@@ -29,8 +29,8 @@ struct TrendsView: View {
                                 Text("最近一次").font(.caption).foregroundStyle(Color.readableSecondary)
                             }
                         } else { Text("—").font(.largeTitle).foregroundStyle(Color.readableSecondary) }
-                        Picker("时间范围", selection: $period) { ForEach(TrendPeriod.allCases) { Text($0.name).tag($0) } }.pickerStyle(.segmented)
-                        HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: period), color: app.scene.accent).frame(height: 210)
+                        Picker("时间范围", selection: $period) { ForEach(TrendPeriod.allCases) { Text($0.name).tag($0) } }.pickerStyle(.segmented).accessibilityIdentifier("trend-period")
+                        HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: period), metric: metric, color: app.scene.accent, period: period).frame(height: 210)
                         Text("曲线按时间段取平均；空缺表示没有记录，不代表数值为零。 ").font(.caption).foregroundStyle(Color.readableSecondary)
                     }
                 }
@@ -91,6 +91,12 @@ struct ECGDetailView: View {
     @State private var points: [VoltagePoint] = []
     @State private var loading = true
     @State private var error: String?
+    @State private var selectedSeconds: Double?
+
+    private var selectedPoint: VoltagePoint? {
+        guard let selectedSeconds else { return nil }
+        return points.min { abs($0.seconds - selectedSeconds) < abs($1.seconds - selectedSeconds) }
+    }
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -99,10 +105,42 @@ struct ECGDetailView: View {
                 Text("以上为健康记录中的系统分类，非晴空的诊断结论。 ").font(.footnote).foregroundStyle(Color.readableSecondary)
                 if loading { ProgressView("正在读取波形").frame(maxWidth: .infinity) }
                 else if !points.isEmpty {
-                    Chart(points) { point in
-                        LineMark(x: .value("秒", point.seconds), y: .value("mV", point.millivolts)).foregroundStyle(app.scene.accent).lineStyle(StrokeStyle(lineWidth: 1))
+                    Chart {
+                        ForEach(points) { point in
+                            LineMark(x: .value("秒", point.seconds), y: .value("mV", point.millivolts)).foregroundStyle(app.scene.accent).lineStyle(StrokeStyle(lineWidth: 1))
+                        }
+                        if let selected = selectedPoint {
+                            RuleMark(x: .value("选中秒数", selected.seconds))
+                                .foregroundStyle(app.scene.accent.opacity(0.65))
+                                .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                                .annotation(position: .top, spacing: 4, overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))) {
+                                    ChartReadingLabel(
+                                        heading: "\(selected.seconds.formatted(.number.precision(.fractionLength(2)))) 秒",
+                                        reading: "\(selected.millivolts.formatted(.number.precision(.fractionLength(3)))) mV",
+                                        color: app.scene.accent
+                                    )
+                                }
+                            RuleMark(y: .value("选中电压", selected.millivolts))
+                                .foregroundStyle(app.scene.accent.opacity(0.3))
+                                .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                            PointMark(x: .value("选中秒数", selected.seconds), y: .value("选中电压", selected.millivolts))
+                                .foregroundStyle(app.scene.accent).symbolSize(65)
+                        }
                     }.frame(height: 240).chartScrollableAxes(.horizontal).chartXVisibleDomain(length: 5)
-                        .chartXAxisLabel("秒").chartYAxisLabel("mV").accessibilityLabel("心电图电压波形，横向滑动查看")
+                        .chartXSelection(value: $selectedSeconds)
+                        .chartGesture { proxy in
+                            LongPressGesture(minimumDuration: 0.2)
+                                .sequenced(before: DragGesture(minimumDistance: 0))
+                                .onChanged { value in
+                                    if case .second(true, let drag?) = value { proxy.selectXValue(at: drag.location.x) }
+                                }
+                                .onEnded { _ in selectedSeconds = nil }
+                        }
+                        .chartXAxisLabel("秒").chartYAxisLabel("mV")
+                        .accessibilityLabel("心电图电压波形")
+                        .accessibilityHint("横向滑动浏览，按住后拖动查看秒数和电压")
+                        .accessibilityIdentifier("ecg-waveform-chart")
+                    Text("轻扫浏览，按住波形再拖动查看秒数和电压。").font(.caption).foregroundStyle(Color.readableSecondary)
                 } else { ContentUnavailableView("暂无可读取的波形", systemImage: "waveform.path.ecg") }
                 if let error { Text(error).font(.footnote).foregroundStyle(Color.readableSecondary); Button("重新读取") { Task { await load() } } }
                 LabeledContent("记录时长", value: "\(record.sample.endDate.timeIntervalSince(record.sample.startDate).formatted(.number.precision(.fractionLength(0)))) 秒")
@@ -114,7 +152,7 @@ struct ECGDetailView: View {
         }.navigationTitle("记录详情").task { await load() }
     }
     private func load() async {
-        loading = true; error = nil
+        loading = true; error = nil; selectedSeconds = nil
         do { points = try await app.health.waveform(for: record) }
         catch { self.error = "波形暂时无法读取，请重试。" }
         loading = false

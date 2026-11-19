@@ -134,3 +134,28 @@ xcodebuild -project QingkongPhonePreview.xcodeproj -scheme Qingkong \
 - 在 `Config/iOS-Info.plist` 和 `Config/Watch-Info.plist` 补齐缺失用途说明，明确当前版本只读、不写入或修改 Apple 健康。未改动健康读写代码、权限或既有本地 Xcode 名称／分类设置。工程已引用这些源 plist，无需修改目标配置或重新生成工程。
 - 完整 Release Archive 成功：`artifacts/archive-health-privacy-fix.log`；新归档为 `build/HealthPrivacyFix/Qingkong.xcarchive`。实际读取归档内 iPhone 与 Watch 的 Info.plist，确认两个包均有非空读取与写入用途说明；整包严格签名验证通过，检查记录 `artifacts/archive-health-privacy-fix-check.json`。
 - 本轮仅改用途配置并检查实际归档，未重新运行业务逻辑测试，未使用模拟器，也未上传应用或声称 App Store 校验已通过。用户需选择新归档重新上传；旧归档不会随源配置修改更新。截图中的 SDK 要求为自 2027 年 4 月起生效的警告，未作为本次缺键错误处理。
+
+## Watch 临时音量行与 iPhone 图表拖动（2026-11-19）
+
+- Watch 音乐页默认只显示封面、曲名和三个播放按钮；旋转表冠唤出原生系统音量控件，在同一个固定高度区域隐藏播放按钮。约三秒没有音量变化或触摸后恢复播放按钮；手指持续按住时保持音量显示。后台、忙碌或错误提示期间释放焦点。
+- 三个按钮采用 plain 样式，不绘制背景，标签保留整格矩形触摸区域和至少 44 pt 高度。手表独立／遥控 iPhone 的选择、回执和播放行为沿用原实现；音量仍由 `WKInterfaceVolumeControl` 的 local／companion 控制系统输出。手机通过即时消息仅转发音量变化活动，帮助遥控期间延长音量显示，不传送或持久化音量值。
+- iPhone 共享健康图表加入拖动选择：今日 HRV 迷你图、趋势页三项指标的日／周／月图，以及表盘设置中的预览均显示横纵参考线、选中点、时间、数值及对应单位。按全部时间段查找，包括空缺段，空缺显示「暂无记录」且没有伪造的数值或选中点；切换指标／数据后清除旧选择。
+- 心电图保留横向浏览；按住约 0.2 秒后拖动显示秒数及 mV 读数和对应参考线，松手清除选择，并提供手势文字说明。Watch 与真实组件不加入 iPhone 的图表拖动手势。
+- 共享逻辑 34 项通过：`artifacts/test-core-watch-volume-chart-selection.log`；最终 iPhone、Watch、表盘组件完整 Debug 构建通过：`artifacts/build-watch-volume-chart-selection.log`。本轮未使用模拟器；未修改现有 Xcode 名称、分类、Scheme 等用户本地设置，未重新生成工程。
+- 完整包 `build/WatchVolumeChartSelection/Qingkong.app` 沿用已授权证书及包含手表的描述文件，逐层签名并严格验证通过：`artifacts/watch-volume-chart-selection-sign.log`、`watch-volume-chart-selection-profiles-check.json`。已覆盖安装至 iPhone 17：`artifacts/iphone17-install-watch-volume-chart-selection.json`；手机安装结果不代表手表新版已同步。
+- 真机视觉、拖动与页面滚动的协调、表冠焦点切换、两端系统音量变化、连续调节和超时恢复均尚未实际操作验收，不能用构建或安装结果代替。没有上传 App Store，也未验证新上传包。
+
+## 健康提醒、首次连接与模拟器复核（2026-11-19）
+
+- 按用户后续要求，首页 HRV 迷你图移除拖动选择，手指从图表区域纵向滑动会滚动页面。趋势页三指标及 iPhone 表盘预览保留选择；Watch／真实组件不增加选择手势。
+- 已复现旧 HRV 规则的密集采样漏提醒：连续偏低超过十分钟，但最新两条相隔不足十分钟时旧代码返回 nil。红色回归证据 `artifacts/test-hrv-cluster-red.log`；修复为连续偏低窗口内存在跨度十分钟的记录，恢复值打断窗口。不能据此断定用户当天漏通知的实际原因，未读取其真实样本或运行日志。
+- 新增默认开启、独立开关和阈值的高／低静息心率及低血氧提醒；只处理同源自动新记录，排除运动、未知静息状态、单次血氧低值、重复、未来及过期数据。每类独立限频和当天暂停；详见 RelaxationReminders.md。系统通知设置与最近判断原因可在「通知检查与测试」查看，提供中性测试通知。
+- 核心逻辑最终 46 项测试通过：`artifacts/test-core-health-notifications-final.log`。新增覆盖密集 HRV、恢复打断、三类指标、静息元数据、单次／短间隔、来源和手动输入、过期／启用边界、阈值及非法值、独立开关／静音／限频、跨日、旧模型解码及配置持久化。
+- 完整 iPhone＋Watch＋组件 Debug 构建成功：`artifacts/build-health-notifications-final.log`。未重新生成或覆盖主工程用户的名称、分类、Scheme 配置；只生成用于模拟器的临时工程。
+- iPhone 17／iOS 26.5 模拟器：首次引导「稍后」后重启不重复、个性化仍能连接、三类提醒设置与检查入口、首页 HRV 区域纵向滚动测试通过。日志 `artifacts/test-simulator-health-notifications.log` 中前三项通过，第四项因测试控件定位失败；修正定位后的三指标拖动测试通过，日志 `artifacts/test-simulator-chart-selection.log`、`test-simulator-chart-selection-capture.log`。实际拖动截图 `artifacts/iphone-chart-drag-2.png` 显示日期、ms 数值、选中点及横纵虚线；松手清除选择。
+- Watch Series 11 46mm／watchOS 26.5 模拟器：实际打开音乐页，默认封面、名称和三个无背景按钮；左右按钮触摸框至少 44 pt；表冠旋转时显示原生音量并隐藏按钮，随后恢复。最终 UI 测试通过：`artifacts/test-watch-simulator-volume-capture.log`，默认截图见 `artifacts/watch-volume-ui-attachments/`，表冠过程截图 `artifacts/watch-volume-crown-1.png`。首次断言因 XCTest 等待界面静止后音量已按三秒规则隐藏而失败，之后用操作过程截图验证临时状态，未为测试延长产品超时。
+- 普通模拟器启动首次说明可打开系统健康授权页。初始未签名测试包因缺少 HealthKit entitlement 无法授权；切换本地签名模拟器构建后系统授权弹窗正常。选择不开放健康数据并完成流程后，首页显示「暂时没有可读取的健康记录」，随后才请求系统通知，未推断用户拒绝状态。首次引导／测试所用健康标记独立于正式存储。
+- 用户已关闭两端开发者模式，遵照后续要求仅做模拟器运行。本轮早期手机启动失败的记录 `artifacts/iphone17-launch-watch-volume-chart-selection.log` 明确为 Developer Mode disabled，不能把覆盖安装当作运行通过。
+- 真实 HealthKit 后台唤醒、新数据触发通知、Watch 镜像、真实系统音量／音频路由、心电图真数据拖动及锁屏／专注行为仍需配对真机验收。模拟器界面、逻辑测试和构建结果不代替这些验证；未上传 App Store。
+
+- 普通签名模拟器版本中，点击「发送测试通知」后，XCTest 在 SpringBoard 查询到测试通知，测试通过：`artifacts/test-simulator-notification-delivery.log`、`test-simulator-notification-delivery-capture.log`。附加截图为通知检查页（`artifacts/notification-delivery-ui-attachments/`）；连续截图未取得横幅画面，因此只认定系统中可查询到通知，不声称横幅视觉验收通过，也不代表真实健康异常已触发或真机后台已通过。

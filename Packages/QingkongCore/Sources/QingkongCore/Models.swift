@@ -31,10 +31,12 @@ public struct HealthReading: Identifiable, Codable, Hashable, Sendable {
     public var source: String
     public var sourceIdentifier: String?
     public var wasUserEntered: Bool?
-    public init(id: UUID = UUID(), metric: HealthMetric, date: Date, value: Double, source: String, sourceIdentifier: String? = nil, wasUserEntered: Bool? = nil) {
+    public var isAtRest: Bool?
+    public init(id: UUID = UUID(), metric: HealthMetric, date: Date, value: Double, source: String, sourceIdentifier: String? = nil, wasUserEntered: Bool? = nil, isAtRest: Bool? = nil) {
         self.id = id; self.metric = metric; self.date = date; self.value = value; self.source = source
         self.sourceIdentifier = sourceIdentifier
         self.wasUserEntered = wasUserEntered
+        self.isAtRest = isAtRest
     }
     public var isValid: Bool { value.isFinite && value > 0 && (metric != .oxygen || value <= 100) }
 }

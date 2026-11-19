@@ -2,12 +2,16 @@ import Foundation
 import Observation
 import WatchConnectivity
 import QingkongCore
+#if os(iOS)
+import AVFoundation
+#endif
 
 @MainActor @Observable
 final class Connectivity: NSObject, WCSessionDelegate {
     private(set) var reachable = false
     private(set) var remoteState: AudioState?
     private(set) var remoteBusy = false
+    private(set) var remoteVolumeRevision: UInt = 0
     var error: String?
     var syncMessage = "等待设备连接"
     @ObservationIgnored private let store: LocalStore
@@ -16,10 +20,23 @@ final class Connectivity: NSObject, WCSessionDelegate {
     @ObservationIgnored private var replies: [UUID: CheckedContinuation<AudioReply, Error>] = [:]
     @ObservationIgnored private var timeouts: [UUID: Task<Void, Never>] = [:]
     @ObservationIgnored var preferencesReceived: (() -> Void)?
+    #if os(iOS)
+    @ObservationIgnored private var volumeObservation: NSKeyValueObservation?
+    #endif
 
     init(store: LocalStore, player: AudioPlayer) {
         self.store = store; self.player = player
         super.init()
+        #if os(iOS)
+        // Native companion volume control changes system output, not AudioState.volume.
+        // Forward only interaction activity so the watch can keep its volume row visible.
+        volumeObservation = AVAudioSession.sharedInstance().observe(\.outputVolume, options: [.new]) { [weak self] _, _ in
+            Task { @MainActor [weak self] in
+                guard let session = self?.session, session.activationState == .activated, session.isReachable else { return }
+                session.sendMessage(["volumeChanged": true], replyHandler: nil, errorHandler: { _ in })
+            }
+        }
+        #endif
     }
 
     func start() {
@@ -180,6 +197,16 @@ final class Connectivity: NSObject, WCSessionDelegate {
                 self.syncMessage = "已传送，等待对端保存确认"
             } catch { self.error = "同步状态暂未保存，将在下次连接时核对。" }
         }
+    }
+
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        #if os(watchOS)
+        guard message["volumeChanged"] as? Bool == true else { return }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.remoteVolumeRevision &+= 1
+        }
+        #endif
     }
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {

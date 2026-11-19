@@ -35,6 +35,14 @@ struct RelaxationReminderTests {
         #expect(result.sampleID == samples.last!.id)
         #expect(result.baseline == 50)
     }
+    @Test func extraCloselySpacedLowReadingsDoNotHideSustainedDrop() {
+        let recent = [-1500.0, -900, -300, -60].map { reading(now.addingTimeInterval($0), 30) }
+        #expect(candidate(baseline + recent) != nil)
+    }
+    @Test func recoveryBreaksTheConfirmationWindow() {
+        let recent = [reading(now.addingTimeInterval(-1500), 30), reading(now.addingTimeInterval(-300), 48), reading(now.addingTimeInterval(-60), 30)]
+        #expect(candidate(baseline + recent) == nil)
+    }
     @Test func smallDropSingleSampleRecoveryAndShortIntervalDoNotNotify() {
         #expect(candidate(baseline + low.map { reading($0.date, 36) }) == nil)
         #expect(candidate(baseline + [low[0]]) == nil)

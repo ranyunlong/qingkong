@@ -10,9 +10,16 @@ struct RootView: View {
     @State private var mood = 3
     @State private var settings = false
     @State private var reminderSheet: ReminderDestination?
+    @State private var healthIntroduction = false
+    @State private var trendMetric: HealthMetric = .hrv
     var body: some View {
         tabShell
             .tint(app.scene.accent)
+            .sheet(isPresented: $healthIntroduction, onDismiss: {
+                app.health.completeConnectionIntroduction()
+                app.healthIntroductionActive = false
+                Task { await app.reminders.requestPermissionIfNeeded(); presentReminderDestination() }
+            }) { HealthConnectionIntroductionView().environment(app) }
             .sheet(isPresented: $settings, onDismiss: presentReminderDestination) { NavigationStack { PersonalizationView() }.environment(app) }
             .sheet(item: $reminderSheet) { _ in
                 NavigationStack {
@@ -20,7 +27,12 @@ struct RootView: View {
                 }.environment(app)
             }
             .onChange(of: app.reminders.destination) { _, _ in presentReminderDestination() }
-            .task { presentReminderDestination(); await app.start() }
+            .task {
+                healthIntroduction = app.needsHealthIntroduction
+                app.healthIntroductionActive = healthIntroduction
+                presentReminderDestination()
+                await app.start()
+            }
             .task {
                 while !Task.isCancelled {
                     do { try await Task.sleep(for: .seconds(30)) } catch { return }
@@ -33,12 +45,15 @@ struct RootView: View {
     }
 
     private func presentReminderDestination() {
+        guard !healthIntroduction else { return }
         guard let destination = app.reminders.destination else { return }
         if settings { settings = false; return }
         app.reminders.destination = nil
         switch destination {
         case .advice: reminderSheet = .advice
         case .sounds: reminderSheet = nil; tab = .sleep
+        case .heartRate: reminderSheet = nil; trendMetric = .heartRate; tab = .trends
+        case .oxygen: reminderSheet = nil; trendMetric = .oxygen; tab = .trends
         }
     }
 
@@ -56,7 +71,7 @@ struct RootView: View {
         TabView(selection: $tab) {
             navigation("今日") { TodayView(selectedMood: $mood, openMood: { tab = .mood }, openSleep: { tab = .sleep }) }
                 .tabItem { tabLabel("今日", systemImage: "sun.max") }.tag(AppTab.today)
-            navigation("趋势") { TrendsView() }
+            navigation("趋势") { TrendsView(metric: $trendMetric) }
                 .tabItem { tabLabel("趋势", systemImage: "chart.bar") }.tag(AppTab.trends)
             navigation("心情") { MoodView(selectedMood: $mood) }
                 .tabItem { tabLabel("心情", systemImage: "face.smiling") }.tag(AppTab.mood)
@@ -85,6 +100,38 @@ struct RootView: View {
                     }
                 }
         }
+    }
+}
+
+private struct HealthConnectionIntroductionView: View {
+    @Environment(AppServices.self) private var app
+    @Environment(\.dismiss) private var dismiss
+    @State private var connecting = false
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    Image(systemName: "heart.text.clipboard").font(.system(size: 48)).foregroundStyle(app.scene.accent).accessibilityHidden(true)
+                    Text("连接健康，\n了解自己的日常。").font(.largeTitle.bold())
+                    Text("允许晴空读取 Apple 健康中的心率、血氧、HRV 和已有的心电图记录，查看趋势并接收你开启的健康提醒。")
+                    Label("只申请读取，不写入或修改记录", systemImage: "checkmark.shield")
+                    Label("健康与日记保留在设备上", systemImage: "iphone")
+                    Text("你可以逐项选择允许读取的数据，也可以稍后在个性化设置中连接。没有可读取数据时，仍能记录心情和听自然声音。")
+                        .font(.subheadline).foregroundStyle(Color.readableSecondary)
+                    if let error = app.health.error { Text(error).font(.footnote) }
+                    Button(connecting ? "正在连接…" : "连接 Apple 健康") {
+                        Task {
+                            connecting = true
+                            await app.health.authorize()
+                            connecting = false
+                            if app.health.requested { dismiss() }
+                        }
+                    }.qingkongGlassButton(prominent: true).disabled(connecting).accessibilityIdentifier("initial-connect-health")
+                    Button("稍后再说") { dismiss() }.qingkongGlassButton().disabled(connecting).accessibilityIdentifier("skip-initial-health")
+                }.padding(24)
+            }.navigationTitle("欢迎来到晴空").navigationBarTitleDisplayMode(.inline)
+        }.tint(app.scene.accent).interactiveDismissDisabled(connecting)
     }
 }
 

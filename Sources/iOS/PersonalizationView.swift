@@ -45,6 +45,7 @@ struct PersonalizationView: View {
             } header: { Text("跟随感受，温柔换景") } footer: { Text("仅根据今天最新的主动压力记录联动。达到 4/5 时切换应用内场景，不自动更改系统壁纸。") }
 
             RelaxationReminderSettingsSection()
+            VitalReminderSettingsSection()
 
             Section {
                 watchPreview
@@ -83,7 +84,7 @@ struct PersonalizationView: View {
                     Text(metric.unit).font(.caption2)
                 }
                 if app.store.preferences.showComplicationTrend {
-                    HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: .week), color: .white, compact: true).frame(height: 32)
+                    HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: .week), metric: metric, color: .white, compact: true).frame(height: 32)
                 }
             }.foregroundStyle(.white).padding(20).frame(width: 176).background(.black, in: RoundedRectangle(cornerRadius: 38))
             Text("健康数值取自 iPhone；真实表盘使用手表上的可读记录。 ").font(.caption2).foregroundStyle(Color.readableSecondary).multilineTextAlignment(.center)
@@ -180,7 +181,7 @@ struct PrivacyView: View {
             }
             Section("权限与删除") {
                 Text("你可以在「健康」App 中调整数据访问，在「心情日记」中删除记录。删除标记会在配对设备恢复连接后同步，防止旧记录再次出现。")
-                Text("放松提醒在 iPhone 本地分析你允许读取的 HRV；开关默认开启，系统通知仍需你授权。提醒账本只保留必要时间，不上传健康数据，通知不包含具体健康值或日记。可在个性化中关闭提醒，并在系统设置中调整通知和专注规则。")
+                Text("健康提醒在 iPhone 本地分析你允许读取的 HRV、心率及血氧；各类开关默认开启，系统通知仍需你授权。提醒账本只保留必要时间，不上传健康数据，通知不包含具体健康值或日记。可在个性化中关闭提醒，并在系统设置中调整通知和专注规则。")
                 Text("保存壁纸时仅请求向照片添加图片的权限。晴空不读取你的照片库。")
                 Text("系统备份是否包含本地应用数据由你的设备备份设置决定。晴空不建立自己的云端副本。")
             }

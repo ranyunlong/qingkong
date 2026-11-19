@@ -1,5 +1,6 @@
 import SwiftUI
 import WatchKit
+import AVFoundation
 import QingkongCore
 
 struct WatchMusicView: View {
@@ -10,27 +11,52 @@ struct WatchMusicView: View {
     @State private var operating = false
     @State private var lastRemoteState: AudioState?
     @State private var playbackError: String?
+    @State private var showingVolume = false
+    @State private var volumeActivity = UUID()
+    @State private var crownPosition = 0.0
+    @GestureState private var touchingVolume = false
+    @FocusState private var crownFocused: Bool
     private var state: AudioState { remote ? (app.link.remoteState ?? lastRemoteState ?? app.player.state) : app.player.state }
     private var busy: Bool { operating || switching || app.link.remoteBusy || app.player.activating }
+    private var canAdjustVolume: Bool { scenePhase == .active && !busy && playbackError == nil }
 
     var body: some View {
         VStack(spacing: 12) {
             Spacer(minLength: 0)
-            HStack(spacing: 8) {
-                Image(state.track.image).resizable().scaledToFill().frame(maxWidth: 100).frame(height: 90).clipped().clipShape(RoundedRectangle(cornerRadius: 18)).accessibilityHidden(true)
-                WatchSystemVolumeControl(remote: remote, focused: scenePhase == .active && !busy && playbackError == nil)
+            Image(state.track.image).resizable().scaledToFill().frame(width: 100, height: 90).clipped().clipShape(RoundedRectangle(cornerRadius: 18)).accessibilityHidden(true)
+            Text(state.track.name).font(.headline).lineLimit(1).accessibilityIdentifier("watch-current-track")
+            ZStack {
+                controls(state)
+                    .opacity(showingVolume ? 0 : 1)
+                    .allowsHitTesting(!showingVolume)
+                    .accessibilityHidden(showingVolume)
+                WatchSystemVolumeControl(remote: remote, focused: showingVolume && canAdjustVolume, volumeChanged: volumeChanged)
                     .id(remote)
-                    .frame(width: 44, height: 44)
-                    .allowsHitTesting(!busy)
+                    .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
+                    .opacity(showingVolume ? 1 : 0)
+                    .allowsHitTesting(showingVolume && canAdjustVolume)
+                    .accessibilityHidden(!showingVolume)
                     .accessibilityLabel(remote ? "iPhone 音量" : "手表音量")
                     .accessibilityHint("旋转数码表冠调节音量")
                     .accessibilityIdentifier("watch-system-volume")
+                    .simultaneousGesture(DragGesture(minimumDistance: 0)
+                        .updating($touchingVolume) { _, touching, _ in touching = true }
+                        .onChanged { _ in volumeChanged() }
+                        .onEnded { _ in volumeChanged() })
             }
-            Text(state.track.name).font(.headline).lineLimit(1).accessibilityIdentifier("watch-current-track")
-            controls(state)
+            .frame(height: 44)
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 6)
+        .focusable(!showingVolume && canAdjustVolume)
+        .focused($crownFocused)
+        .focusEffectDisabled()
+        .digitalCrownRotation($crownPosition, from: -1, through: 1, sensitivity: .low, isContinuous: true, isHapticFeedbackEnabled: false, onChange: { _ in
+            revealVolume()
+        })
+        .digitalCrownAccessory(.hidden)
+        .accessibilityHint("旋转数码表冠调节音量")
+        .accessibilityAction(named: "调节音量", revealVolume)
         .navigationTitle("")
         .alert("播放未完成", isPresented: Binding(get: { playbackError != nil }, set: { if !$0 { playbackError = nil } })) {
             Button("知道了", role: .cancel) { playbackError = nil }
@@ -39,11 +65,27 @@ struct WatchMusicView: View {
         }
             .task {
                 try? await chooseLocation()
+                crownFocused = canAdjustVolume && !showingVolume
                 while !Task.isCancelled {
                     do { try await Task.sleep(for: .seconds(10)) } catch { return }
-                    if scenePhase == .active, !busy { try? await chooseLocation() }
+                    if scenePhase == .active, !busy, !showingVolume { try? await chooseLocation() }
                 }
             }
+            .task(id: volumeActivity) {
+                guard showingVolume else { return }
+                do { try await Task.sleep(for: .seconds(3)) } catch { return }
+                guard !touchingVolume else { return }
+                showingVolume = false
+                crownFocused = canAdjustVolume
+            }
+            .onChange(of: canAdjustVolume) { _, available in
+                if !available { showingVolume = false }
+                crownFocused = available && !showingVolume
+            }
+            .onChange(of: app.link.remoteVolumeRevision) { _, _ in
+                if remote { volumeChanged() }
+            }
+            .onDisappear { showingVolume = false; crownFocused = false }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active, !busy { Task { try? await chooseLocation() } }
             }
@@ -54,10 +96,30 @@ struct WatchMusicView: View {
 
     private func controls(_ state: AudioState) -> some View {
         HStack(spacing: 10) {
-            Button("上一首", systemImage: "backward.end.fill") { perform(.previous) }.labelStyle(.iconOnly)
-            Button(state.playing ? "暂停" : "播放", systemImage: state.playing ? "pause.fill" : "play.fill") { perform(.playPause) }.labelStyle(.iconOnly)
-            Button("下一首", systemImage: "forward.end.fill") { perform(.next) }.labelStyle(.iconOnly)
-        }.buttonStyle(.bordered).disabled(busy)
+            playbackButton("上一首", symbol: "backward.end.fill", action: .previous)
+            playbackButton(state.playing ? "暂停" : "播放", symbol: state.playing ? "pause.fill" : "play.fill", action: .playPause)
+            playbackButton("下一首", symbol: "forward.end.fill", action: .next)
+        }.buttonStyle(.plain).disabled(busy)
+    }
+
+    private func playbackButton(_ title: String, symbol: String, action: AudioCommand.Action) -> some View {
+        Button { perform(action) } label: {
+            Image(systemName: symbol)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
+        }.accessibilityLabel(title)
+    }
+
+    private func revealVolume() {
+        guard canAdjustVolume else { return }
+        crownFocused = false
+        showingVolume = true
+        volumeActivity = UUID()
+    }
+
+    private func volumeChanged() {
+        guard showingVolume else { return }
+        volumeActivity = UUID()
     }
 
     private func perform(_ action: AudioCommand.Action) {
@@ -112,19 +174,38 @@ struct WatchMusicView: View {
 private struct WatchSystemVolumeControl: WKInterfaceObjectRepresentable {
     let remote: Bool
     let focused: Bool
+    var volumeChanged: () -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(volumeChanged: volumeChanged) }
 
     func makeWKInterfaceObject(context: Context) -> WKInterfaceVolumeControl {
         let control = WKInterfaceVolumeControl(origin: remote ? .companion : .local)
         control.setTintColor(.white)
+        context.coordinator.observeLocalVolume()
         return control
     }
 
     func updateWKInterfaceObject(_ control: WKInterfaceVolumeControl, context: Context) {
+        context.coordinator.volumeChanged = volumeChanged
         if focused { control.focus() }
         else { control.resignFocus() }
     }
 
-    static func dismantleWKInterfaceObject(_ control: WKInterfaceVolumeControl, coordinator: ()) {
+    static func dismantleWKInterfaceObject(_ control: WKInterfaceVolumeControl, coordinator: Coordinator) {
         control.resignFocus()
+        coordinator.observation?.invalidate()
+    }
+
+    final class Coordinator {
+        var volumeChanged: () -> Void
+        var observation: NSKeyValueObservation?
+
+        init(volumeChanged: @escaping () -> Void) { self.volumeChanged = volumeChanged }
+
+        func observeLocalVolume() {
+            observation = AVAudioSession.sharedInstance().observe(\.outputVolume, options: [.new]) { [weak self] _, _ in
+                Task { @MainActor [weak self] in self?.volumeChanged() }
+            }
+        }
     }
 }
