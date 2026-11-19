@@ -1,0 +1,155 @@
+import SwiftUI
+import QingkongCore
+
+@main
+struct QingkongWatchApp: App {
+    @State private var services: AppServices? = try? AppServices()
+    var body: some Scene {
+        WindowGroup {
+            Group {
+                if let services { WatchRootView().environment(services) }
+                else { RecoveryView(retry: initialize) }
+            }.tint(.white)
+        }
+    }
+    private func initialize() { services = try? AppServices() }
+}
+
+enum WatchRoute: Hashable { case trend(HealthMetric), mood, music, setup }
+
+struct WatchRootView: View {
+    @Environment(AppServices.self) private var app
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var path: [WatchRoute] = []
+    var body: some View {
+        NavigationStack(path: $path) {
+            List {
+                if app.health.isDemo { Text("演示健康数据").font(.caption2) }
+                ForEach(HealthMetric.allCases) { metric in
+                    NavigationLink(value: WatchRoute.trend(metric)) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Label(metric.name, systemImage: metric.symbol).font(.caption)
+                            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                                Text(app.health.latest(metric).map { $0.value.formatted(.number.precision(.fractionLength(0))) } ?? "—").font(.system(.title2, design: .rounded).weight(.medium))
+                                Text(metric.unit).font(.caption2).foregroundStyle(.secondary)
+                            }
+                            if app.health.latest(metric) != nil {
+                                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: .week), color: .white, compact: true).frame(height: 28)
+                            }
+                        }.padding(.vertical, 4)
+                    }
+                }
+                NavigationLink(value: WatchRoute.mood) { Label("记下此刻", systemImage: "face.smiling") }
+                NavigationLink(value: WatchRoute.music) { Label("听听自然", systemImage: "moon") }
+                NavigationLink(value: WatchRoute.setup) { Label("连接与设置", systemImage: "gearshape") }
+            }.navigationTitle("晴空")
+                .navigationDestination(for: WatchRoute.self) { route in
+                    switch route {
+                    case .trend(let metric): WatchTrendView(metric: metric)
+                    case .mood: WatchMoodView()
+                    case .music: WatchMusicView()
+                    case .setup: WatchSetupView()
+                    }
+                }
+        }.task { await app.start() }
+            .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await app.activate() } } }
+            .onOpenURL { url in
+                guard url.scheme == "qingkong", url.host == "trend",
+                      let metric = HealthMetric(rawValue: url.lastPathComponent) else { return }
+                path = [.trend(metric)]
+            }
+    }
+}
+
+struct WatchTrendView: View {
+    @Environment(AppServices.self) private var app
+    let metric: HealthMetric
+    @State private var period: TrendPeriod = .week
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                if let latest = app.health.latest(metric) {
+                    Text("\(latest.value.formatted(.number.precision(.fractionLength(0)))) \(metric.unit)").font(.system(.title2, design: .rounded))
+                    Text(latest.date.formatted(date: .abbreviated, time: .shortened)).font(.caption2).foregroundStyle(.secondary)
+                    Text("来源：\(latest.source)").font(.caption2).foregroundStyle(.secondary)
+                } else { Text("暂无可读取的记录").font(.headline) }
+                Picker("时间范围", selection: $period) {
+                    ForEach(TrendPeriod.allCases) { Text($0.name).tag($0) }
+                }
+                .pickerStyle(.navigationLink)
+                .frame(maxWidth: .infinity, minHeight: 48)
+                .accessibilityIdentifier("watch-trend-period")
+                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: period), color: .white, compact: true).frame(height: 80)
+                if metric == .hrv {
+                    Text(app.health.baseline.map { "个人基线 \($0.formatted(.number.precision(.fractionLength(0)))) ms" } ?? "基线积累中").font(.caption)
+                    Text("SDNN · 此前 7 日至少 3 个有效日的日均值平均。 ").font(.caption2).foregroundStyle(.secondary)
+                }
+                Text("空缺表示没有记录，不代表零。 ").font(.caption2).foregroundStyle(.secondary)
+                Button("刷新") { Task { await app.health.refresh() } }.disabled(app.health.loading)
+                if let error = app.health.error { Text(error).font(.caption2) }
+            }.padding(.horizontal, 8)
+        }.navigationTitle(metric.name)
+    }
+}
+
+struct WatchMoodView: View {
+    @Environment(AppServices.self) private var app
+    @State private var mood = 3
+    @State private var stress = 2
+    @State private var message: String?
+    private let stressLabels = ["很放松", "轻微压力", "中等压力", "压力较大", "压力很大"]
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 14) {
+                Text("此刻，感觉如何？").font(.headline)
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                    ForEach(1...5, id: \.self) { value in
+                        Button { mood = value } label: {
+                            VStack(spacing: 3) {
+                                Image("mood-\(value)").resizable().scaledToFit().frame(height: 38)
+                                Text(MoodRecord.labels[value - 1]).font(.caption2)
+                            }.padding(4).frame(maxWidth: .infinity).background(mood == value ? .white.opacity(0.18) : .clear, in: RoundedRectangle(cornerRadius: 12))
+                        }.buttonStyle(.plain).accessibilityLabel("心情：\(MoodRecord.labels[value - 1])").accessibilityAddTraits(mood == value ? .isSelected : [])
+                    }
+                }
+                Picker("此刻的压力", selection: $stress) {
+                    ForEach(1...5, id: \.self) { value in
+                        Text(stressLabels[value - 1]).tag(value)
+                    }
+                }
+                .pickerStyle(.navigationLink)
+                .frame(minHeight: 52)
+                .accessibilityIdentifier("watch-stress-picker")
+                Button("保存此刻") {
+                    do { try app.store.add(mood: mood, stress: stress, note: ""); message = "已保存在手表，连接后同步" }
+                    catch { message = "未能保存，请重试。" }
+                }.buttonStyle(.borderedProminent).tint(.white).foregroundStyle(.black)
+                if let message { Text(message).font(.caption2).foregroundStyle(.secondary) }
+            }.padding(.horizontal, 6)
+        }.navigationTitle("心情")
+    }
+}
+
+struct WatchSetupView: View {
+    @Environment(AppServices.self) private var app
+    var body: some View {
+        List {
+            Section("Apple 健康") {
+                Text("只读取你允许的健康记录，无数据不代表你拒绝了访问。 ").font(.caption2)
+                Button(app.health.requested ? "检查健康连接" : "连接健康") { Task { await app.health.authorize() } }
+                if let error = app.health.error { Text(error).font(.caption2) }
+            }
+            Section("配对同步") {
+                Text(app.link.syncMessage).font(.caption2)
+                Text(app.link.reachable ? "iPhone 当前可连接" : "iPhone 当前未连接，记录会先保存在手表").font(.caption2)
+                Button("重试同步") { app.link.flush() }
+                if let error = app.link.error { Text(error).font(.caption2) }
+            }
+            Section("表盘组件") {
+                Text("长按系统表盘 → 编辑 → 复杂功能，选择晴空。可在 iPhone 晴空中配置默认指标和迷你趋势。 ").font(.caption2)
+                if let error = app.snapshotError { Text(error).font(.caption2) }
+            }
+            Section("隐私") { Text("无注册、无广告，不上传日记或健康记录。心情与偏好只在配对设备间同步。详细说明见 iPhone 端个性化设置。 ").font(.caption2) }
+        }.navigationTitle("连接与设置")
+    }
+}

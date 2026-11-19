@@ -1,0 +1,12 @@
+.DS_Store
+.build/
+build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+artifacts/*
+!artifacts/.gitkeep
+.swiftpm/
+QingkongPhonePreview.xcodeproj/
+__pycache__/
+*.pyc

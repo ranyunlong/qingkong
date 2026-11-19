@@ -1,0 +1,183 @@
+import Foundation
+import HealthKit
+import Observation
+import QingkongCore
+
+struct ECGRecord: Identifiable {
+    let sample: HKElectrocardiogram
+    var id: UUID { sample.uuid }
+    var date: Date { sample.startDate }
+    var source: String { sample.sourceRevision.source.name }
+    var classification: String {
+        switch sample.classification {
+        case .sinusRhythm: "窦性心律"
+        case .atrialFibrillation: "房颤"
+        case .inconclusiveLowHeartRate: "心率偏低，未能分类"
+        case .inconclusiveHighHeartRate: "心率偏高，未能分类"
+        case .inconclusivePoorReading: "记录质量不足"
+        case .inconclusiveOther: "未能分类"
+        default: "暂无系统分类"
+        }
+    }
+}
+
+struct VoltagePoint: Identifiable {
+    let seconds: Double
+    let millivolts: Double
+    var id: Double { seconds }
+}
+
+@MainActor @Observable
+final class HealthService {
+    private(set) var readings: [HealthReading] = []
+    private(set) var ecgs: [ECGRecord] = []
+    private(set) var loading = false
+    private(set) var requested = UserDefaults.standard.bool(forKey: "health.authorizationRequested")
+    private(set) var error: String?
+    private(set) var isDemo = false
+    private(set) var backgroundDeliveryWarning: String?
+    var available: Bool { HKHealthStore.isHealthDataAvailable() }
+    @ObservationIgnored var didRefresh: (() async -> Void)?
+    @ObservationIgnored private let store = HKHealthStore()
+    @ObservationIgnored private var observers: [HKObserverQuery] = []
+    @ObservationIgnored private var refreshTask: Task<Void, Never>?
+    @ObservationIgnored private let testing: Bool
+
+    init(testing: Bool = false, demo: Bool = false) {
+        self.testing = testing
+        #if DEBUG
+        isDemo = demo
+        #endif
+        if available && requested && !testing && !isDemo { installObservers() }
+    }
+
+    func latest(_ metric: HealthMetric) -> HealthReading? {
+        readings.filter { $0.metric == metric && $0.isValid && $0.date <= .now }.max { $0.date < $1.date }
+    }
+    var dailyHRV: Double? { HealthMath.dailyMean(readings, metric: .hrv, day: .now) }
+    var baseline: Double? { HealthMath.hrvBaseline(readings) }
+
+    func authorize() async {
+        guard available && !testing && !isDemo else { return }
+        error = nil
+        let types: Set<HKObjectType> = Set(HealthMetric.allCases.map { quantityType($0) } + [HKObjectType.electrocardiogramType()])
+        do {
+            try await store.requestAuthorization(toShare: [], read: types)
+            requested = true
+            UserDefaults.standard.set(true, forKey: "health.authorizationRequested")
+            await refresh()
+            installObservers()
+        } catch { self.error = "健康数据连接未完成，请稍后重试。" }
+    }
+
+    func refresh() async {
+        // Every observer waits for the same refresh, including notification evaluation,
+        // before reporting its background delivery complete to HealthKit.
+        if let refreshTask { await refreshTask.value; return }
+        let task = Task { await self.loadReadings() }
+        refreshTask = task
+        await task.value
+        refreshTask = nil
+    }
+
+    private func loadReadings() async {
+        if isDemo { readings = Self.demoReadings(); await didRefresh?(); return }
+        guard available && requested && !testing else { return }
+        loading = true
+        defer { loading = false }
+        error = nil
+        do {
+            var collected: [HealthReading] = []
+            for metric in HealthMetric.allCases {
+                let since = Calendar.current.date(byAdding: .day, value: -38, to: .now)!
+                let samples = try await query(type: quantityType(metric), since: since)
+                for case let sample as HKQuantitySample in samples {
+                    let value = sample.quantity.doubleValue(for: unit(metric))
+                    let reading = HealthReading(id: sample.uuid, metric: metric, date: sample.startDate, value: metric == .oxygen ? value * 100 : value, source: sample.sourceRevision.source.name, sourceIdentifier: sample.sourceRevision.source.bundleIdentifier, wasUserEntered: sample.metadata?[HKMetadataKeyWasUserEntered] as? Bool)
+                    if reading.isValid { collected.append(reading) }
+                }
+            }
+            let ecgSamples = try await query(type: HKObjectType.electrocardiogramType(), since: nil, limit: 100)
+            readings = collected
+            ecgs = ecgSamples.compactMap { ($0 as? HKElectrocardiogram).map { ECGRecord(sample: $0) } }
+            await didRefresh?()
+            installObservers()
+        } catch { self.error = "暂时无法更新健康记录，请稍后刷新。" }
+    }
+
+    func waveform(for record: ECGRecord) async throws -> [VoltagePoint] {
+        try await withCheckedThrowingContinuation { continuation in
+            var points: [VoltagePoint] = []
+            let query = HKElectrocardiogramQuery(record.sample) { _, result in
+                switch result {
+                case .measurement(let measurement):
+                    if let value = measurement.quantity(for: .appleWatchSimilarToLeadI) {
+                        points.append(VoltagePoint(seconds: measurement.timeSinceSampleStart, millivolts: value.doubleValue(for: .voltUnit(with: .milli))))
+                    }
+                case .done: continuation.resume(returning: points)
+                case .error(let error): continuation.resume(throwing: error)
+                @unknown default: break
+                }
+            }
+            store.execute(query)
+        }
+    }
+
+    private func query(type: HKSampleType, since: Date?, limit: Int = HKObjectQueryNoLimit) async throws -> [HKSample] {
+        try await withCheckedThrowingContinuation { continuation in
+            let predicate = since.map { HKQuery.predicateForSamples(withStart: $0, end: .now, options: .strictStartDate) }
+            let query = HKSampleQuery(sampleType: type, predicate: predicate, limit: limit, sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]) { _, samples, error in
+                if let error { continuation.resume(throwing: error) }
+                else { continuation.resume(returning: samples ?? []) }
+            }
+            store.execute(query)
+        }
+    }
+
+    private func quantityType(_ metric: HealthMetric) -> HKQuantityType {
+        switch metric {
+        case .hrv: HKQuantityType(.heartRateVariabilitySDNN)
+        case .heartRate: HKQuantityType(.heartRate)
+        case .oxygen: HKQuantityType(.oxygenSaturation)
+        }
+    }
+    private func unit(_ metric: HealthMetric) -> HKUnit {
+        switch metric {
+        case .hrv: .secondUnit(with: .milli)
+        case .heartRate: .count().unitDivided(by: .minute())
+        case .oxygen: .percent()
+        }
+    }
+
+    private func installObservers() {
+        guard observers.isEmpty && !testing && !isDemo else { return }
+        for metric in HealthMetric.allCases {
+            let type = quantityType(metric)
+            let query = HKObserverQuery(sampleType: type, predicate: nil) { [weak self] _, completion, error in
+                Task { @MainActor in
+                    if error == nil { await self?.refresh() }
+                    completion()
+                }
+            }
+            observers.append(query)
+            store.execute(query)
+            store.enableBackgroundDelivery(for: type, frequency: metric == .hrv ? .immediate : .hourly) { [weak self] success, _ in
+                guard metric == .hrv, !success else { return }
+                Task { @MainActor in self?.backgroundDeliveryWarning = "后台健康更新暂未启用，放松提醒可能仅在打开应用刷新后判断。" }
+            }
+        }
+    }
+
+    private static func demoReadings() -> [HealthReading] {
+        let today = Calendar.current.startOfDay(for: .now)
+        return (0..<30).flatMap { offset -> [HealthReading] in
+            guard offset % 8 != 4 else { return [] }
+            let day = Calendar.current.date(byAdding: .day, value: -offset, to: today)!
+            return HealthMetric.allCases.map { metric in
+                let base: Double = metric == .hrv ? 45 : metric == .heartRate ? 68 : 97
+                let oscillation = metric == .oxygen ? Double(offset % 3) : sin(Double(offset)) * 7
+                return HealthReading(metric: metric, date: day.addingTimeInterval(offset == 0 ? min(Date.now.timeIntervalSince(today), 8 * 3600) : 12 * 3600), value: base + oscillation, source: "演示数据")
+            }
+        }
+    }
+}
