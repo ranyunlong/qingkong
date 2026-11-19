@@ -1,6 +1,9 @@
 import SwiftUI
 import Charts
 import QingkongCore
+#if os(iOS)
+import UIKit
+#endif
 
 extension Color {
     static var readableSecondary: Color { Color.primary.opacity(0.72) }
@@ -45,18 +48,16 @@ struct HealthTrendChart: View {
             #if os(iOS)
             if selectionEnabled {
             chart(points)
-                .chartXSelection(value: $selectedDate)
-                .chartGesture { proxy in
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { proxy.selectXValue(at: $0.location.x) }
-                        .onEnded { _ in selectedDate = nil }
+                .chartOverlay { proxy in
+                    HorizontalChartSelection(proxy: proxy, selection: $selectedDate)
                 }
                 .onChange(of: buckets) { _, _ in selectedDate = nil }
                 .onChange(of: metric) { _, _ in selectedDate = nil }
-                .accessibilityHint("在图表上拖动，查看时间和\(metric.name)数值")
+                .accessibilityHint("左右拖动查看时间和\(metric.name)数值，上下拖动滚动页面")
                 .accessibilityIdentifier("health-trend-\(metric.rawValue)")
             } else {
                 chart(points)
+                    .accessibilityIdentifier("health-trend-\(metric.rawValue)")
             }
             #else
             chart(points)
@@ -77,7 +78,7 @@ struct HealthTrendChart: View {
                 }
             }
             #if os(iOS)
-            if let selected = selectedBucket {
+            if selectionEnabled, let selected = selectedBucket {
                 RuleMark(x: .value("选中时间", selected.date))
                     .foregroundStyle(color.opacity(0.65))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
@@ -109,6 +110,61 @@ struct HealthTrendChart: View {
 }
 
 #if os(iOS)
+struct HorizontalChartSelection<Value: Plottable>: View {
+    let proxy: ChartProxy
+    @Binding var selection: Value?
+
+    var body: some View {
+        GeometryReader { geometry in
+            if let plotFrame = proxy.plotFrame {
+                let plot = geometry[plotFrame]
+                Color.clear
+                    .contentShape(Rectangle())
+                    .gesture(HorizontalChartDrag { location in
+                        let x = min(max(location.x - plot.minX, 0), plot.width)
+                        selection = proxy.value(atX: x, as: Value.self)
+                    } onEnded: {
+                        selection = nil
+                    })
+            }
+        }
+        .onDisappear { selection = nil }
+        .accessibilityHidden(true)
+    }
+}
+
+struct HorizontalChartDrag: UIGestureRecognizerRepresentable {
+    var onChanged: (CGPoint) -> Void
+    var onEnded: () -> Void
+
+    func makeCoordinator(converter: CoordinateSpaceConverter) -> Coordinator { Coordinator() }
+
+    func makeUIGestureRecognizer(context: Context) -> UIPanGestureRecognizer {
+        let pan = UIPanGestureRecognizer()
+        pan.maximumNumberOfTouches = 1
+        pan.cancelsTouchesInView = false
+        pan.delegate = context.coordinator
+        return pan
+    }
+
+    func handleUIGestureRecognizerAction(_ recognizer: UIPanGestureRecognizer, context: Context) {
+        switch recognizer.state {
+        case .began, .changed: onChanged(context.converter.localLocation)
+        case .ended, .cancelled, .failed: onEnded()
+        default: break
+        }
+    }
+
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+            guard let pan = gestureRecognizer as? UIPanGestureRecognizer else { return false }
+            let velocity = pan.velocity(in: pan.view)
+            // Reject vertical pans before recognition so the page's scroll view can take them.
+            return abs(velocity.x) > abs(velocity.y)
+        }
+    }
+}
+
 struct ChartReadingLabel: View {
     let heading: String
     let reading: String

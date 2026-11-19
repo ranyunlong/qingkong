@@ -91,12 +91,6 @@ struct ECGDetailView: View {
     @State private var points: [VoltagePoint] = []
     @State private var loading = true
     @State private var error: String?
-    @State private var selectedSeconds: Double?
-
-    private var selectedPoint: VoltagePoint? {
-        guard let selectedSeconds else { return nil }
-        return points.min { abs($0.seconds - selectedSeconds) < abs($1.seconds - selectedSeconds) }
-    }
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -105,42 +99,8 @@ struct ECGDetailView: View {
                 Text("以上为健康记录中的系统分类，非晴空的诊断结论。 ").font(.footnote).foregroundStyle(Color.readableSecondary)
                 if loading { ProgressView("正在读取波形").frame(maxWidth: .infinity) }
                 else if !points.isEmpty {
-                    Chart {
-                        ForEach(points) { point in
-                            LineMark(x: .value("秒", point.seconds), y: .value("mV", point.millivolts)).foregroundStyle(app.scene.accent).lineStyle(StrokeStyle(lineWidth: 1))
-                        }
-                        if let selected = selectedPoint {
-                            RuleMark(x: .value("选中秒数", selected.seconds))
-                                .foregroundStyle(app.scene.accent.opacity(0.65))
-                                .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
-                                .annotation(position: .top, spacing: 4, overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))) {
-                                    ChartReadingLabel(
-                                        heading: "\(selected.seconds.formatted(.number.precision(.fractionLength(2)))) 秒",
-                                        reading: "\(selected.millivolts.formatted(.number.precision(.fractionLength(3)))) mV",
-                                        color: app.scene.accent
-                                    )
-                                }
-                            RuleMark(y: .value("选中电压", selected.millivolts))
-                                .foregroundStyle(app.scene.accent.opacity(0.3))
-                                .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
-                            PointMark(x: .value("选中秒数", selected.seconds), y: .value("选中电压", selected.millivolts))
-                                .foregroundStyle(app.scene.accent).symbolSize(65)
-                        }
-                    }.frame(height: 240).chartScrollableAxes(.horizontal).chartXVisibleDomain(length: 5)
-                        .chartXSelection(value: $selectedSeconds)
-                        .chartGesture { proxy in
-                            LongPressGesture(minimumDuration: 0.2)
-                                .sequenced(before: DragGesture(minimumDistance: 0))
-                                .onChanged { value in
-                                    if case .second(true, let drag?) = value { proxy.selectXValue(at: drag.location.x) }
-                                }
-                                .onEnded { _ in selectedSeconds = nil }
-                        }
-                        .chartXAxisLabel("秒").chartYAxisLabel("mV")
-                        .accessibilityLabel("心电图电压波形")
-                        .accessibilityHint("横向滑动浏览，按住后拖动查看秒数和电压")
-                        .accessibilityIdentifier("ecg-waveform-chart")
-                    Text("轻扫浏览，按住波形再拖动查看秒数和电压。").font(.caption).foregroundStyle(Color.readableSecondary)
+                    ECGWaveformChart(points: points, color: app.scene.accent)
+                    Text("左右滑动浏览完整波形，上下滑动滚动页面。").font(.caption).foregroundStyle(Color.readableSecondary)
                 } else { ContentUnavailableView("暂无可读取的波形", systemImage: "waveform.path.ecg") }
                 if let error { Text(error).font(.footnote).foregroundStyle(Color.readableSecondary); Button("重新读取") { Task { await load() } } }
                 LabeledContent("记录时长", value: "\(record.sample.endDate.timeIntervalSince(record.sample.startDate).formatted(.number.precision(.fractionLength(0)))) 秒")
@@ -152,9 +112,55 @@ struct ECGDetailView: View {
         }.navigationTitle("记录详情").task { await load() }
     }
     private func load() async {
-        loading = true; error = nil; selectedSeconds = nil
+        loading = true; error = nil
         do { points = try await app.health.waveform(for: record) }
         catch { self.error = "波形暂时无法读取，请重试。" }
         loading = false
     }
+}
+
+struct ECGWaveformChart: View {
+    let points: [VoltagePoint]
+    let color: Color
+    @State private var visiblePosition = 0.0
+
+    private var lowerBound: Double { points.first?.seconds ?? 0 }
+    private var upperBound: Double { max(points.last?.seconds ?? 5, lowerBound + 5) }
+    private var visibleStart: Double { min(max(visiblePosition, lowerBound), upperBound - 5) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Chart {
+                LinePlot(points, x: .value("秒", \.seconds), y: .value("mV", \.millivolts))
+                    .foregroundStyle(color).lineStyle(StrokeStyle(lineWidth: 1))
+                    .interpolationMethod(.linear)
+            }.frame(height: 240)
+                .chartScrollableAxes(.horizontal)
+                .chartXVisibleDomain(length: 5)
+                .chartXScale(domain: lowerBound...upperBound)
+                .chartScrollPosition(initialX: lowerBound)
+                .chartOverlay { proxy in
+                    GeometryReader { geometry in
+                        if let content = proxy.plotFrame, let viewport = proxy.plotContainerFrame {
+                            let offset = geometry[viewport].minX - geometry[content].minX
+                            Color.clear.preference(key: ECGVisiblePositionKey.self, value: proxy.value(atX: offset, as: Double.self) ?? lowerBound)
+                        }
+                    }.allowsHitTesting(false).accessibilityHidden(true)
+                }
+                .onPreferenceChange(ECGVisiblePositionKey.self) { visiblePosition = $0 }
+                .chartXAxisLabel("秒").chartYAxisLabel("mV")
+                .accessibilityLabel("心电图电压波形")
+                .accessibilityHint("左右滑动浏览完整波形，上下滑动滚动页面")
+                .accessibilityIdentifier("ecg-waveform-chart")
+
+            Text("\(visibleStart.formatted(.number.precision(.fractionLength(1))))–\((visibleStart + 5).formatted(.number.precision(.fractionLength(1)))) 秒 / 共 \(upperBound.formatted(.number.precision(.fractionLength(1)))) 秒")
+                .font(.caption).monospacedDigit().foregroundStyle(Color.readableSecondary)
+                .accessibilityIdentifier("ecg-visible-range")
+        }
+    }
+}
+
+private struct ECGVisiblePositionKey: PreferenceKey {
+    static let defaultValue = 0.0
+    static func reduce(value: inout Double, nextValue: () -> Double) { value = nextValue() }
 }

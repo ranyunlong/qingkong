@@ -159,3 +159,27 @@ xcodebuild -project QingkongPhonePreview.xcodeproj -scheme Qingkong \
 - 真实 HealthKit 后台唤醒、新数据触发通知、Watch 镜像、真实系统音量／音频路由、心电图真数据拖动及锁屏／专注行为仍需配对真机验收。模拟器界面、逻辑测试和构建结果不代替这些验证；未上传 App Store。
 
 - 普通签名模拟器版本中，点击「发送测试通知」后，XCTest 在 SpringBoard 查询到测试通知，测试通过：`artifacts/test-simulator-notification-delivery.log`、`test-simulator-notification-delivery-capture.log`。附加截图为通知检查页（`artifacts/notification-delivery-ui-attachments/`）；连续截图未取得横幅画面，因此只认定系统中可查询到通知，不声称横幅视觉验收通过，也不代表真实健康异常已触发或真机后台已通过。
+
+## 图表滚动、心电图纯浏览与 Watch 表冠（2026-11-20）
+
+- 按用户最终澄清，只有心电图取消选值交互；趋势页心率、HRV、血氧均保留横向选值。首页 HRV 迷你图沿用此前要求，不接收选择手势。支持选值的健康图表在识别前拒绝纵向拖动，让页面正常上下滚动，横向拖动才显示读数。
+- 心电图已复现透明选取层遮挡原生横向浏览的问题。按用户进一步确认，最终移除心电图选值层、读数浮层、选中点和参考线，保留系统原生横向滚动；显式时间轴覆盖整条波形，下面显示当前可见秒数与总秒数。发现 `LinePlot` 原生滚动后的波形已移动，但绑定的滚动值未更新；范围标签改从实际可见绘图区计算，读取层明确禁用触摸，不再影响浏览手势。
+- 全采样测试暴露逐点 Chart 内容重算的卡顿，波形改用 `LinePlot` 批量绘图，保留全部原始点和线性连接，不抽样或平滑健康数据。中间尝试过将浏览与选值合并的时间窗方案，已按用户取消选值的要求移除。
+- Watch 音乐页常驻原生音量控件并在页面可见、前台且操作可用时取得表冠焦点，移除先接收表冠再交接焦点的路径。默认播放按钮覆盖音量控件，音量变化时显示音量；超时恢复按钮仍保留表冠焦点。离开页面、进入后台或操作不可用时释放焦点。
+- ECG 独立测试入口位于 `Tests/InteractionFixtures/`，使用明确标注的 30 秒、512 Hz 合成波形，直接调用正式 `ECGWaveformChart`。不会初始化健康服务或向健康库写入演示记录，正式 App 不包含此入口。使用 `python3 scripts/generate_project.py --ecg-interaction` 仅生成忽略提交的 `QingkongECGPreview.xcodeproj`，不会覆盖主工程或既有 PhonePreview 工程。
+
+复现心电图交互测试（模拟器 ID 按本机设备替换）：
+
+```sh
+python3 scripts/generate_project.py --ecg-interaction
+xcodebuild -project QingkongECGPreview.xcodeproj -scheme Qingkong \
+  -destination 'platform=iOS Simulator,id=608D8E95-8DD9-402A-BE47-D4F40EAEC557' \
+  -derivedDataPath build/ECGPreviewDerivedData -parallel-testing-enabled NO \
+  -only-testing:QingkongUITests/ECGScrollingUITests test
+```
+
+- 最终心电图模拟器测试通过：`artifacts/test-ecg-native-viewport-label.log`，覆盖从开头到 25–30 秒末尾、向回浏览、横拖不滚页面、纵拖滚页面及无选值浮层。实际截图见 `artifacts/ecg-browse-final-attachments/`，测试使用完整 512 Hz 合成波形。较早的失败中，波形已经移动而范围标签未更新，不能据此认定波形没有滚动；上述最终测试已覆盖标签修复。
+- 最新三项 iPhone UI 测试通过：`artifacts/test-three-metrics-final.log`。分别覆盖首页 HRV 区域滚页、趋势页图表区域纵向滚页、心率／HRV／血氧横向选值并松手清除。已实际查看 `artifacts/chart-final-{hrv,heart,oxygen}-1.png`，均可看到对应日期、数值和单位、选中点与参考线。
+- 最终 Watch UI 测试通过（1 项、0 失败）：`artifacts/test-watch-final-focus.log`。覆盖默认播放按钮、至少 44 pt 触摸区域、不先点击音量图标直接双向旋转表冠、切曲、离页再进入后旋转表冠。模拟器操作和页面状态不证明真实输出音量变化。
+- 共享逻辑 46 项测试通过：`artifacts/test-core-ecg-scroll.log`。最终完整 iPhone＋Watch＋表盘组件 Debug 构建通过：`artifacts/build-final-chart-and-crown.log`。电脑重启前被中断的执行不作为通过证据；恢复后串行构建与模拟器验收，一次只运行一台本轮模拟器。
+- 本轮未安装或运行真机。真实心电图数据、手表输出音量及音频路由仍未验收；保留用户已关闭开发者模式的状态，未上传 App Store。

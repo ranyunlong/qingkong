@@ -6,8 +6,9 @@ import json
 import sys
 
 ROOT = Path(__file__).resolve().parent.parent
-PHONE_ONLY = '--phone-only' in sys.argv
-PROJECT_NAME = 'QingkongPhonePreview' if PHONE_ONLY else 'Qingkong'
+ECG_INTERACTION = '--ecg-interaction' in sys.argv
+PHONE_ONLY = '--phone-only' in sys.argv or ECG_INTERACTION
+PROJECT_NAME = 'QingkongECGPreview' if ECG_INTERACTION else 'QingkongPhonePreview' if PHONE_ONLY else 'Qingkong'
 objects = {}
 
 def uid(key):
@@ -76,6 +77,10 @@ for name,folder,sdk,platforms,family,bundle,product_type,assets in specs:
         sources=['Sources/Shared/SnapshotStorage.swift','Sources/Shared/Appearance.swift']+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/Widgets').glob('*.swift'))]
     else:
         sources=common+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/f'Sources/{folder}').glob('*.swift'))]
+    if ECG_INTERACTION and folder == 'iOS':
+        sources = [s for s in sources if s != 'Sources/iOS/QingkongApp.swift'] + ['Tests/InteractionFixtures/ECGFixtureApp.swift']
+    if ECG_INTERACTION and folder == 'Tests':
+        sources = ['Tests/InteractionFixtures/ECGScrollingUITests.swift']
     source_phase=add(name+'.sources','PBXSourcesBuildPhase',buildActionMask=2147483647,files=[add(name+'.build.'+s,'PBXBuildFile',fileRef=file(s)) for s in sources],runOnlyForDeploymentPostprocessing=0)
     resource_phase=add(name+'.resources','PBXResourcesBuildPhase',buildActionMask=2147483647,files=[add(name+'.build.'+s,'PBXBuildFile',fileRef=file(s)) for s in assets],runOnlyForDeploymentPostprocessing=0)
     dependencies=[]
@@ -131,6 +136,8 @@ for name in ['Qingkong','QingkongWatch']:
     testref=f'<BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{targets["QingkongUITests"]}" BuildableName="QingkongUITests.xctest" BlueprintName="QingkongUITests" ReferencedContainer="container:{PROJECT_NAME}.xcodeproj"/>'
     unitref=f'<BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{targets["QingkongTests"]}" BuildableName="QingkongTests.xctest" BlueprintName="QingkongTests" ReferencedContainer="container:{PROJECT_NAME}.xcodeproj"/>'
     testables=f'<TestableReference skipped="NO">{unitref}</TestableReference><TestableReference skipped="NO">{testref}</TestableReference>' if name=='Qingkong' else ''
+    if ECG_INTERACTION and name == 'Qingkong':
+        testables = f'<TestableReference skipped="NO">{testref}</TestableReference>'
     (schemes/f'{name}.xcscheme').write_text(f'''<?xml version="1.0" encoding="UTF-8"?>
 <Scheme LastUpgradeVersion="2660" version="1.3">
 <BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES"><BuildActionEntries><BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="YES" buildForArchiving="YES" buildForAnalyzing="YES">{ref}</BuildActionEntry></BuildActionEntries></BuildAction>

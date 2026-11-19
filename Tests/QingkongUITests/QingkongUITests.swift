@@ -18,6 +18,21 @@ final class QingkongUITests: XCTestCase {
     }
 
     @MainActor
+    func testTrendChartAllowsVerticalPageScrolling() {
+        let app = launch(demo: true)
+        app.tabBars.buttons["趋势"].tap()
+        let chart = app.descendants(matching: .any)["health-trend-hrv"].firstMatch
+        if !chart.isHittable { app.swipeUp() }
+        XCTAssertTrue(chart.isHittable)
+        let originalY = chart.frame.midY
+        print("CHART_VERTICAL_BEGIN")
+        chart.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.65))
+            .press(forDuration: 0.1, thenDragTo: chart.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: -0.8)))
+        XCTAssertLessThan(chart.frame.midY, originalY - 20, "从图表纵向拖动也应滚动页面")
+        XCTAssertFalse(app.descendants(matching: .any)["chart-selected-reading"].exists)
+    }
+
+    @MainActor
     func testFirstHealthIntroductionCanBeDeferredWithoutRepeating() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing", "--ui-reset", "--ui-health-introduction"]
@@ -71,11 +86,14 @@ final class QingkongUITests: XCTestCase {
             app.segmentedControls["trend-metric"].buttons[metric].tap()
             let id = metric == "HRV" ? "hrv" : metric == "心率" ? "heartRate" : "oxygen"
             let chart = app.descendants(matching: .any)["health-trend-\(id)"].firstMatch
-            if !chart.isHittable { app.swipeUp() }
+            for _ in 0..<3 {
+                if chart.isHittable && chart.frame.maxY < app.frame.maxY - 100 { break }
+                app.swipeUp()
+            }
             XCTAssertTrue(chart.isHittable)
             print("CHART_GESTURE_BEGIN_\(id)")
-            chart.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5))
-                .press(forDuration: 0.3, thenDragTo: chart.coordinate(withNormalizedOffset: CGVector(dx: 0.65, dy: 0.5)), withVelocity: .slow, thenHoldForDuration: 4)
+            chart.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+                .press(forDuration: 0.3, thenDragTo: chart.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)), withVelocity: .slow, thenHoldForDuration: 4)
             XCTAssertFalse(app.descendants(matching: .any)["chart-selected-reading"].exists)
         }
     }

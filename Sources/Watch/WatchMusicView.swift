@@ -13,12 +13,11 @@ struct WatchMusicView: View {
     @State private var playbackError: String?
     @State private var showingVolume = false
     @State private var volumeActivity = UUID()
-    @State private var crownPosition = 0.0
+    @State private var pageVisible = false
     @GestureState private var touchingVolume = false
-    @FocusState private var crownFocused: Bool
     private var state: AudioState { remote ? (app.link.remoteState ?? lastRemoteState ?? app.player.state) : app.player.state }
     private var busy: Bool { operating || switching || app.link.remoteBusy || app.player.activating }
-    private var canAdjustVolume: Bool { scenePhase == .active && !busy && playbackError == nil }
+    private var canAdjustVolume: Bool { pageVisible && scenePhase == .active && !busy && playbackError == nil }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -26,15 +25,12 @@ struct WatchMusicView: View {
             Image(state.track.image).resizable().scaledToFill().frame(width: 100, height: 90).clipped().clipShape(RoundedRectangle(cornerRadius: 18)).accessibilityHidden(true)
             Text(state.track.name).font(.headline).lineLimit(1).accessibilityIdentifier("watch-current-track")
             ZStack {
-                controls(state)
-                    .opacity(showingVolume ? 0 : 1)
-                    .allowsHitTesting(!showingVolume)
-                    .accessibilityHidden(showingVolume)
-                WatchSystemVolumeControl(remote: remote, focused: showingVolume && canAdjustVolume, volumeChanged: volumeChanged)
+                // Keep the native control mounted and focused, including while covered.
+                // Handing focus over after the first crown event loses that volume step.
+                WatchSystemVolumeControl(remote: remote, focused: canAdjustVolume, volumeChanged: volumeChanged)
                     .id(remote)
                     .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
-                    .opacity(showingVolume ? 1 : 0)
-                    .allowsHitTesting(showingVolume && canAdjustVolume)
+                    .allowsHitTesting(canAdjustVolume)
                     .accessibilityHidden(!showingVolume)
                     .accessibilityLabel(remote ? "iPhone 音量" : "手表音量")
                     .accessibilityHint("旋转数码表冠调节音量")
@@ -43,17 +39,16 @@ struct WatchMusicView: View {
                         .updating($touchingVolume) { _, touching, _ in touching = true }
                         .onChanged { _ in volumeChanged() }
                         .onEnded { _ in volumeChanged() })
+                if !showingVolume {
+                    controls(state)
+                        .padding(.vertical, 4)
+                        .background(.black)
+                }
             }
             .frame(height: 44)
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 6)
-        .focusable(!showingVolume && canAdjustVolume)
-        .focused($crownFocused)
-        .focusEffectDisabled()
-        .digitalCrownRotation($crownPosition, from: -1, through: 1, sensitivity: .low, isContinuous: true, isHapticFeedbackEnabled: false, onChange: { _ in
-            revealVolume()
-        })
         .digitalCrownAccessory(.hidden)
         .accessibilityHint("旋转数码表冠调节音量")
         .accessibilityAction(named: "调节音量", revealVolume)
@@ -65,7 +60,6 @@ struct WatchMusicView: View {
         }
             .task {
                 try? await chooseLocation()
-                crownFocused = canAdjustVolume && !showingVolume
                 while !Task.isCancelled {
                     do { try await Task.sleep(for: .seconds(10)) } catch { return }
                     if scenePhase == .active, !busy, !showingVolume { try? await chooseLocation() }
@@ -76,16 +70,15 @@ struct WatchMusicView: View {
                 do { try await Task.sleep(for: .seconds(3)) } catch { return }
                 guard !touchingVolume else { return }
                 showingVolume = false
-                crownFocused = canAdjustVolume
             }
             .onChange(of: canAdjustVolume) { _, available in
                 if !available { showingVolume = false }
-                crownFocused = available && !showingVolume
             }
             .onChange(of: app.link.remoteVolumeRevision) { _, _ in
                 if remote { volumeChanged() }
             }
-            .onDisappear { showingVolume = false; crownFocused = false }
+            .onAppear { pageVisible = true }
+            .onDisappear { pageVisible = false; showingVolume = false }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active, !busy { Task { try? await chooseLocation() } }
             }
@@ -112,14 +105,12 @@ struct WatchMusicView: View {
 
     private func revealVolume() {
         guard canAdjustVolume else { return }
-        crownFocused = false
         showingVolume = true
         volumeActivity = UUID()
     }
 
     private func volumeChanged() {
-        guard showingVolume else { return }
-        volumeActivity = UUID()
+        revealVolume()
     }
 
     private func perform(_ action: AudioCommand.Action) {
@@ -187,11 +178,11 @@ private struct WatchSystemVolumeControl: WKInterfaceObjectRepresentable {
 
     func updateWKInterfaceObject(_ control: WKInterfaceVolumeControl, context: Context) {
         context.coordinator.volumeChanged = volumeChanged
-        if focused { control.focus() }
-        else { control.resignFocus() }
+        context.coordinator.updateFocus(focused, control: control)
     }
 
     static func dismantleWKInterfaceObject(_ control: WKInterfaceVolumeControl, coordinator: Coordinator) {
+        coordinator.wantsFocus = false
         control.resignFocus()
         coordinator.observation?.invalidate()
     }
@@ -199,8 +190,19 @@ private struct WatchSystemVolumeControl: WKInterfaceObjectRepresentable {
     final class Coordinator {
         var volumeChanged: () -> Void
         var observation: NSKeyValueObservation?
+        var wantsFocus = false
 
         init(volumeChanged: @escaping () -> Void) { self.volumeChanged = volumeChanged }
+
+        func updateFocus(_ focused: Bool, control: WKInterfaceVolumeControl) {
+            wantsFocus = focused
+            guard focused else { control.resignFocus(); return }
+            // SwiftUI may update before attaching the WatchKit object to the page.
+            DispatchQueue.main.async { [weak self, weak control] in
+                guard self?.wantsFocus == true else { return }
+                control?.focus()
+            }
+        }
 
         func observeLocalVolume() {
             observation = AVAudioSession.sharedInstance().observe(\.outputVolume, options: [.new]) { [weak self] _, _ in

@@ -8,5 +8,6 @@ artifacts/*
 !artifacts/.gitkeep
 .swiftpm/
 QingkongPhonePreview.xcodeproj/
+QingkongECGPreview.xcodeproj/
 __pycache__/
 *.pyc
