@@ -56,7 +56,7 @@ struct PersonalizationView: View {
                 Button("在系统中添加表盘组件", systemImage: "applewatch") { faceGuide = true }
                 Label(app.link.syncMessage, systemImage: "arrow.triangle.2.circlepath").font(.footnote).foregroundStyle(Color.readableSecondary)
                 if let error = app.link.error { Text(error).font(.footnote).foregroundStyle(Color.readableSecondary) }
-            } header: { Text("手腕上的晴空") } footer: { Text("这里编辑晴空组件的默认显示。系统表盘布局由 Apple Watch 管理；圆形显示数值，矩形可显示趋势。组件按系统调度更新。") }
+            } header: { Text("手腕上的晴空") } footer: { Text("这里编辑晴空组件的默认显示。系统表盘布局由 Apple Watch 管理；圆形与单行文字显示数值，矩形可显示趋势。组件按系统调度更新。") }
 
             Section("数据与隐私") {
                 Button("检查 Apple 健康连接", systemImage: "heart.text.clipboard") { Task { await app.health.authorize() } }
@@ -138,12 +138,13 @@ struct WatchFaceGuideView: View {
                 Section("把晴空放到表盘上") {
                     Label("先在配对的 Apple Watch 安装晴空并打开一次。", systemImage: "1.circle")
                     Label("长按当前表盘，点「编辑」，滑到复杂功能。", systemImage: "2.circle")
-                    Label("选一个圆形或大矩形位置，在「所有 App」中找到「小晴空」，再选 HRV、心率或血氧。", systemImage: "3.circle")
+                    Label("选一个圆形、大矩形或单行文字位置，在「所有 App」中找到「小晴空」，再选 HRV、心率或血氧。", systemImage: "3.circle")
                     Label("若选择「跟随 iPhone 配置」，此页的指标与趋势设置会在连接后同步到手表。", systemImage: "4.circle")
                 }
                 Section("找不到组件时") {
                     Text("可先使用「健身记录数字」表盘，编辑左上或右上的圆形位置，再到「所有 App」中查找。")
-                    Text("小晴空支持圆形和大矩形组件，不支持角落或单行文字位置。表盘图库中没有独立的小晴空表盘，需要先选择系统表盘，再编辑复杂功能。")
+                    Text("「动态」的水母样式可选择顶部或底部的单行文字位置；中间的日期位置由系统限定为日期，不能放健康组件。")
+                    Text("小晴空支持圆形、大矩形和单行文字组件，不支持角落位置。表盘图库中没有独立的小晴空表盘，需要先选择系统表盘，再编辑复杂功能。")
                 }
                 Section {
                     Button("添加已有的 .watchface 文件", systemImage: "square.and.arrow.down") { importing = true }

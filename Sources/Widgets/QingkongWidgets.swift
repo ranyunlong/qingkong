@@ -63,7 +63,9 @@ struct MetricWidgetView: View {
     private var reading: HealthReading? { entry.snapshot?.readings.first { $0.metric == metric } }
     var body: some View {
         Group {
-            if family == .accessoryCircular {
+            if family == .accessoryInline {
+                Label("\(value) \(metric.unit)", systemImage: metric.symbol)
+            } else if family == .accessoryCircular {
                 VStack(spacing: 2) {
                     Image(systemName: metric.symbol).font(.caption2)
                     Text(value).font(.system(.title3, design: .rounded).weight(.medium)).minimumScaleFactor(0.6)
@@ -99,6 +101,6 @@ struct QingkongWidgets: Widget {
         AppIntentConfiguration(kind: "QingkongMetric", intent: MetricIntent.self, provider: MetricProvider()) { entry in MetricWidgetView(entry: entry) }
             .configurationDisplayName("晴空健康")
             .description("查看最近健康记录与变化，点按打开趋势。")
-            .supportedFamilies([.accessoryCircular, .accessoryRectangular])
+            .supportedFamilies([.accessoryCircular, .accessoryRectangular, .accessoryInline])
     }
 }

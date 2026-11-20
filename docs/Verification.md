@@ -212,3 +212,13 @@ xcodebuild -project QingkongECGPreview.xcodeproj -scheme Qingkong \
 - 完整 iPhone＋Watch＋表盘组件 Debug 模拟器构建成功：`artifacts/build-hrv-background-final.log`。iPhone 模拟器服务测试已验证：用独立存储完成空数据检查，重新创建提醒服务后恢复检查时间与原因，不发送健康通知、不写入健康库。
 - iPhone 17／iOS 26.5 模拟器两项相关测试分别通过：服务保存／恢复见 `artifacts/test-hrv-background-diagnostics-simulator.log` 中的单元测试结果；通知设置及后台检查页面见 `artifacts/test-hrv-background-diagnostics-ui-final.log`（1 项、0 失败）。初次 UI 断言未滚动到最后一条状态，补足滚动后通过；实际查看最终截图 `artifacts/hrv-diagnostics-final-attachments/`，三条空状态、检查说明和后台说明均正常显示。初次日志整体含一次 UI 失败，不能当作整轮测试成功。
 - 真实 HealthKit 后台唤醒、锁屏数据交付、变化触发系统通知及 Watch 镜像尚未真机验证；本轮只验证规则、存储、构建和模拟器页面。Watch 新增刷新按钮仅完成构建验证，watchOS 27／TestFlight 缺失组件仍待实际安装包复测。当前安装的 8 号包不会自动获得本轮源码修改，需要制作并安装包含修改的新 TestFlight 构建；本轮未上传。
+
+## 水母表盘单行复杂功能（2026-11-20）
+
+- 用户明确复现为 TestFlight 0.1.0（8）在「动态 → 水母」表盘的「所有 App」列表中找不到小晴空。专用 Series 11 46mm／watchOS 26.5 模拟器复现：顶部、底部使用单行文字组件，旧扩展只声明圆形和矩形，未支持 `accessoryInline`。Apple 官方《Migrating ClockKit complications to WidgetKit》将 `utilitarianSmallFlat`／`utilitarianLarge` 对应到 `accessoryInline`，本机系统日志也实际使用该 family 渲染这些位置。
+- 新增 `accessoryInline` 支持及独立 `Label` 布局，只显示指标图标、数值和单位；窄的顶部位置不再因重复指标名截断单位。圆形、矩形布局与趋势行为保持原实现，采样时间等完整信息保留在无障碍描述中。无数据使用「—」，不填入演示值。iPhone 添加引导同步说明单行位置与日期位置的区别。
+- 已实际在模拟器的「动态 → 水母」编辑器中，经「所有 App → 小晴空」为顶部选 HRV、底部选心率，并确认保存后的真实系统表盘同时显示两个组件。点按顶部进入 HRV 详情，点按底部进入心率详情。最终表盘截图：`artifacts/watch-motion-inline-final.png`；组件时间线与渲染证据：`artifacts/watch-motion-inline-after.log`，含 `accessoryInline`、`reload: succeeded with 1 entries`、`util-large-narrow family` 的成功快照。旧版缺失列表复现截图：`artifacts/watch-motion-inline-before.png`。
+- 中间明确标为「正中（日期）」的位置已实际检查：只有系统日期的两种样式与关闭选项，不提供「所有 App」。这是该表盘的系统限制，补充单行组件不能让健康组件占用日期位置。
+- 最终 Watch＋组件本地签名 Debug 模拟器构建通过：`artifacts/build-motion-inline-watch-final.log`；iPhone 添加说明构建通过：`artifacts/build-motion-inline-phone-guide.log`。本轮未重新生成或覆盖主工程配置，未操作真机或其他任务的模拟器。
+- 共享逻辑回归 49 项测试通过：`artifacts/test-core-motion-inline.log`；差异空白检查通过。本轮没有更改健康、提醒或同步逻辑。
+- 本机没有 watchOS 27 模拟器；上述证据来自 watchOS 26.5，不代表用户 watchOS 27／TestFlight 实际安装已复测。当前 8 号包不会自动获得源码修改，需要新构建后更新 Watch App；本轮未上传 TestFlight。
