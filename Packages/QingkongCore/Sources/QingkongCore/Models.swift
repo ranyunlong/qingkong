@@ -177,7 +177,9 @@ public struct ComplicationSnapshot: Codable, Sendable {
     public var readings: [HealthReading]
     public var trends: [HealthMetric: [TrendBucket]]
     public var preferences: Preferences
-    public init(generatedAt: Date = .now, readings: [HealthReading], trends: [HealthMetric: [TrendBucket]], preferences: Preferences) {
+    public var mood: MoodSummary?
+    public init(generatedAt: Date = .now, readings: [HealthReading], trends: [HealthMetric: [TrendBucket]], preferences: Preferences, mood: MoodSummary? = nil) {
         self.generatedAt = generatedAt; self.readings = readings; self.trends = trends; self.preferences = preferences
+        self.mood = mood
     }
 }

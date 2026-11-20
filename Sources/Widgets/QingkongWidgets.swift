@@ -95,12 +95,19 @@ struct MetricWidgetView: View {
     private var value: String { reading.map { $0.value.formatted(.number.precision(.fractionLength(0))) } ?? "—" }
 }
 
-@main
-struct QingkongWidgets: Widget {
+struct MetricWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: "QingkongMetric", intent: MetricIntent.self, provider: MetricProvider()) { entry in MetricWidgetView(entry: entry) }
             .configurationDisplayName("晴空健康")
             .description("查看最近健康记录与变化，点按打开趋势。")
             .supportedFamilies([.accessoryCircular, .accessoryRectangular, .accessoryInline])
+    }
+}
+
+@main
+struct QingkongWidgets: WidgetBundle {
+    var body: some Widget {
+        MetricWidget()
+        DumplingWidget()
     }
 }

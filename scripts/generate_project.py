@@ -3,12 +3,20 @@
 from pathlib import Path
 import hashlib
 import json
+import re
+import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parent.parent
 ECG_INTERACTION = '--ecg-interaction' in sys.argv
 PHONE_ONLY = '--phone-only' in sys.argv or ECG_INTERACTION
 PROJECT_NAME = 'QingkongECGPreview' if ECG_INTERACTION else 'QingkongPhonePreview' if PHONE_ONLY else 'Qingkong'
+UPDATE_EXISTING = '--update-existing' in sys.argv
+project_file = ROOT / f'{PROJECT_NAME}.xcodeproj/project.pbxproj'
+existing_text = project_file.read_text() if UPDATE_EXISTING and project_file.exists() else None
+existing = json.loads(subprocess.check_output(['plutil', '-convert', 'json', '-o', '-', str(project_file)])) if existing_text else None
+version_settings = next((o['buildSettings'] for o in (existing or {}).get('objects', {}).values()
+                         if o.get('isa') == 'XCBuildConfiguration' and o.get('buildSettings', {}).get('PRODUCT_BUNDLE_IDENTIFIER') == 'cn.geckoai.qingkong'), {})
 objects = {}
 
 def uid(key):
@@ -62,19 +70,22 @@ targets={}
 specs=[
     ('Qingkong','iOS','iphoneos','iphoneos iphonesimulator','1','cn.geckoai.qingkong','com.apple.product-type.application',resources+['Resources/iOS/Assets.xcassets']),
     ('QingkongWatch','Watch','watchos','watchos watchsimulator','4','cn.geckoai.qingkong.watchapp','com.apple.product-type.application',resources+['Resources/Watch/Assets.xcassets']),
-    ('QingkongWidgets','Widgets','watchos','watchos watchsimulator','4','cn.geckoai.qingkong.watchapp.widgets','com.apple.product-type.app-extension',['Resources/PrivacyInfo.xcprivacy']),
+    ('QingkongWidgets','Widgets','watchos','watchos watchsimulator','4','cn.geckoai.qingkong.watchapp.widgets','com.apple.product-type.app-extension',['Resources/PrivacyInfo.xcprivacy','Resources/Assets.xcassets']),
+    ('QingkongPhoneWidgets','iOSWidgets','iphoneos','iphoneos iphonesimulator','1','cn.geckoai.qingkong.widgets','com.apple.product-type.app-extension',['Resources/PrivacyInfo.xcprivacy','Resources/Assets.xcassets']),
     ('QingkongUITests','Tests','iphoneos','iphoneos iphonesimulator','1','cn.geckoai.qingkong.uitests','com.apple.product-type.bundle.ui-testing',[]),
     ('QingkongTests','UnitTests','iphoneos','iphoneos iphonesimulator','1','cn.geckoai.qingkong.tests','com.apple.product-type.bundle.unit-test',[])
 ]
 for name,folder,sdk,platforms,family,bundle,product_type,assets in specs:
     is_test = folder in ('Tests', 'UnitTests')
-    suffix='.appex' if folder=='Widgets' else '.xctest' if is_test else '.app'
+    suffix='.appex' if folder in ('Widgets', 'iOSWidgets') else '.xctest' if is_test else '.app'
     product=add(name+'.product','PBXFileReference',explicitFileType='wrapper.app-extension' if suffix=='.appex' else 'wrapper.cfbundle' if suffix=='.xctest' else 'wrapper.application',includeInIndex=0,path=name+suffix,sourceTree='BUILT_PRODUCTS_DIR')
     products.append(product)
     if is_test:
         sources=[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/f'Tests/{name}').glob('*.swift'))]
     elif folder=='Widgets':
-        sources=['Sources/Shared/SnapshotStorage.swift','Sources/Shared/Appearance.swift']+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/Widgets').glob('*.swift'))]
+        sources=['Sources/Shared/SnapshotStorage.swift','Sources/Shared/Appearance.swift']+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/Widgets').glob('*.swift'))]+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/WidgetShared').glob('*.swift'))]
+    elif folder=='iOSWidgets':
+        sources=['Sources/Shared/SnapshotStorage.swift']+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/iOSWidgets').glob('*.swift'))]+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/WidgetShared').glob('*.swift'))]
     else:
         sources=common+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/f'Sources/{folder}').glob('*.swift'))]
     if ECG_INTERACTION and folder == 'iOS':
@@ -94,10 +105,12 @@ for name,folder,sdk,platforms,family,bundle,product_type,assets in specs:
     if not is_test:
         settings.update(INFOPLIST_FILE=f'Config/{folder}-Info.plist',CODE_SIGN_ENTITLEMENTS=f'Config/{folder}.entitlements')
     settings['DEVELOPMENT_TEAM']='9S743LF4C7'
+    for setting in ('CURRENT_PROJECT_VERSION', 'MARKETING_VERSION'):
+        if setting in version_settings: settings[setting] = version_settings[setting]
     if folder in ('iOS','Watch'):
         settings['ASSETCATALOG_COMPILER_APPICON_NAME']='AppIcon'
     if folder=='Watch': settings.update(SKIP_INSTALL='YES',WK_APPLICATION='YES')
-    if folder=='Widgets':
+    if folder in ('Widgets', 'iOSWidgets'):
         settings.update(SKIP_INSTALL='YES',APPLICATION_EXTENSION_API_ONLY='YES',LD_RUNPATH_SEARCH_PATHS=['$(inherited)','@executable_path/Frameworks','@executable_path/../../Frameworks'])
     if folder=='Tests': settings.update(GENERATE_INFOPLIST_FILE='YES',TEST_TARGET_NAME='Qingkong',SKIP_INSTALL='YES')
     if folder=='UnitTests': settings.update(GENERATE_INFOPLIST_FILE='YES',TEST_HOST='$(BUILT_PRODUCTS_DIR)/Qingkong.app/Qingkong',BUNDLE_LOADER='$(TEST_HOST)',SKIP_INSTALL='YES')
@@ -118,6 +131,7 @@ def embed(parent, child, dst, path):
 if not PHONE_ONLY:
     embed('Qingkong','QingkongWatch',16,'$(CONTENTS_FOLDER_PATH)/Watch')
 embed('QingkongWatch','QingkongWidgets',13,'')
+embed('Qingkong','QingkongPhoneWidgets',13,'')
 dependency('QingkongUITests','Qingkong')
 dependency('QingkongTests','Qingkong')
 for p in sorted((ROOT/'Config').iterdir()): file(p.relative_to(ROOT).as_posix())
@@ -128,10 +142,43 @@ project_config=configs('project',dict(CLANG_ENABLE_OBJC_ARC='YES',CLANG_WARN_DOC
 add('project','PBXProject',attributes={'BuildIndependentTargetsInParallel':'YES','LastUpgradeCheck':'2660','TargetAttributes':{str(targets['QingkongUITests']):{'TestTargetID':targets['Qingkong']}}},buildConfigurationList=project_config,compatibilityVersion='Xcode 14.0',developmentRegion='zh_CN',hasScannedForEncodings=0,knownRegions=['zh_CN','en','Base'],mainGroup=main_group,productRefGroup=product_group,projectDirPath='',projectRoot='',targets=list(targets.values()),packageReferences=[package])
 project=ROOT/f'{PROJECT_NAME}.xcodeproj'
 project.mkdir(exist_ok=True)
-text='// !$*UTF8*$!\n'+encode({'archiveVersion':1,'classes':{},'objectVersion':60,'objects':{Ref(k):v for k,v in objects.items()},'rootObject':project_id})+'\n'
+if existing:
+    # Add only new references and phases. Preserve Xcode-managed signing, versions,
+    # settings, file ordering, and schemes instead of rebuilding the user's project.
+    text = existing_text
+    additions = {}
+    for identifier, generated in objects.items():
+        old = existing['objects'].get(identifier)
+        if old is None:
+            additions.setdefault(generated['isa'], []).append((identifier, generated))
+            continue
+        changed = False
+        for key in ('children', 'targets', 'buildPhases', 'dependencies', 'files', 'packageProductDependencies'):
+            if key not in generated: continue
+            for value in generated[key]:
+                if value not in old.setdefault(key, []):
+                    old[key].append(value)
+                    changed = True
+        if changed:
+            pattern = re.compile(r'^\t\t"?' + identifier + r'"?(?: /\*.*?\*/)? = \{.*?^\t\t\};', re.M | re.S)
+            text, count = pattern.subn(lambda _: '\t\t' + identifier + ' = ' + encode(old, 2) + ';', text)
+            if count != 1: raise RuntimeError('Cannot safely update project object ' + identifier)
+    for isa, entries in additions.items():
+        chunk = ''.join('\t\t' + identifier + ' = ' + encode(value, 2) + ';\n' for identifier, value in entries)
+        marker = '/* End ' + isa + ' section */'
+        if marker in text:
+            text = text.replace(marker, chunk + marker, 1)
+        else:
+            # Projects emitted by this generator have no Xcode section comments.
+            boundary = '\n\t};\n\t"rootObject"'
+            if boundary not in text: raise RuntimeError('Cannot locate project objects boundary')
+            text = text.replace(boundary, '\n' + chunk + boundary, 1)
+else:
+    text='// !$*UTF8*$!\n'+encode({'archiveVersion':1,'classes':{},'objectVersion':60,'objects':{Ref(k):v for k,v in objects.items()},'rootObject':project_id})+'\n'
 (project/'project.pbxproj').write_text(text)
 schemes=project/'xcshareddata/xcschemes'; schemes.mkdir(parents=True,exist_ok=True)
 for name in ['Qingkong','QingkongWatch']:
+    if UPDATE_EXISTING and (schemes/f'{name}.xcscheme').exists(): continue
     ref=f'<BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{targets[name]}" BuildableName="{name}.app" BlueprintName="{name}" ReferencedContainer="container:{PROJECT_NAME}.xcodeproj"/>'
     testref=f'<BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{targets["QingkongUITests"]}" BuildableName="QingkongUITests.xctest" BlueprintName="QingkongUITests" ReferencedContainer="container:{PROJECT_NAME}.xcodeproj"/>'
     unitref=f'<BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{targets["QingkongTests"]}" BuildableName="QingkongTests.xctest" BlueprintName="QingkongTests" ReferencedContainer="container:{PROJECT_NAME}.xcodeproj"/>'
@@ -147,4 +194,4 @@ for name in ['Qingkong','QingkongWatch']:
 <AnalyzeAction buildConfiguration="Debug"/><ArchiveAction buildConfiguration="Release" revealArchiveInOrganizer="YES"/>
 </Scheme>
 ''')
-print(f'Generated {PROJECT_NAME}.xcodeproj (5 targets, 2 shared schemes, local QingkongCore package).')
+print(f'Generated {PROJECT_NAME}.xcodeproj ({len(specs)} targets, 2 shared schemes, local QingkongCore package).')

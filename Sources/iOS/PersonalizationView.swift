@@ -48,6 +48,24 @@ struct PersonalizationView: View {
             VitalReminderSettingsSection()
 
             Section {
+                HStack(spacing: 12) {
+                    Image("mood-\(MoodSummary.latest(in: app.store.records)?.value ?? 3)")
+                        .resizable().scaledToFit().frame(width: 60, height: 60)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("心情团子").font(.headline)
+                        Text("随最近的心情记录更新，陪你看看日常健康。")
+                            .font(.footnote).foregroundStyle(Color.readableSecondary)
+                    }
+                }
+                Text("主屏幕：长按空白处 → 编辑 → 添加小组件 → 小晴空 → 心情团子。支持小号和中号。")
+                    .font(.footnote)
+                Text("锁定屏幕：长按锁屏 → 自定 → 锁定屏幕 → 添加小组件 → 小晴空。")
+                    .font(.footnote)
+            } header: { Text("屏幕上的小团子") } footer: {
+                Text("组件显示最近可读取的健康数据及采样时间，按系统调度刷新。点按打开应用；无记录时显示空缺。")
+            }
+
+            Section {
                 watchPreview
                 Picker("显示指标", selection: Binding(get: { app.store.preferences.complicationMetric }, set: { value in app.store.updatePreferences { $0.complicationMetric = value } })) {
                     ForEach(HealthMetric.allCases) { Text($0.name).tag($0) }
@@ -56,7 +74,7 @@ struct PersonalizationView: View {
                 Button("在系统中添加表盘组件", systemImage: "applewatch") { faceGuide = true }
                 Label(app.link.syncMessage, systemImage: "arrow.triangle.2.circlepath").font(.footnote).foregroundStyle(Color.readableSecondary)
                 if let error = app.link.error { Text(error).font(.footnote).foregroundStyle(Color.readableSecondary) }
-            } header: { Text("手腕上的晴空") } footer: { Text("这里编辑晴空组件的默认显示。系统表盘布局由 Apple Watch 管理；圆形与单行文字显示数值，矩形可显示趋势。组件按系统调度更新。") }
+            } header: { Text("手腕上的晴空") } footer: { Text("团子预览对应手表 App 页面；系统表盘中的「心情团子」是进入页面的入口。下面的指标与趋势设置用于原有健康组件。组件按系统调度更新。") }
 
             Section("数据与隐私") {
                 Button("检查 Apple 健康连接", systemImage: "heart.text.clipboard") { Task { await app.health.authorize() } }
@@ -73,18 +91,22 @@ struct PersonalizationView: View {
     }
 
     private var watchPreview: some View {
-        let metric = app.store.preferences.complicationMetric
+        let mood = MoodSummary.latest(in: app.store.records)
         return VStack(spacing: 10) {
-            Text("组件预览").font(.caption).foregroundStyle(Color.readableSecondary)
+            Text("手表团子页面预览").font(.caption).foregroundStyle(Color.readableSecondary)
             VStack(spacing: 8) {
-                Text(Date.now, style: .time).font(.system(.largeTitle, design: .rounded).weight(.medium))
-                Label(metric.name, systemImage: metric.symbol).font(.caption)
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text(app.health.latest(metric).map { $0.value.formatted(.number.precision(.fractionLength(0))) } ?? "—").font(.title)
-                    Text(metric.unit).font(.caption2)
-                }
-                if app.store.preferences.showComplicationTrend {
-                    HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: .week), metric: metric, color: .white, compact: true).frame(height: 32)
+                HStack { Spacer(); Text(Date.now, style: .time).font(.caption2.monospacedDigit()) }
+                Image("mood-\(mood?.value ?? 3)").resizable().scaledToFit().frame(height: 100)
+                Text(mood?.label ?? "心情待记录").font(.caption2).foregroundStyle(.secondary)
+                HStack(spacing: 8) {
+                    ForEach(HealthMetric.allCases) { metric in
+                        VStack(spacing: 3) {
+                            Text(metric.name).font(.system(size: 9)).foregroundStyle(.secondary)
+                            Text(app.health.latest(metric).map { $0.value.formatted(.number.precision(.fractionLength(0))) } ?? "—")
+                                .font(.system(size: 18, weight: .medium, design: .rounded))
+                            Text(metric.unit).font(.system(size: 8)).foregroundStyle(.secondary)
+                        }.frame(maxWidth: .infinity)
+                    }
                 }
             }.foregroundStyle(.white).padding(20).frame(width: 176).background(.black, in: RoundedRectangle(cornerRadius: 38))
             Text("健康数值取自 iPhone；真实表盘使用手表上的可读记录。 ").font(.caption2).foregroundStyle(Color.readableSecondary).multilineTextAlignment(.center)
@@ -141,6 +163,11 @@ struct WatchFaceGuideView: View {
                     Label("选一个圆形、大矩形或单行文字位置，在「所有 App」中找到「小晴空」，再选 HRV、心率或血氧。", systemImage: "3.circle")
                     Label("若选择「跟随 iPhone 配置」，此页的指标与趋势设置会在连接后同步到手表。", systemImage: "4.circle")
                 }
+                Section("心情团子") {
+                    Text("选择系统表盘中的圆形或大矩形位置，在小晴空里选择「心情团子」。圆形显示团子与 HRV，矩形显示团子和三项健康摘要。")
+                    Text("点按组件进入手表 App 的团子页面。页面再次亮屏活跃时播放一次表情动作，随后静止；点按团子可重播。系统仍可能按设置返回原来的表盘。")
+                    Text("团子使用最近一次主动记录的心情，不根据健康数值推断情绪。没有记录时显示中性团子。")
+                }
                 Section("找不到组件时") {
                     Text("可先使用「健身记录数字」表盘，编辑左上或右上的圆形位置，再到「所有 App」中查找。")
                     Text("「动态」的水母样式可选择顶部或底部的单行文字位置；中间的日期位置由系统限定为日期，不能放健康组件。")
@@ -182,7 +209,7 @@ struct PrivacyView: View {
             Section("你掌握自己的记录") {
                 Text("晴空不要求注册，不展示广告，不将健康数据和日记上传至服务器。应用没有云端 AI 或广告分析服务。")
                 Text("健康数据保留在 Apple 健康中，晴空只读取你允许的数据。心情、日记和偏好保存在本机；配对设备通过 Apple WatchConnectivity 同步心情与偏好。")
-                Text("手表会为表盘组件在本地共享容器保存最少量的健康摘要，供手表上的组件显示。原始健康记录不通过晴空跨设备传送。")
+                Text("iPhone 与手表会在各自本地共享容器保存最少量的健康摘要及最近心情档位、时间，供屏幕或表盘组件显示；不包含日记或压力评分。原始健康记录不通过晴空跨设备传送。")
             }
             Section("权限与删除") {
                 Text("你可以在「健康」App 中调整数据访问，在「心情日记」中删除记录。删除标记会在配对设备恢复连接后同步，防止旧记录再次出现。")

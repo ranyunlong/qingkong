@@ -22,6 +22,7 @@ final class LocalStore {
     private(set) var preferences: Preferences
     var error: String?
     @ObservationIgnored var didChange: (() -> Void)?
+    @ObservationIgnored var didChangeRecords: (() -> Void)?
     @ObservationIgnored var didChangePreferences: (() -> Void)?
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let context: ModelContext
@@ -73,6 +74,7 @@ final class LocalStore {
         }
         do { try context.save() } catch { context.rollback(); throw error }
         try reload()
+        didChangeRecords?()
         if !fromPeer { didChange?() }
     }
 

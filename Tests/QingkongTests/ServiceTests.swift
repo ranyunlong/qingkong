@@ -1,9 +1,94 @@
 import XCTest
 import UserNotifications
+import WatchConnectivity
+import Observation
 import QingkongCore
 @testable import Qingkong
 
 final class ServiceTests: XCTestCase {
+    @MainActor
+    func testForegroundMoodMessageUpdatesObservedRecordBeforeReply() async throws {
+        let store = try LocalStore(testing: true, reset: true)
+        let link = Connectivity(store: store, player: AudioPlayer())
+        let pageOpenedAt = Date.now.addingTimeInterval(-60)
+        let previous = MoodRecord(mood: 2, stress: 2, note: "", createdAt: pageOpenedAt.addingTimeInterval(-60))
+        try store.save(previous, fromPeer: true)
+        let current = MoodRecord(mood: 5, stress: 1, note: "", createdAt: .now.addingTimeInterval(-1))
+        let observed = expectation(description: "Foreground view observes incoming mood")
+        withObservationTracking {
+            _ = MoodSummary.latest(in: store.records)
+        } onChange: { observed.fulfill() }
+        let replied = expectation(description: "Reply follows persistence")
+        link.session(WCSession.default, didReceiveMessage: ["record": try JSONEncoder().encode(SyncPayload(record: current))]) { response in
+            MainActor.assumeIsolated {
+                XCTAssertEqual(MoodSummary.latest(in: store.records)?.value, 5)
+                XCTAssertEqual(MoodSummary.latest(in: store.records, now: pageOpenedAt)?.value, 2,
+                               "页面打开时的旧时间会错误排除新收到的心情")
+                let receipt = (response["receipt"] as? Data).flatMap { try? JSONDecoder().decode(SyncReceipt.self, from: $0) }
+                XCTAssertEqual(receipt, SyncReceipt(record: current))
+                XCTAssertTrue((try? store.pendingRecords().isEmpty) == true)
+            }
+            replied.fulfill()
+        }
+        await fulfillment(of: [observed, replied], timeout: 2)
+    }
+
+    @MainActor
+    func testImmediateDeletionAndDelayedDuplicateCannotRestoreMood() async throws {
+        let store = try LocalStore(testing: true, reset: true)
+        let link = Connectivity(store: store, player: AudioPlayer())
+        let original = MoodRecord(mood: 4, stress: 2, note: "", createdAt: .now.addingTimeInterval(-60))
+        var deleted = original
+        deleted.isDeleted = true
+        deleted.updatedAt = original.updatedAt.addingTimeInterval(1)
+        for record in [original, deleted, original] {
+            let replied = expectation(description: "Saved record acknowledged")
+            link.session(WCSession.default, didReceiveMessage: ["record": try JSONEncoder().encode(SyncPayload(record: record))]) { response in
+                XCTAssertNotNil(response["receipt"])
+                replied.fulfill()
+            }
+            await fulfillment(of: [replied], timeout: 2)
+        }
+        XCTAssertNil(MoodSummary.latest(in: store.records))
+        XCTAssertEqual(store.records.count, 1)
+        XCTAssertTrue(store.records[0].isDeleted)
+        let reopened = try LocalStore(testing: true)
+        XCTAssertTrue(reopened.entries.isEmpty)
+    }
+
+    @MainActor
+    func testInvalidImmediateRecordIsNotAcknowledged() async throws {
+        let store = try LocalStore(testing: true, reset: true)
+        let link = Connectivity(store: store, player: AudioPlayer())
+        var payload = SyncPayload(record: MoodRecord(mood: 4, stress: 2, note: ""))
+        payload.version = 99
+        let replied = expectation(description: "Unsupported payload rejected")
+        link.session(WCSession.default, didReceiveMessage: ["record": try JSONEncoder().encode(payload)]) { response in
+            XCTAssertNil(response["receipt"])
+            replied.fulfill()
+        }
+        await fulfillment(of: [replied], timeout: 2)
+        XCTAssertTrue(store.records.isEmpty)
+    }
+
+    @MainActor
+    func testRecordObserverReceivesLocalPeerAndDeletionChanges() throws {
+        let store = try LocalStore(testing: true, reset: true)
+        var changes = 0
+        store.didChangeRecords = { changes += 1 }
+        let local = MoodRecord(mood: 4, stress: 2, note: "本地")
+        try store.save(local)
+        XCTAssertEqual(changes, 1)
+        try store.save(local, fromPeer: true)
+        XCTAssertEqual(changes, 1, "重复同步不刷新摘要")
+        let peer = MoodRecord(mood: 2, stress: 3, note: "来自配对端")
+        try store.save(peer, fromPeer: true)
+        XCTAssertEqual(changes, 2)
+        try store.delete(peer)
+        XCTAssertEqual(changes, 3)
+        XCTAssertEqual(MoodSummary.latest(in: store.records)?.value, 4)
+    }
+
     @MainActor
     func testReminderCheckSurvivesServiceRecreationWithoutSendingNotification() async throws {
         let suite = "qingkong.reminder-history-test." + UUID().uuidString

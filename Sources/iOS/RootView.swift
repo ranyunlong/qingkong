@@ -42,6 +42,13 @@ struct RootView: View {
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { Task { await app.activate() } }
             }
+            .onOpenURL { url in
+                guard url.scheme == "qingkong" else { return }
+                if url.host == "dumpling" { tab = .mood }
+                else if url.host == "trend", let metric = HealthMetric(rawValue: url.lastPathComponent) {
+                    trendMetric = metric; tab = .trends
+                }
+            }
     }
 
     private func presentReminderDestination() {

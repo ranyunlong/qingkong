@@ -222,3 +222,19 @@ xcodebuild -project QingkongECGPreview.xcodeproj -scheme Qingkong \
 - 最终 Watch＋组件本地签名 Debug 模拟器构建通过：`artifacts/build-motion-inline-watch-final.log`；iPhone 添加说明构建通过：`artifacts/build-motion-inline-phone-guide.log`。本轮未重新生成或覆盖主工程配置，未操作真机或其他任务的模拟器。
 - 共享逻辑回归 49 项测试通过：`artifacts/test-core-motion-inline.log`；差异空白检查通过。本轮没有更改健康、提醒或同步逻辑。
 - 本机没有 watchOS 27 模拟器；上述证据来自 watchOS 26.5，不代表用户 watchOS 27／TestFlight 实际安装已复测。当前 8 号包不会自动获得源码修改，需要新构建后更新 Watch App；本轮未上传 TestFlight。
+
+## 原生团子与两端组件（2026-11-20）
+
+- Watch 新增五种原生分层团子，亮屏活跃播放约三秒后停止，点按可重播；减少动态效果、低亮度、离页与后台停止动作。页面保留系统右上角时间，放大团子，下方显示 HRV／心率／血氧。模拟器已查看页面和点按效果，截图为 `artifacts/watch-dumpling-native.png`；未用真机验证抬腕、常亮或耗电。
+- Watch 新增圆形、矩形静态团子组件，点按进入 App 动画页；iPhone 新增小号、中号主屏幕及锁屏组件。共享摘要只增加最近有效心情档位与记录时间，不包含日记或压力评分。新增、同步、删除记录时刷新摘要，无健康数据不填零、不写入演示数据。
+- 共享逻辑 53 项测试通过，包含旧摘要兼容、心情删除、未来记录、隐私字段及动画截止，日志 `artifacts/test-dumpling-core.log`；服务测试验证本地、配对端及删除触发刷新、重复同步不重复通知，日志 `artifacts/test-dumpling-services.log`。Watch 与完整 iPhone／Watch／两组件 Debug 构建通过，日志 `artifacts/build-dumpling-watch.log`、`artifacts/build-dumpling-phone.log`。
+- iPhone 模拟器图库能找到并渲染团子预览，但添加组件时系统桌面 SpringBoard 崩溃；仅含一行文字的诊断组件及 Apple 自带组件同样复现。崩溃记录的共同栈为 `-[SBHRippleSimulation clear]` 与 `createRippleAtGridCoordinate:strength:`。减少动态效果未解决，已恢复原设置；最小诊断入口已恢复正式组件并重新构建成功。未将这些结果计为组件添加通过。
+- 新建 `Qingkong Widget Check` 模拟器保留原设备数据，启动后用户要求停止测试，因此未进行新设备添加对照。2026-11-20 用户反馈自行发送到 TestFlight 测试后没有问题；对应构建号、逐项覆盖范围未提供。此为用户实测反馈，不代表开发侧真机验收。本轮未上传 TestFlight、未操作真机或修改开发者模式。
+- 工程生成器支持 `--update-existing` 增量更新，保留现有版本、签名和 scheme。新增 iPhone 组件扩展、共享资源与 App Group。锁屏组件添加、Watch 新团子复杂功能添加与真机唤醒动作未由开发侧逐项验证。
+
+## 前台心情同步刷新（2026-11-20）
+
+- 代码确认团子页面用 `app.today`（最近激活时刻）筛选心情，之后在手机新建并同步的记录会因晚于该时刻被排除，重新激活页面才显示。改为随记录变化按当前时间计算最近心情，不依赖退出后台更新页面时钟。
+- 原记录仅走系统后台队列；新增两端可连接时的即时消息通道，与后台队列共用持久化、合并及删除规则。只在本地保存完成后回执，按记录 ID 与更新时间核对确认；即时发送失败保留后台队列补传。正在传送的同一修订不重复发送，延迟的队列完成回调不会覆盖已确认的同步状态。音频遥控协议保持原实现。
+- 增加三项服务回归用例，覆盖前台观察更新与保存后回执、删除后迟到旧消息不复活记录、未知版本拒绝确认。按用户要求不再运行模拟器界面验收；这些新增服务用例仅完成编译，未执行，不把它们记录为测试通过。完整 iPhone／Watch／两端组件及测试包编译通过，构建日志为 `artifacts/build-mood-live-sync.log`。Mac 本地共享逻辑回归 53 项通过，日志 `artifacts/test-core-mood-live-sync.log`。
+- 尚未使用配对真机确认即时传输时延。需重新编译并同时更新 iPhone 与 Watch App；旧版本不支持新增的即时心情消息。系统复杂功能仍由 WidgetKit 调度刷新，不能把 App 页面即时更新承诺为表盘固定秒级刷新。

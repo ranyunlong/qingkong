@@ -18,7 +18,7 @@ for TASK_ARCH in arm64_32 arm64; do
     xcrun swiftc -typecheck -parse-as-library -module-name QingkongWidgets \
         -swift-version 5 -sdk "$WATCH_SDK" -target "$TASK_ARCH-apple-watchos11.0" \
         -module-cache-path "$PROJECT_ROOT/build/WatchTypecheckCache" -I "$TASK_OUTPUT" \
-        Sources/Shared/SnapshotStorage.swift Sources/Shared/Appearance.swift Sources/Widgets/*.swift
+        Sources/Shared/SnapshotStorage.swift Sources/Shared/Appearance.swift Sources/WidgetShared/*.swift Sources/Widgets/*.swift
     printf 'Watch App and Widget source checks passed: %s\n' "$TASK_ARCH"
 done
 printf 'Source checks do not verify resource packaging, installation, or runtime behavior.\n'

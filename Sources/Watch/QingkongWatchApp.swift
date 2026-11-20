@@ -15,7 +15,7 @@ struct QingkongWatchApp: App {
     private func initialize() { services = try? AppServices() }
 }
 
-enum WatchRoute: Hashable { case trend(HealthMetric), mood, music, setup }
+enum WatchRoute: Hashable { case trend(HealthMetric), mood, music, setup, dumpling }
 
 struct WatchRootView: View {
     @Environment(AppServices.self) private var app
@@ -24,6 +24,13 @@ struct WatchRootView: View {
     var body: some View {
         NavigationStack(path: $path) {
             List {
+                NavigationLink(value: WatchRoute.dumpling) {
+                    HStack(spacing: 8) {
+                        Image("mood-\(MoodSummary.latest(in: app.store.records)?.value ?? 3)")
+                            .resizable().scaledToFit().frame(width: 40, height: 40)
+                        Text("心情团子")
+                    }
+                }.accessibilityIdentifier("open-watch-dumpling")
                 if app.health.isDemo { Text("演示健康数据").font(.caption2) }
                 ForEach(HealthMetric.allCases) { metric in
                     NavigationLink(value: WatchRoute.trend(metric)) {
@@ -45,6 +52,7 @@ struct WatchRootView: View {
             }.navigationTitle("晴空")
                 .navigationDestination(for: WatchRoute.self) { route in
                     switch route {
+                    case .dumpling: WatchDumplingView()
                     case .trend(let metric): WatchTrendView(metric: metric)
                     case .mood: WatchMoodView()
                     case .music: WatchMusicView()
@@ -54,6 +62,7 @@ struct WatchRootView: View {
         }.task { await app.start() }
             .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await app.activate() } } }
             .onOpenURL { url in
+                if url.scheme == "qingkong", url.host == "dumpling" { path = [.dumpling]; return }
                 guard url.scheme == "qingkong", url.host == "trend",
                       let metric = HealthMetric(rawValue: url.lastPathComponent) else { return }
                 path = [.trend(metric)]
@@ -147,6 +156,7 @@ struct WatchSetupView: View {
                 if let error = app.link.error { Text(error).font(.caption2) }
             }
             Section("表盘组件") {
+                Text("添加「心情团子」圆形或矩形组件，点按进入团子页面。该页面亮屏活跃时播放一次表情动作，随后静止；系统仍会按设置返回表盘。").font(.caption2)
                 Text("长按系统表盘 → 编辑 → 复杂功能，选择晴空。可在 iPhone 晴空中配置默认指标和迷你趋势。 ").font(.caption2)
                 Button("刷新表盘组件") {
                     app.refreshComplications()

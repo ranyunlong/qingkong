@@ -1,9 +1,7 @@
 import Foundation
 import Observation
 import QingkongCore
-#if os(watchOS)
 import WidgetKit
-#endif
 
 @MainActor @Observable
 final class AppServices {
@@ -39,6 +37,7 @@ final class AppServices {
         player = AudioPlayer()
         link = Connectivity(store: store, player: player)
         store.didChange = { [weak self] in self?.link.flush() }
+        store.didChangeRecords = { [weak self] in self?.writeSnapshot() }
         store.didChangePreferences = { [weak self] in self?.link.flush(); self?.writeSnapshot() }
         health.didRefresh = { [weak self] in
             guard let self else { return }
@@ -83,17 +82,15 @@ final class AppServices {
     #endif
 
     private func writeSnapshot() {
-        #if os(watchOS)
         guard !health.isDemo else { return }
         let latest = HealthMetric.allCases.compactMap { health.latest($0) }
         let trends = Dictionary(uniqueKeysWithValues: HealthMetric.allCases.map { metric in
             (metric, HealthMath.buckets(health.readings, metric: metric, period: .week))
         })
         do {
-            try SnapshotStorage.save(ComplicationSnapshot(readings: latest, trends: trends, preferences: store.preferences))
+            try SnapshotStorage.save(ComplicationSnapshot(readings: latest, trends: trends, preferences: store.preferences, mood: MoodSummary.latest(in: store.records)))
             WidgetCenter.shared.reloadAllTimelines()
             snapshotError = nil
         } catch { snapshotError = "表盘数据暂未保存，请重新打开应用后重试。" }
-        #endif
     }
 }

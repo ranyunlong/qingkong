@@ -19,6 +19,7 @@ final class Connectivity: NSObject, WCSessionDelegate {
     @ObservationIgnored private var session: WCSession?
     @ObservationIgnored private var replies: [UUID: CheckedContinuation<AudioReply, Error>] = [:]
     @ObservationIgnored private var timeouts: [UUID: Task<Void, Never>] = [:]
+    @ObservationIgnored private var immediateRecords: [SyncReceipt] = []
     @ObservationIgnored var preferencesReceived: (() -> Void)?
     #if os(iOS)
     @ObservationIgnored private var volumeObservation: NSKeyValueObservation?
@@ -63,10 +64,47 @@ final class Connectivity: NSObject, WCSessionDelegate {
             for record in pending {
                 let data = try JSONEncoder().encode(SyncPayload(record: record))
                 if !queued.contains(SyncPayload(record: record)) { session.transferUserInfo(["record": data]) }
+                sendRecordImmediately(data, record: record, session: session)
             }
             syncMessage = pending.isEmpty ? "记录已同步" : "\(pending.count) 条记录等待系统传送"
             try session.updateApplicationContext(["preferences": JSONEncoder().encode(store.preferences)])
         } catch { self.error = "同步暂未完成，记录已保存在本机，将在下次连接时重试。" }
+    }
+
+    private func sendRecordImmediately(_ data: Data, record: MoodRecord, session: WCSession) {
+        let expectedReceipt = SyncReceipt(record: record)
+        guard session.isReachable, !immediateRecords.contains(expectedReceipt) else { return }
+        immediateRecords.append(expectedReceipt)
+        session.sendMessage(["record": data], replyHandler: { [weak self] response in
+            let receiptData = response["receipt"] as? Data
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.immediateRecords.removeAll { $0 == expectedReceipt }
+                guard let receiptData,
+                      let receipt = try? JSONDecoder().decode(SyncReceipt.self, from: receiptData),
+                      receipt == expectedReceipt else { return }
+                do {
+                    try self.store.acknowledge(receipt)
+                    self.updateSyncMessage()
+                } catch { self.error = "同步回执暂未保存，将在下次连接时核对。" }
+            }
+        }, errorHandler: { [weak self] _ in
+            Task { @MainActor [weak self] in self?.immediateRecords.removeAll { $0 == expectedReceipt } }
+            // The durable user-info queue remains responsible for disconnected delivery.
+        })
+    }
+
+    private func receiveRecord(_ data: Data) throws -> Data {
+        let payload = try JSONDecoder().decode(SyncPayload.self, from: data)
+        guard payload.version == 1 else { throw LinkError.invalidReply }
+        try store.save(payload.record, fromPeer: true)
+        // Both transports acknowledge only after saving; duplicate delivery uses the same merge.
+        return try JSONEncoder().encode(SyncReceipt(record: payload.record))
+    }
+
+    private func updateSyncMessage() {
+        do { syncMessage = try store.pendingRecords().isEmpty ? "记录已同步" : "部分记录等待确认" }
+        catch { self.error = "同步状态暂未读取，将在下次连接时核对。" }
     }
 
     func confirmPhoneForPlayback() async throws -> Bool {
@@ -167,22 +205,18 @@ final class Connectivity: NSObject, WCSessionDelegate {
                 do {
                     let receipt = try JSONDecoder().decode(SyncReceipt.self, from: data)
                     try self.store.acknowledge(receipt)
-                    self.syncMessage = (try self.store.pendingRecords()).isEmpty ? "记录已同步" : "部分记录等待确认"
+                    self.updateSyncMessage()
                 } catch { self.error = "同步回执暂未保存，将在下次连接时核对。" }
             }
             return
         }
         guard let data = userInfo["record"] as? Data else { return }
         Task { @MainActor [weak self] in
+            guard let self else { return }
             do {
-                let payload = try JSONDecoder().decode(SyncPayload.self, from: data)
-                guard payload.version == 1 else { throw LinkError.invalidReply }
-                try self?.store.save(payload.record, fromPeer: true)
-                // Acknowledge only after durable local persistence, not merely delivery.
-                if let session = self?.session {
-                    session.transferUserInfo(["receipt": try JSONEncoder().encode(SyncReceipt(record: payload.record))])
-                }
-            } catch { self?.error = "有一条记录未能导入，请稍后重试同步。" }
+                let receipt = try self.receiveRecord(data)
+                self.session?.transferUserInfo(["receipt": receipt])
+            } catch { self.error = "有一条记录未能导入，请稍后重试同步。" }
         }
     }
 
@@ -193,8 +227,9 @@ final class Connectivity: NSObject, WCSessionDelegate {
             do {
                 if error != nil { self.error = "记录尚未传送，已保留在本机待重试。"; return }
                 let payload = try JSONDecoder().decode(SyncPayload.self, from: data)
-                _ = payload
-                self.syncMessage = "已传送，等待对端保存确认"
+                if try self.store.pendingRecords().contains(where: { SyncReceipt(record: payload.record).matches($0) }) {
+                    self.syncMessage = "已传送，等待对端保存确认"
+                } else { self.updateSyncMessage() }
             } catch { self.error = "同步状态暂未保存，将在下次连接时核对。" }
         }
     }
@@ -210,6 +245,17 @@ final class Connectivity: NSObject, WCSessionDelegate {
     }
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
+        if let data = message["record"] as? Data {
+            Task { @MainActor [weak self] in
+                guard let self else { replyHandler([:]); return }
+                do { replyHandler(["receipt": try self.receiveRecord(data)]) }
+                catch {
+                    self.error = "有一条记录未能导入，请稍后重试同步。"
+                    replyHandler([:])
+                }
+            }
+            return
+        }
         guard let data = message["audio"] as? Data, let request = try? JSONDecoder().decode(AudioCommand.self, from: data) else { replyHandler([:]); return }
         Task { @MainActor [weak self] in
             guard let self else { replyHandler([:]); return }
