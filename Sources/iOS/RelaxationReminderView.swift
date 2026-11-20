@@ -40,22 +40,26 @@ struct VitalReminderSettingsSection: View {
     var body: some View {
         Section {
             ForEach(VitalReminderKind.allCases) { kind in
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 20) {
                     Toggle(kind.title, isOn: Binding(get: { app.reminders.vitalRules[kind]?.delivery.enabled ?? true }, set: { enabled in
                         Task { await app.reminders.setVitalEnabled(kind, enabled) }
-                    })).accessibilityIdentifier("reminder-\(kind.rawValue)")
+                    })).frame(minHeight: 44)
+                        .accessibilityIdentifier("reminder-\(kind.rawValue)")
                     if let rule = app.reminders.vitalRules[kind], rule.delivery.enabled {
-                        Stepper(value: Binding(get: { rule.threshold }, set: { app.reminders.setVitalThreshold(kind, $0) }), in: kind.thresholdRange, step: kind.thresholdStep) {
-                            Text("\(kind == .highHeartRate ? "高于" : "低于") \(Int(rule.threshold)) \(kind == .lowOxygen ? "%" : "次/分")")
-                                .font(.subheadline)
-                        }.accessibilityIdentifier("threshold-\(kind.rawValue)")
-                        Text(kind == .lowOxygen ? "至少两条偏低读数，相隔 1 分钟以上。" : "仅使用明确标记为静息的记录，连续异常记录跨度至少 10 分钟。")
-                            .font(.caption).foregroundStyle(Color.readableSecondary)
-                        if rule.delivery.mutedUntil.map({ $0 > .now }) ?? false {
-                            Button("恢复今天的\(kind.title)提醒") { app.reminders.resumeVitalToday(kind) }.buttonStyle(.automatic)
+                        VStack(alignment: .leading, spacing: 10) {
+                            Stepper(value: Binding(get: { rule.threshold }, set: { app.reminders.setVitalThreshold(kind, $0) }), in: kind.thresholdRange, step: kind.thresholdStep) {
+                                Text("\(kind == .highHeartRate ? "高于" : "低于") \(Int(rule.threshold)) \(kind == .lowOxygen ? "%" : "次/分")")
+                                    .font(.subheadline)
+                            }.frame(minHeight: 44)
+                                .accessibilityIdentifier("threshold-\(kind.rawValue)")
+                            Text(kind == .lowOxygen ? "至少两条偏低读数，相隔 1 分钟以上。" : "仅使用明确标记为静息的记录，连续异常记录跨度至少 10 分钟。")
+                                .font(.caption).foregroundStyle(Color.readableSecondary)
+                            if rule.delivery.mutedUntil.map({ $0 > .now }) ?? false {
+                                Button("恢复今天的\(kind.title)提醒") { app.reminders.resumeVitalToday(kind) }.buttonStyle(.automatic)
+                            }
                         }
                     }
-                }.padding(.vertical, 4)
+                }.padding(.vertical, 8)
             }
             NavigationLink("通知检查与测试") { NotificationDiagnosticsView() }
                 .accessibilityIdentifier("notification-diagnostics")
