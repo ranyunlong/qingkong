@@ -191,3 +191,13 @@ xcodebuild -project QingkongECGPreview.xcodeproj -scheme Qingkong \
 - 每轮平均 CPU 用时由 10.450 秒降为 1.546 秒（约减少 85%）；平均 CPU 指令数由 41,192,191.829 kI 降为 2,929,035.686 kI（约减少 93%）。这是本机模拟器同一操作的测量，不是帧率或真机性能保证；系统滚动区间用时也不当作丢帧指标。
 - 优化后两项 UI 测试均通过：性能采集，以及完整波形前后浏览、到达 25–30 秒末尾、横拖不移动页面、纵拖正常滚页、无选值浮层。没有修改心率／HRV／血氧图表。未操作真机或改变开发者模式。
 - 完整 iPhone＋Watch＋表盘组件 Debug 构建通过：`artifacts/build-ecg-scroll-performance.log`；共享逻辑 46 项测试通过：`artifacts/test-core-ecg-scroll-performance.log`。使用独立临时工程进行模拟器测试，未覆盖主工程配置或其他本地改动。
+
+## 表盘组件发现与添加（2026-11-20）
+
+- 用户确认手表 App 可打开，但未提供当前表盘名称或实际安装包版本。本轮仅操作专用 Series 11 46mm／watchOS 26.5 模拟器 `F6D2A7BF-6563-4DA1-BCF9-4BF62FF45823`，未安装或运行真机，也未变更开发者模式。
+- 全新 Watch Debug 模拟器构建成功，扩展包含 `Metadata.appintents`，系统能读取 `MetricIntent`、默认配置及圆形／矩形支持信息。证据：`artifacts/build-complication-discovery-before.log`、`watch-complication-registration-before.log`。此前另一 Debug 产物缺少元数据，但 Release 归档包含元数据，不能据此认定为用户真机找不到组件的原因。
+- 初始无签名模拟器包可以出现在列表，但配置预览为空、时间线加载失败；系统日志显示配置服务因权限不足拒绝连接。使用本地签名重新构建、覆盖安装并打开 App 刷新后，配置选项及时间线正常加载。签名构建：`artifacts/build-complication-discovery-signed.log`；前后日志：`watch-appintents-system-errors.log`、`watch-complication-registration-signed.log`。这是模拟器测试包的验证条件，未增加产品权限或修改签名配置。
+- 实际界面验证：「健身记录数字」→ 编辑 → 左上圆形复杂功能 → 所有 App → 小晴空，可选择「跟随 iPhone 配置」「HRV」「心率」等推荐项；选择 HRV 后返回真实系统表盘，显示空数据占位，系统无障碍描述为「1个复杂功能，HRV」，点击进入 App 的 HRV 详情。签名版本圆形时间线日志明确为 `reload: succeeded with 1 entries`。
+- 实际界面验证：智能叠放 → 编辑 → 添加 → 小晴空，可配置指标与迷你趋势；添加后矩形卡片显示 HRV、`— ms` 及连接健康提示，点击进入 HRV 详情。模拟器未使用演示健康值。尚未实际完成系统表盘上大矩形槽位的添加，不以智能叠放验证替代该项。
+- 补充 iPhone 添加引导，明确「所有 App」入口、圆形／大矩形位置及可用于排查的「健身记录数字」表盘；解释图库中没有独立小晴空表盘。组件功能代码未改变。用户真机未复测，安装版本、表盘位置是否兼容及实际找不到的原因仍未确认。
+- 引导修改后的 iPhone 模拟器构建通过：`artifacts/build-complication-guide.log`（`QingkongPhonePreview`、Debug、通用 iOS 模拟器目标）；本轮未更改健康与同步逻辑，未重复运行业务逻辑测试，也未操作其他任务的模拟器。
