@@ -76,6 +76,23 @@ final class QingkongUITests: XCTestCase {
         diagnostics.tap()
         XCTAssertTrue(app.buttons["send-test-notification"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["尚未完成健康数据检查"].exists)
+        let background = app.staticTexts["尚未记录后台判断"]
+        for _ in 0..<5 {
+            if background.isHittable { break }
+            app.swipeUp()
+        }
+        XCTAssertTrue(background.isHittable)
+        let submitted = app.staticTexts["尚未向系统提交健康提醒"]
+        for _ in 0..<5 {
+            if submitted.isHittable { break }
+            app.swipeUp()
+        }
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "通知后台检查记录"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        if !submitted.exists { print("REMINDER_DIAGNOSTICS", app.debugDescription) }
+        XCTAssertTrue(submitted.isHittable)
     }
 
     @MainActor

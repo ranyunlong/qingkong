@@ -58,17 +58,29 @@ final class AppServices {
 
     func activate() async {
         today = .now
+        #if os(watchOS)
+        refreshComplications()
+        #endif
         #if os(iOS)
         await reminders.refreshAuthorization()
         if !needsHealthIntroduction && !healthIntroductionActive { await reminders.requestPermissionIfNeeded() }
         #endif
         player.reconcileDeadline()
         if !testing { link.flush() }
+        await health.restoreBackgroundDelivery()
         await health.refresh()
         writeSnapshot()
     }
 
     func updateClock() { today = .now; player.reconcileDeadline() }
+
+    #if os(watchOS)
+    func refreshComplications() {
+        guard !testing else { return }
+        WidgetCenter.shared.invalidateConfigurationRecommendations()
+        writeSnapshot()
+    }
+    #endif
 
     private func writeSnapshot() {
         #if os(watchOS)

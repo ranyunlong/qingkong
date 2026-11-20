@@ -15,6 +15,9 @@ final class RelaxationReminderService: NSObject, UNUserNotificationCenterDelegat
     private(set) var vitalRules: [VitalReminderKind: VitalReminderRule]
     private(set) var lastCheckedAt: Date?
     private(set) var checkResults: [String: String] = [:]
+    private(set) var lastBackgroundCheckedAt: Date?
+    private(set) var backgroundCheckResults: [String: String] = [:]
+    private(set) var lastSubmittedAt: Date?
     private(set) var deliveryText = "尚未检查系统通知设置"
     private(set) var testStatus: String?
     var destination: ReminderDestination?
@@ -31,6 +34,7 @@ final class RelaxationReminderService: NSObject, UNUserNotificationCenterDelegat
     private static let vitalCategory = "qingkong.vital"
     private static let vitalPrefix = "qingkong.vital."
     private static let testCategory = "qingkong.notification-test"
+    private static let diagnosticsKey = "qingkong.reminder-diagnostics.v1"
 
     var enabled: Bool { state.enabled }
     var pausedToday: Bool { state.mutedUntil.map { $0 > .now } ?? false }
@@ -46,9 +50,9 @@ final class RelaxationReminderService: NSObject, UNUserNotificationCenterDelegat
         }
     }
 
-    init(disabledForTesting: Bool = false) {
+    init(disabledForTesting: Bool = false, defaultsOverride: UserDefaults? = nil) {
         self.disabledForTesting = disabledForTesting
-        defaults = disabledForTesting ? UserDefaults(suiteName: "qingkong.reminders.testing")! : .standard
+        defaults = defaultsOverride ?? (disabledForTesting ? UserDefaults(suiteName: "qingkong.reminders.testing")! : .standard)
         if !disabledForTesting, let data = defaults.data(forKey: Self.key),
            let saved = try? JSONDecoder().decode(RelaxationReminderState.self, from: data) {
             state = saved
@@ -60,6 +64,13 @@ final class RelaxationReminderService: NSObject, UNUserNotificationCenterDelegat
         super.init()
         for kind in VitalReminderKind.allCases where vitalRules[kind] == nil { vitalRules[kind] = .init(kind: kind) }
         guard !disabledForTesting else { return }
+        if let saved = defaults.dictionary(forKey: Self.diagnosticsKey) {
+            lastCheckedAt = saved["checkedAt"] as? Date
+            checkResults = saved["results"] as? [String: String] ?? [:]
+            lastBackgroundCheckedAt = saved["backgroundCheckedAt"] as? Date
+            backgroundCheckResults = saved["backgroundResults"] as? [String: String] ?? [:]
+            lastSubmittedAt = saved["submittedAt"] as? Date
+        }
         persist()
         center.delegate = self
         let advice = UNNotificationAction(identifier: "advice", title: "放松一下", options: .foreground)
@@ -157,13 +168,23 @@ final class RelaxationReminderService: NSObject, UNUserNotificationCenterDelegat
     func evaluate(readings: [HealthReading], isDemo: Bool) async {
         guard !disabledForTesting, !isDemo, !evaluating else { return }
         evaluating = true
-        defer { evaluating = false }
+        let inBackground = UIApplication.shared.applicationState == .background
+        var completedAssessment = false
+        defer {
+            evaluating = false
+            if inBackground && completedAssessment {
+                lastBackgroundCheckedAt = lastCheckedAt
+                backgroundCheckResults = checkResults
+            }
+            persistDiagnostics()
+        }
         let revision = generation
         await refreshAuthorization()
         guard revision == generation else { return }
         let now = Date.now
         let assessment = RelaxationReminderPolicy.assess(readings: readings, state: state, now: now)
         lastCheckedAt = now
+        completedAssessment = true
         checkResults["hrv"] = assessment.reason
         var vitalCandidates: [VitalReminderCandidate] = []
         for kind in VitalReminderKind.allCases {
@@ -180,7 +201,12 @@ final class RelaxationReminderService: NSObject, UNUserNotificationCenterDelegat
             state.consume(through: newest)
         }
         persist()
-        guard revision == generation, authorized else { return }
+        guard revision == generation else { return }
+        guard authorized else {
+            if assessment.candidate != nil { checkResults["hrv"] = "达到变化条件，但系统通知未允许，未提交提醒" }
+            for candidate in vitalCandidates { checkResults[candidate.kind.rawValue] = "达到变化条件，但系统通知未允许，未提交提醒" }
+            return
+        }
         if state.enabled, let candidate = assessment.candidate {
             let content = UNMutableNotificationContent()
             content.title = "给自己一点放松时间"
@@ -199,10 +225,14 @@ final class RelaxationReminderService: NSObject, UNUserNotificationCenterDelegat
                     return
                 }
                 state.recordDelivery(candidate, now: now)
+                lastSubmittedAt = .now
                 checkResults["hrv"] = "本次 HRV 提醒已交给系统"
                 persist()
                 error = nil
-            } catch { self.error = "这次提醒未能交给系统，将等待新的健康记录后再判断。" }
+            } catch {
+                self.error = "这次提醒未能交给系统，将等待新的健康记录后再判断。"
+                checkResults["hrv"] = self.error
+            }
         }
         for candidate in vitalCandidates {
             guard revision == generation, vitalRules[candidate.kind]?.delivery.enabled == true else { return }
@@ -226,10 +256,25 @@ final class RelaxationReminderService: NSObject, UNUserNotificationCenterDelegat
                     return
                 }
                 vitalRules[kind]?.recordDelivery(candidate, now: now)
+                lastSubmittedAt = .now
                 checkResults[kind.rawValue] = "本次提醒已交给系统"
                 persist()
-            } catch { self.error = "这次健康提醒未能交给系统，将等待新的记录后再判断。" }
+            } catch {
+                self.error = "这次健康提醒未能交给系统，将等待新的记录后再判断。"
+                checkResults[kind.rawValue] = self.error
+            }
         }
+    }
+
+    // Keep the last background decision when a foreground refresh consumes the same sample.
+    // Store explanations and timestamps only, never the underlying health readings.
+    private func persistDiagnostics() {
+        guard !disabledForTesting else { return }
+        var saved: [String: Any] = ["results": checkResults, "backgroundResults": backgroundCheckResults]
+        saved["checkedAt"] = lastCheckedAt
+        saved["backgroundCheckedAt"] = lastBackgroundCheckedAt
+        saved["submittedAt"] = lastSubmittedAt
+        defaults.set(saved, forKey: Self.diagnosticsKey)
     }
 
     private func persist() {

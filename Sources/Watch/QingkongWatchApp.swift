@@ -132,6 +132,7 @@ struct WatchMoodView: View {
 
 struct WatchSetupView: View {
     @Environment(AppServices.self) private var app
+    @State private var complicationRefreshRequested = false
     var body: some View {
         List {
             Section("Apple 健康") {
@@ -147,6 +148,13 @@ struct WatchSetupView: View {
             }
             Section("表盘组件") {
                 Text("长按系统表盘 → 编辑 → 复杂功能，选择晴空。可在 iPhone 晴空中配置默认指标和迷你趋势。 ").font(.caption2)
+                Button("刷新表盘组件") {
+                    app.refreshComplications()
+                    complicationRefreshRequested = true
+                }
+                if complicationRefreshRequested {
+                    Text("已请求系统重新加载组件列表，请返回表盘编辑查看。组件是否出现仍取决于系统与所选位置。").font(.caption2)
+                }
                 if let error = app.snapshotError { Text(error).font(.caption2) }
             }
             Section("隐私") { Text("无注册、无广告，不上传日记或健康记录。心情与偏好只在配对设备间同步。详细说明见 iPhone 端个性化设置。 ").font(.caption2) }

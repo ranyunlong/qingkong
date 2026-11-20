@@ -35,35 +35,58 @@ struct RelaxationReminderTests {
         #expect(result.sampleID == samples.last!.id)
         #expect(result.baseline == 50)
     }
+    @Test func singleNewAutomaticDropDoesNotRequireAnotherMeasurement() throws {
+        let sample = reading(now.addingTimeInterval(-60), 35)
+        let result = try #require(candidate(baseline + [sample]))
+        #expect(result.sampleID == sample.id)
+        #expect(result.baseline == 50)
+    }
+    @Test func delayedHealthDeliveryWithinAnHourCanStillNotifyOnce() throws {
+        let sample = reading(now.addingTimeInterval(-40 * 60), 30)
+        var value = RelaxationReminderState(now: now.addingTimeInterval(-7200))
+        let result = try #require(candidate(baseline + [sample], value))
+        value.recordDelivery(result, now: now)
+        let restored = try JSONDecoder().decode(RelaxationReminderState.self, from: JSONEncoder().encode(value))
+        #expect(candidate(baseline + [sample], restored) == nil)
+    }
+    @Test func hourFreshnessBoundaryAndActivationBoundaryAreExplicit() {
+        let value = RelaxationReminderState(now: now.addingTimeInterval(-7200))
+        #expect(candidate(baseline + [reading(now.addingTimeInterval(-3600), 30)], value) != nil)
+        #expect(candidate(baseline + [reading(now.addingTimeInterval(-3601), 30)], value) == nil)
+        #expect(candidate(baseline + [reading(value.eligibleSince, 30)], value) == nil)
+        #expect(candidate(baseline + [reading(now, 30)], RelaxationReminderState(now: now)) == nil)
+    }
     @Test func extraCloselySpacedLowReadingsDoNotHideSustainedDrop() {
         let recent = [-1500.0, -900, -300, -60].map { reading(now.addingTimeInterval($0), 30) }
         #expect(candidate(baseline + recent) != nil)
     }
-    @Test func recoveryBreaksTheConfirmationWindow() {
-        let recent = [reading(now.addingTimeInterval(-1500), 30), reading(now.addingTimeInterval(-300), 48), reading(now.addingTimeInterval(-60), 30)]
+    @Test func latestRecoverySuppressesEarlierLowReadings() {
+        let recent = [reading(now.addingTimeInterval(-1500), 30), reading(now.addingTimeInterval(-300), 30), reading(now.addingTimeInterval(-60), 48)]
         #expect(candidate(baseline + recent) == nil)
     }
-    @Test func smallDropSingleSampleRecoveryAndShortIntervalDoNotNotify() {
+    @Test func smallDropAndLatestRecoveryDoNotNotify() {
         #expect(candidate(baseline + low.map { reading($0.date, 36) }) == nil)
-        #expect(candidate(baseline + [low[0]]) == nil)
         #expect(candidate(baseline + [low[0], reading(now.addingTimeInterval(-60), 48)]) == nil)
-        #expect(candidate(baseline + [reading(now.addingTimeInterval(-300), 30), low[1]]) == nil)
     }
     @Test func insufficientOrMixedSourceBaselineCannotNotify() {
         #expect(candidate(Array(baseline.prefix(2)) + low) == nil)
         #expect(candidate(baseline + low.map { reading($0.date, $0.value, source: "Other") }) == nil)
         #expect(candidate(baseline + [low[0], reading(low[1].date, 30, source: "Other")]) == nil)
     }
-    @Test func repeatedUUIDsAreNotIndependentEvidence() {
+    @Test func repeatedUUIDsProduceOnlyOneCandidateAndAreNotReplayed() throws {
         let original = low[0]
         var duplicate = original
         duplicate.date = now.addingTimeInterval(-60)
-        #expect(candidate(baseline + [original, duplicate]) == nil)
+        var value = state()
+        let result = try #require(candidate(baseline + [original, duplicate], value))
+        #expect(result.sampleID == original.id)
+        value.recordDelivery(result, now: now)
+        #expect(candidate(baseline + [original, duplicate], value) == nil)
     }
     @Test func oldFutureInvalidAndPreActivationSamplesDoNotNotify() {
         #expect(candidate(baseline + low, at: now.addingTimeInterval(3600)) == nil)
         #expect(candidate(baseline + [reading(now.addingTimeInterval(60), 20)]) == nil)
-        #expect(candidate(baseline + [reading(low[0].date, .nan), low[1]]) == nil)
+        #expect(candidate(baseline + [reading(low[0].date, .nan)]) == nil)
         var value = state()
         value.setEnabled(false, now: now.addingTimeInterval(-30))
         value.setEnabled(true, now: now)

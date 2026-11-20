@@ -36,6 +36,8 @@ final class HealthService {
     private(set) var error: String?
     private(set) var isDemo = false
     private(set) var backgroundDeliveryWarning: String?
+    private(set) var lastObserverUpdateAt: Date?
+    private(set) var observerWarning: String?
     var available: Bool { HKHealthStore.isHealthDataAvailable() }
     @ObservationIgnored var didRefresh: (() async -> Void)?
     @ObservationIgnored private let store = HKHealthStore()
@@ -43,6 +45,7 @@ final class HealthService {
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
     @ObservationIgnored private let testing: Bool
     @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private var registeringBackgroundDelivery = false
 
     init(testing: Bool = false, demo: Bool = false) {
         self.testing = testing
@@ -52,10 +55,16 @@ final class HealthService {
             defaults.removeObject(forKey: "health.connectionIntroductionShown")
         }
         requested = defaults.bool(forKey: "health.authorizationRequested")
+        lastObserverUpdateAt = defaults.object(forKey: "health.lastObserverUpdateAt") as? Date
+        observerWarning = defaults.string(forKey: "health.observerWarning")
+        backgroundDeliveryWarning = defaults.string(forKey: "health.backgroundDeliveryWarning")
         #if DEBUG
         isDemo = demo
         #endif
-        if available && requested && !testing && !isDemo { installObservers() }
+        if available && requested && !testing && !isDemo {
+            installObservers()
+            Task { await restoreBackgroundDelivery() }
+        }
     }
 
     func latest(_ metric: HealthMetric) -> HealthReading? {
@@ -76,8 +85,9 @@ final class HealthService {
             try await store.requestAuthorization(toShare: [], read: types)
             requested = true
             defaults.set(true, forKey: "health.authorizationRequested")
-            await refresh()
             installObservers()
+            await restoreBackgroundDelivery()
+            await refresh()
         } catch { self.error = "健康数据连接未完成，请稍后重试。" }
     }
 
@@ -168,17 +178,39 @@ final class HealthService {
             let type = quantityType(metric)
             let query = HKObserverQuery(sampleType: type, predicate: nil) { [weak self] _, completion, error in
                 Task { @MainActor in
+                    if let self {
+                        self.lastObserverUpdateAt = .now
+                        self.defaults.set(self.lastObserverUpdateAt, forKey: "health.lastObserverUpdateAt")
+                        self.observerWarning = error == nil ? nil : "最近一次健康更新回调未完成，请打开应用刷新；若仍无数据，请检查 Apple 健康连接。"
+                        self.defaults.set(self.observerWarning, forKey: "health.observerWarning")
+                    }
                     if error == nil { await self?.refresh() }
                     completion()
                 }
             }
             observers.append(query)
             store.execute(query)
-            store.enableBackgroundDelivery(for: type, frequency: .immediate) { [weak self] success, _ in
-                guard !success else { return }
-                Task { @MainActor in self?.backgroundDeliveryWarning = "后台健康更新暂未启用，健康提醒可能仅在打开应用刷新后判断。" }
-            }
         }
+    }
+
+    // Retry independently of observer creation: an earlier registration may have
+    // failed before health access was changed in Settings.
+    func restoreBackgroundDelivery() async {
+        guard available && requested && !testing && !isDemo && !registeringBackgroundDelivery else { return }
+        registeringBackgroundDelivery = true
+        defer { registeringBackgroundDelivery = false }
+        installObservers()
+        var failed: [String] = []
+        for metric in HealthMetric.allCases {
+            let success: Bool = await withCheckedContinuation { continuation in
+                store.enableBackgroundDelivery(for: quantityType(metric), frequency: .immediate) { success, _ in
+                    continuation.resume(returning: success)
+                }
+            }
+            if !success { failed.append(metric.name) }
+        }
+        backgroundDeliveryWarning = failed.isEmpty ? nil : "\(failed.joined(separator: "、"))后台健康更新暂未启用；打开应用时会重试，系统仍决定实际交付时间。"
+        defaults.set(backgroundDeliveryWarning, forKey: "health.backgroundDeliveryWarning")
     }
 
     private static func demoReadings() -> [HealthReading] {

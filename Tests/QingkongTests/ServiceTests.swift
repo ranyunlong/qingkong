@@ -1,8 +1,30 @@
 import XCTest
+import UserNotifications
 import QingkongCore
 @testable import Qingkong
 
 final class ServiceTests: XCTestCase {
+    @MainActor
+    func testReminderCheckSurvivesServiceRecreationWithoutSendingNotification() async throws {
+        let suite = "qingkong.reminder-history-test." + UUID().uuidString
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let center = UNUserNotificationCenter.current()
+        let previousDelegate = center.delegate
+        defer {
+            center.delegate = previousDelegate
+            defaults.removePersistentDomain(forName: suite)
+        }
+        let service = RelaxationReminderService(defaultsOverride: defaults)
+        await service.evaluate(readings: [], isDemo: false)
+        let checkedAt = try XCTUnwrap(service.lastCheckedAt)
+        XCTAssertEqual(service.checkResults["hrv"], "暂无可读取的自动 HRV 记录")
+        let restored = RelaxationReminderService(defaultsOverride: defaults)
+        XCTAssertEqual(restored.lastCheckedAt, checkedAt)
+        XCTAssertEqual(restored.checkResults, service.checkResults)
+        XCTAssertNil(restored.lastSubmittedAt, "没有健康记录不能提交健康提醒")
+        XCTAssertTrue(restored.state.deliveries.isEmpty)
+    }
+
     @MainActor
     func testOfflineRecordAndDeletionRemainPendingAfterReopening() throws {
         let store = try LocalStore(testing: true, reset: true)

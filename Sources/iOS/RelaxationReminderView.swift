@@ -29,7 +29,7 @@ struct RelaxationReminderSettingsSection: View {
             if let error = app.reminders.error { Text(error).font(.footnote).foregroundStyle(Color.readableSecondary) }
             if let warning = app.health.backgroundDeliveryWarning { Text(warning).font(.footnote).foregroundStyle(Color.readableSecondary) }
         } header: { Text("给自己一点松弛") } footer: {
-            Text("默认开启。仅在近期 HRV 持续明显低于个人基线时提醒，每天最多 2 次、间隔至少 4 小时。通知声音和展示遵循系统专注设置；不代表心理压力诊断，也不保证实时检测。")
+            Text("默认开启。新的自动 HRV 读数比个人基线低至少 30% 时考虑提醒，每天最多 2 次、间隔至少 4 小时。通知声音和展示遵循系统专注设置；不代表心理压力诊断，也不保证实时检测。")
         }
     }
 }
@@ -90,11 +90,30 @@ struct NotificationDiagnosticsView: View {
                     LabeledContent(kind.title, value: app.reminders.checkResults[kind.rawValue] ?? "等待可读取的健康记录")
                 }
                 if let warning = app.health.backgroundDeliveryWarning { Text(warning).font(.footnote) }
+                if let warning = app.health.observerWarning { Text(warning).font(.footnote) }
+                if let error = app.health.error { Text(error).font(.footnote) }
                 if let error = app.reminders.error { Text(error).font(.footnote) }
-                Button("刷新检查") { Task { await app.health.refresh() } }.buttonStyle(.automatic)
+                Button("刷新检查") {
+                    Task { await app.health.restoreBackgroundDelivery(); await app.health.refresh() }
+                }.buttonStyle(.automatic)
             }
+            Section("后台检查记录") {
+                if let date = app.health.lastObserverUpdateAt {
+                    LabeledContent("健康更新回调") { Text(date, format: .dateTime.month().day().hour().minute().second()) }
+                } else { Text("尚未记录健康更新回调") }
+                if let date = app.reminders.lastBackgroundCheckedAt {
+                    LabeledContent("上次后台判断") { Text(date, format: .dateTime.month().day().hour().minute().second()) }
+                    LabeledContent("HRV", value: app.reminders.backgroundCheckResults["hrv"] ?? "尚无判断结果")
+                } else { Text("尚未记录后台判断") }
+                if let date = app.reminders.lastSubmittedAt {
+                    LabeledContent("最近健康提醒提交") { Text(date, format: .dateTime.month().day().hour().minute().second()) }
+                } else { Text("尚未向系统提交健康提醒") }
+                Text("记录会在重新打开应用后保留。健康更新回调也可能发生在前台，不等同于后台成功送达；提交成功也不等同于通知已经展示。")
+                    .font(.footnote).foregroundStyle(Color.readableSecondary)
+            }.accessibilityIdentifier("notification-background-diagnostics")
             Section {
                 Text("测试通知用于检查系统送达，不代表健康异常。健康提醒只根据新记录判断；授权成功也不表示健康库中一定有数据。后台更新、通知展示及手表镜像由系统安排。")
+                Text("不需要一直停留在应用界面。请避免从多任务中强制关闭应用；新数据到达及后台处理的时间由系统决定，锁屏时健康数据也可能暂时无法读取。")
             }.font(.footnote)
         }.navigationTitle("通知检查").navigationBarTitleDisplayMode(.inline)
             .task { await app.reminders.refreshAuthorization() }
@@ -124,7 +143,7 @@ struct RelaxationAdviceView: View {
             }
             Section("什么情况下会提醒？") {
                 Text("使用同一来源此前 7 天的日均 HRV 作为个人基线，至少需要 3 个有效日。")
-                Text("最近一小时内，连续偏低的 HRV 均比基线低至少 30%，记录跨度至少 10 分钟，且最新读数不超过 15 分钟，才会考虑提醒。中途恢复会重新确认。")
+                Text("最新一条自动 HRV 读数比个人基线低至少 30%，且距当前不超过 1 小时，就会考虑提醒，不再要求多条读数跨度达到十分钟。最新读数已恢复时不提醒。")
                 Text("30% 是首版的产品参考规则，未经临床验证，不能判断你是否有心理压力。活动、呼吸和睡眠等也会影响 HRV。")
                 Text("每天最多两次，至少间隔四小时。后台更新由系统安排；没有足够的新记录时不会提醒，不补发旧提醒。")
                 Text("通知按 iPhone 的系统规则显示在手机或配对手表上，遵循专注模式与通知设置。无需两端各发一次。")

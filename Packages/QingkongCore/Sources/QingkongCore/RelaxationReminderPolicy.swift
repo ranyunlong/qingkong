@@ -30,15 +30,14 @@ public enum RelaxationReminderPolicy {
             .filter { seen.insert($0.id).inserted }
         guard let latest = valid.first else { return skip("暂无可读取的自动 HRV 记录") }
         guard latest.date > state.consumedThrough else { return skip("等待新的 HRV 记录，不重复判断旧记录") }
-        guard now.timeIntervalSince(latest.date) <= 15 * 60 else { return skip("最新 HRV 已超过 15 分钟，不补发旧提醒") }
+        guard latest.date > state.eligibleSince else { return skip("不补发启用前的 HRV 记录") }
+        guard now.timeIntervalSince(latest.date) <= 60 * 60 else { return skip("最新 HRV 已超过 1 小时，不补发旧提醒") }
         let source = latest.sourceIdentifier ?? latest.source
         let sameSource = valid.filter { ($0.sourceIdentifier ?? $0.source) == source }
-        let recent = sameSource.filter { $0.date > state.eligibleSince && now.timeIntervalSince($0.date) <= 3600 }
         guard let baseline = HealthMath.hrvBaseline(sameSource, now: now, calendar: calendar), baseline.isFinite, baseline > 0 else { return skip("同一来源的个人基线不足 3 个有效日") }
-        guard let newest = recent.first, newest.value <= baseline * 0.7 else { return skip("最新 HRV 未明显低于个人基线") }
-        // Frequent samples must not prevent confirmation. A recovery breaks the run.
-        let sustainedLow = recent.prefix { $0.value <= baseline * 0.7 }
-        guard sustainedLow.contains(where: { newest.date.timeIntervalSince($0.date) >= 10 * 60 }) else { return skip("等待相隔至少 10 分钟的持续偏低记录") }
+        guard latest.value <= baseline * 0.7 else { return skip("最新 HRV 未明显低于个人基线") }
+        // HRV measurements are not guaranteed to arrive in a dense sequence.
+        // This is a gentle change reminder, not confirmation of psychological stress.
         return .init(candidate: RelaxationReminderCandidate(sampleID: latest.id, sampleDate: latest.date, baseline: baseline), reason: "已达到 HRV 变化提醒条件")
     }
 }

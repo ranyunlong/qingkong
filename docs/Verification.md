@@ -201,3 +201,14 @@ xcodebuild -project QingkongECGPreview.xcodeproj -scheme Qingkong \
 - 实际界面验证：智能叠放 → 编辑 → 添加 → 小晴空，可配置指标与迷你趋势；添加后矩形卡片显示 HRV、`— ms` 及连接健康提示，点击进入 HRV 详情。模拟器未使用演示健康值。尚未实际完成系统表盘上大矩形槽位的添加，不以智能叠放验证替代该项。
 - 补充 iPhone 添加引导，明确「所有 App」入口、圆形／大矩形位置及可用于排查的「健身记录数字」表盘；解释图库中没有独立小晴空表盘。组件功能代码未改变。用户真机未复测，安装版本、表盘位置是否兼容及实际找不到的原因仍未确认。
 - 引导修改后的 iPhone 模拟器构建通过：`artifacts/build-complication-guide.log`（`QingkongPhonePreview`、Debug、通用 iOS 模拟器目标）；本轮未更改健康与同步逻辑，未重复运行业务逻辑测试，也未操作其他任务的模拟器。
+
+## TestFlight 表盘复核与 HRV 通知（2026-11-20）
+
+- 用户进一步确认 TestFlight 版本为 0.1.0（8）、手表系统为 watchOS 27。本机仅有 watchOS 26.5 模拟器，不声称已复现或验证 watchOS 27。读取本地 2026-11-20 11.22 的 8 号归档：Watch App 内含 WidgetKit 扩展、正确的标识前缀、App Group 和完整 `Metadata.appintents/extract.actionsdata`；三层严格签名验证通过。上传前归档不等同于 Apple 处理后实际安装的包，缺元数据或签名失败均未被证实为用户问题的根因。
+- Release Watch 模拟器构建通过：`artifacts/build-complication-release-simulator.log`。安装后现有圆形组件可显示并点击进入 HRV 详情；此前已验证的添加列表见上一节。新增在 Watch 激活时刷新组件推荐列表，并提供「连接与设置 → 刷新表盘组件」恢复入口；这只请求系统刷新，不保证能解决用户 TestFlight 安装后的列表缺失。未上传新版本，也未改变真机开发者模式。
+- 回归测试复现旧 HRV 规则排除单条明显下降及延迟约四十分钟送达的记录：`artifacts/test-hrv-sparse-red.log`。改为最新一条自动读数低于同来源七日个人基线至少 30%、最新不超过一小时即可进入提醒判断，仍需至少三个有效基线日，保留启用时间、去重、每天两次及四小时间隔。高低心率和低血氧的重复确认规则未改变。
+- 共享逻辑最终 49 项测试通过：`artifacts/test-core-hrv-background-final.log`，包括单条下降、延迟送达、一小时边界、重新启用、来源隔离、基线、去重和限频。没有读取用户当天实际健康样本，因此不能把旧规则认作其从未收到通知的唯一原因。
+- 后台投递注册与观察查询创建分开，启动／激活时可重试注册失败；记录最近健康更新回调及错误。通知检查原因、最近后台判断和最近成功提交时间本地保存，避免前台刷新掩盖此前后台判断；权限未允许或提交失败时明确记为未发送。没有健康值或日记内容进入诊断存储。
+- 完整 iPhone＋Watch＋表盘组件 Debug 模拟器构建成功：`artifacts/build-hrv-background-final.log`。iPhone 模拟器服务测试已验证：用独立存储完成空数据检查，重新创建提醒服务后恢复检查时间与原因，不发送健康通知、不写入健康库。
+- iPhone 17／iOS 26.5 模拟器两项相关测试分别通过：服务保存／恢复见 `artifacts/test-hrv-background-diagnostics-simulator.log` 中的单元测试结果；通知设置及后台检查页面见 `artifacts/test-hrv-background-diagnostics-ui-final.log`（1 项、0 失败）。初次 UI 断言未滚动到最后一条状态，补足滚动后通过；实际查看最终截图 `artifacts/hrv-diagnostics-final-attachments/`，三条空状态、检查说明和后台说明均正常显示。初次日志整体含一次 UI 失败，不能当作整轮测试成功。
+- 真实 HealthKit 后台唤醒、锁屏数据交付、变化触发系统通知及 Watch 镜像尚未真机验证；本轮只验证规则、存储、构建和模拟器页面。Watch 新增刷新按钮仅完成构建验证，watchOS 27／TestFlight 缺失组件仍待实际安装包复测。当前安装的 8 号包不会自动获得本轮源码修改，需要制作并安装包含修改的新 TestFlight 构建；本轮未上传。
