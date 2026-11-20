@@ -122,11 +122,10 @@ struct ECGDetailView: View {
 struct ECGWaveformChart: View {
     let points: [VoltagePoint]
     let color: Color
-    @State private var visiblePosition = 0.0
+    @State private var visibleRange = ECGVisibleRange()
 
     private var lowerBound: Double { points.first?.seconds ?? 0 }
     private var upperBound: Double { max(points.last?.seconds ?? 5, lowerBound + 5) }
-    private var visibleStart: Double { min(max(visiblePosition, lowerBound), upperBound - 5) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -147,16 +146,34 @@ struct ECGWaveformChart: View {
                         }
                     }.allowsHitTesting(false).accessibilityHidden(true)
                 }
-                .onPreferenceChange(ECGVisiblePositionKey.self) { visiblePosition = $0 }
+                .onPreferenceChange(ECGVisiblePositionKey.self) { position in
+                    // Only the small range label observes scroll updates, not the waveform.
+                    let start = min(max((position * 10).rounded() / 10, lowerBound), upperBound - 5)
+                    if visibleRange.start != start { visibleRange.start = start }
+                }
                 .chartXAxisLabel("秒").chartYAxisLabel("mV")
                 .accessibilityLabel("心电图电压波形")
                 .accessibilityHint("左右滑动浏览完整波形，上下滑动滚动页面")
                 .accessibilityIdentifier("ecg-waveform-chart")
 
-            Text("\(visibleStart.formatted(.number.precision(.fractionLength(1))))–\((visibleStart + 5).formatted(.number.precision(.fractionLength(1)))) 秒 / 共 \(upperBound.formatted(.number.precision(.fractionLength(1)))) 秒")
-                .font(.caption).monospacedDigit().foregroundStyle(Color.readableSecondary)
-                .accessibilityIdentifier("ecg-visible-range")
+            ECGVisibleRangeLabel(range: visibleRange, duration: upperBound)
         }
+    }
+}
+
+@Observable
+private final class ECGVisibleRange {
+    var start = 0.0
+}
+
+private struct ECGVisibleRangeLabel: View {
+    let range: ECGVisibleRange
+    let duration: Double
+
+    var body: some View {
+        Text("\(range.start.formatted(.number.precision(.fractionLength(1))))–\((range.start + 5).formatted(.number.precision(.fractionLength(1)))) 秒 / 共 \(duration.formatted(.number.precision(.fractionLength(1)))) 秒")
+            .font(.caption).monospacedDigit().foregroundStyle(Color.readableSecondary)
+            .accessibilityIdentifier("ecg-visible-range")
     }
 }
 

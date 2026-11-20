@@ -2,6 +2,24 @@ import XCTest
 
 final class ECGScrollingUITests: XCTestCase {
     @MainActor
+    func testWaveformScrollingPerformance() {
+        let app = XCUIApplication()
+        app.launch()
+        let chart = app.descendants(matching: .any)["ecg-waveform-chart"].firstMatch
+        XCTAssertTrue(chart.waitForExistence(timeout: 15))
+        let frame = chart.frame.intersection(app.frame)
+        let origin = app.coordinate(withNormalizedOffset: .zero)
+        let right = origin.withOffset(CGVector(dx: frame.minX + frame.width * 0.85, dy: frame.midY))
+        let left = origin.withOffset(CGVector(dx: frame.minX + frame.width * 0.15, dy: frame.midY))
+        let options = XCTMeasureOptions()
+        options.iterationCount = 3
+        measure(metrics: [XCTOSSignpostMetric.scrollingAndDecelerationMetric, XCTCPUMetric(application: app)], options: options) {
+            right.press(forDuration: 0.1, thenDragTo: left, withVelocity: .slow, thenHoldForDuration: 0)
+            left.press(forDuration: 0.1, thenDragTo: right, withVelocity: .slow, thenHoldForDuration: 0)
+        }
+    }
+
+    @MainActor
     func testBrowseEntireWaveformAndScrollPage() {
         continueAfterFailure = false
         let app = XCUIApplication()

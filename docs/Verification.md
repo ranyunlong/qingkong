@@ -183,3 +183,11 @@ xcodebuild -project QingkongECGPreview.xcodeproj -scheme Qingkong \
 - 最终 Watch UI 测试通过（1 项、0 失败）：`artifacts/test-watch-final-focus.log`。覆盖默认播放按钮、至少 44 pt 触摸区域、不先点击音量图标直接双向旋转表冠、切曲、离页再进入后旋转表冠。模拟器操作和页面状态不证明真实输出音量变化。
 - 共享逻辑 46 项测试通过：`artifacts/test-core-ecg-scroll.log`。最终完整 iPhone＋Watch＋表盘组件 Debug 构建通过：`artifacts/build-final-chart-and-crown.log`。电脑重启前被中断的执行不作为通过证据；恢复后串行构建与模拟器验收，一次只运行一台本轮模拟器。
 - 本轮未安装或运行真机。真实心电图数据、手表输出音量及音频路由仍未验收；保留用户已关闭开发者模式的状态，未上传 App Store。
+
+## 心电图横向浏览性能（2026-11-20）
+
+- 原实现把连续滚动位置保存在整张波形视图的 `@State` 中，底部时间范围的变化会使包含全部采样点的图表重新计算。改为独立的可观察范围状态，仅由文字子视图读取；按显示精度更新至 0.1 秒，不再由文字刷新触发整张波形视图更新。波形仍使用全部原始采样点、线性连接与原生滚动，无抽样、平滑或选值浮层。
+- 新增 `testWaveformScrollingPerformance`，使用相同 iPhone 17／iOS 26.5 模拟器、Debug 配置和 30 秒／512 Hz 合成波形，每轮执行相同的左右拖动，采集三轮 CPU 与系统滚动指标。优化前日志 `artifacts/test-ecg-scroll-performance-before.log`，优化后日志 `artifacts/test-ecg-scroll-performance-after.log`。
+- 每轮平均 CPU 用时由 10.450 秒降为 1.546 秒（约减少 85%）；平均 CPU 指令数由 41,192,191.829 kI 降为 2,929,035.686 kI（约减少 93%）。这是本机模拟器同一操作的测量，不是帧率或真机性能保证；系统滚动区间用时也不当作丢帧指标。
+- 优化后两项 UI 测试均通过：性能采集，以及完整波形前后浏览、到达 25–30 秒末尾、横拖不移动页面、纵拖正常滚页、无选值浮层。没有修改心率／HRV／血氧图表。未操作真机或改变开发者模式。
+- 完整 iPhone＋Watch＋表盘组件 Debug 构建通过：`artifacts/build-ecg-scroll-performance.log`；共享逻辑 46 项测试通过：`artifacts/test-core-ecg-scroll-performance.log`。使用独立临时工程进行模拟器测试，未覆盖主工程配置或其他本地改动。
