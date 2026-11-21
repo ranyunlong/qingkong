@@ -252,3 +252,10 @@ xcodebuild -project QingkongECGPreview.xcodeproj -scheme Qingkong \
 - 将原本混在团子预览下的指标、趋势选项移至独立的「健康指标组件」分区，明确默认指标只影响「跟随 iPhone 配置」的健康组件；趋势仅用于同时启用自身趋势选项的矩形健康组件。保留既有偏好与同步行为，团子页面继续同时显示三项健康数值。
 - iPhone 手表预览屏幕改为固定 184 × 224 pt，团子保持正方形等比显示，调整内边距与底部读数布局。按用户补充要求保留预览心情文字，并在真实 Watch 团子页面增加相同心情文字；团子分别上移 6／8 pt，为文字留出间距，Watch 布局为新增文字预留高度。
 - Mac 共享逻辑 55 项测试通过：`artifacts/test-core-watch-preview.log`。最终完整 iPhone／Watch／两端组件 Debug 编译通过：`artifacts/build-watch-preview.log`。差异空白检查通过。遵循用户此前要求，未启动模拟器做界面验收，未操作真机或上传 TestFlight；比例及文字视觉效果仍需安装新版本后确认。
+
+## Watch 健康卡片留白与趋势分页（2026-11-21）
+
+- 首页 HRV、心率、血氧卡片增加内容水平与垂直内边距，迷你折线图再增加四周留白，减少线条贴近卡片边缘的情况。未改变图表数据或缺失值处理。
+- 三项健康详情共用原生 `TabView` 横向分页，顺序为日、周、月，默认周；移除原来需要点开二级页面的时间范围选择器。各页独立纵向滚动，保留最近采样、来源、图表、HRV 基线、空值说明与刷新，并为图表增加留白。
+- Mac 共享逻辑 55 项测试通过：`artifacts/test-core-watch-trend-pages.log`；完整 iPhone／Watch／两端组件 Debug 编译通过：`artifacts/build-watch-trend-pages.log`；差异空白检查通过。
+- 按用户本轮允许打开模拟器确认的要求，在 Series 11 46mm／watchOS 26.5 模拟器安装并打开新版，使用 `--demo-health` 明确标注的开发演示数据，实际查看首页 HRV 卡片留白、HRV 周趋势及纵向滚动。模拟器保留在详情页供用户确认；本轮未取得横向拖动切换页面的可靠交互证据，未认定三项详情的手势逐项验收通过。未运行真机或上传 TestFlight。

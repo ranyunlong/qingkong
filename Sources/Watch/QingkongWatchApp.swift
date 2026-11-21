@@ -41,9 +41,11 @@ struct WatchRootView: View {
                                 Text(metric.unit).font(.caption2).foregroundStyle(.secondary)
                             }
                             if app.health.latest(metric) != nil {
-                                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: .week), metric: metric, color: .white, compact: true).frame(height: 28)
+                                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: .week), metric: metric, color: .white, compact: true)
+                                    .frame(height: 28)
+                                    .padding(.horizontal, 6).padding(.vertical, 6)
                             }
-                        }.padding(.vertical, 4)
+                        }.padding(.horizontal, 6).padding(.vertical, 8)
                     }
                 }
                 NavigationLink(value: WatchRoute.mood) { Label("记下此刻", systemImage: "face.smiling") }
@@ -75,20 +77,30 @@ struct WatchTrendView: View {
     let metric: HealthMetric
     @State private var period: TrendPeriod = .week
     var body: some View {
+        TabView(selection: $period) {
+            ForEach(TrendPeriod.allCases) { period in
+                trendPage(for: period).tag(period)
+            }
+        }
+        .tabViewStyle(.page(indexDisplayMode: .always))
+        .navigationTitle(metric.name)
+        .accessibilityIdentifier("watch-trend-pages")
+        .accessibilityHint("左右轻扫切换日、周、月趋势，上下滚动查看详情")
+    }
+
+    private func trendPage(for period: TrendPeriod) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
+                Text("\(period.name)趋势").font(.headline)
+                    .accessibilityIdentifier("watch-trend-period-\(period.rawValue)")
                 if let latest = app.health.latest(metric) {
                     Text("\(latest.value.formatted(.number.precision(.fractionLength(0)))) \(metric.unit)").font(.system(.title2, design: .rounded))
                     Text(latest.date.formatted(date: .abbreviated, time: .shortened)).font(.caption2).foregroundStyle(.secondary)
                     Text("来源：\(latest.source)").font(.caption2).foregroundStyle(.secondary)
                 } else { Text("暂无可读取的记录").font(.headline) }
-                Picker("时间范围", selection: $period) {
-                    ForEach(TrendPeriod.allCases) { Text($0.name).tag($0) }
-                }
-                .pickerStyle(.navigationLink)
-                .frame(maxWidth: .infinity, minHeight: 48)
-                .accessibilityIdentifier("watch-trend-period")
-                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: period), metric: metric, color: .white, compact: true, period: period).frame(height: 80)
+                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: period), metric: metric, color: .white, compact: true, period: period)
+                    .frame(height: 80)
+                    .padding(.horizontal, 6).padding(.vertical, 6)
                 if metric == .hrv {
                     Text(app.health.baseline.map { "个人基线 \($0.formatted(.number.precision(.fractionLength(0)))) ms" } ?? "基线积累中").font(.caption)
                     Text("SDNN · 此前 7 日至少 3 个有效日的日均值平均。 ").font(.caption2).foregroundStyle(.secondary)
@@ -96,8 +108,8 @@ struct WatchTrendView: View {
                 Text("空缺表示没有记录，不代表零。 ").font(.caption2).foregroundStyle(.secondary)
                 Button("刷新") { Task { await app.health.refresh() } }.disabled(app.health.loading)
                 if let error = app.health.error { Text(error).font(.caption2) }
-            }.padding(.horizontal, 8)
-        }.navigationTitle(metric.name)
+            }.padding(.horizontal, 12).padding(.bottom, 24)
+        }
     }
 }
 
