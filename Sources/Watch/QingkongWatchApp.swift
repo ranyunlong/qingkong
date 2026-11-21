@@ -77,30 +77,14 @@ struct WatchTrendView: View {
     let metric: HealthMetric
     @State private var period: TrendPeriod = .week
     var body: some View {
-        TabView(selection: $period) {
-            ForEach(TrendPeriod.allCases) { period in
-                trendPage(for: period).tag(period)
-            }
-        }
-        .tabViewStyle(.page(indexDisplayMode: .always))
-        .navigationTitle(metric.name)
-        .accessibilityIdentifier("watch-trend-pages")
-        .accessibilityHint("左右轻扫切换日、周、月趋势，上下滚动查看详情")
-    }
-
-    private func trendPage(for period: TrendPeriod) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Text("\(period.name)趋势").font(.headline)
-                    .accessibilityIdentifier("watch-trend-period-\(period.rawValue)")
                 if let latest = app.health.latest(metric) {
                     Text("\(latest.value.formatted(.number.precision(.fractionLength(0)))) \(metric.unit)").font(.system(.title2, design: .rounded))
                     Text(latest.date.formatted(date: .abbreviated, time: .shortened)).font(.caption2).foregroundStyle(.secondary)
                     Text("来源：\(latest.source)").font(.caption2).foregroundStyle(.secondary)
                 } else { Text("暂无可读取的记录").font(.headline) }
-                HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: period), metric: metric, color: .white, compact: true, period: period)
-                    .frame(height: 80)
-                    .padding(.horizontal, 6).padding(.vertical, 6)
+                trendPages
                 if metric == .hrv {
                     Text(app.health.baseline.map { "个人基线 \($0.formatted(.number.precision(.fractionLength(0)))) ms" } ?? "基线积累中").font(.caption)
                     Text("SDNN · 此前 7 日至少 3 个有效日的日均值平均。 ").font(.caption2).foregroundStyle(.secondary)
@@ -109,7 +93,28 @@ struct WatchTrendView: View {
                 Button("刷新") { Task { await app.health.refresh() } }.disabled(app.health.loading)
                 if let error = app.health.error { Text(error).font(.caption2) }
             }.padding(.horizontal, 12).padding(.bottom, 24)
+        }.navigationTitle(metric.name)
+    }
+
+    private var trendPages: some View {
+        TabView(selection: $period) {
+            ForEach(TrendPeriod.allCases) { period in
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("\(period.name)趋势").font(.headline)
+                        .accessibilityIdentifier("watch-trend-period-\(period.rawValue)")
+                    HealthTrendChart(buckets: HealthMath.buckets(app.health.readings, metric: metric, period: period), metric: metric, color: .white, compact: true, period: period)
+                        .frame(height: 80)
+                        .padding(.horizontal, 6).padding(.vertical, 6)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding(.bottom, 24)
+                .tag(period)
+            }
         }
+        .tabViewStyle(.page(indexDisplayMode: .always))
+        .frame(height: 160)
+        .accessibilityIdentifier("watch-trend-pages")
+        .accessibilityHint("左右轻扫切换日、周、月图表")
     }
 }
 

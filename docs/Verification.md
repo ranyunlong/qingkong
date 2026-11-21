@@ -259,3 +259,9 @@ xcodebuild -project QingkongECGPreview.xcodeproj -scheme Qingkong \
 - 三项健康详情共用原生 `TabView` 横向分页，顺序为日、周、月，默认周；移除原来需要点开二级页面的时间范围选择器。各页独立纵向滚动，保留最近采样、来源、图表、HRV 基线、空值说明与刷新，并为图表增加留白。
 - Mac 共享逻辑 55 项测试通过：`artifacts/test-core-watch-trend-pages.log`；完整 iPhone／Watch／两端组件 Debug 编译通过：`artifacts/build-watch-trend-pages.log`；差异空白检查通过。
 - 按用户本轮允许打开模拟器确认的要求，在 Series 11 46mm／watchOS 26.5 模拟器安装并打开新版，使用 `--demo-health` 明确标注的开发演示数据，实际查看首页 HRV 卡片留白、HRV 周趋势及纵向滚动。模拟器保留在详情页供用户确认；本轮未取得横向拖动切换页面的可靠交互证据，未认定三项详情的手势逐项验收通过。未运行真机或上传 TestFlight。
+
+## Watch 仅图表切换时间范围（2026-11-21）
+
+- 按用户进一步要求，将最近数值、采样时间、来源、HRV 基线及说明、刷新按钮移出横向分页。详情页只保留一层纵向滚动，固定高度的分页区域仅包含日／周／月标签与对应折线图；上方信息不随横向切换滑走，默认仍为周趋势。
+- Mac 共享逻辑 55 项测试通过：`artifacts/test-core-watch-chart-only.log`；完整 iPhone／Watch／两端组件 Debug 编译通过：`artifacts/build-watch-chart-only.log`。差异空白检查通过。
+- 已更新正在使用的 Series 11 46mm／watchOS 26.5 模拟器，打开 HRV 详情并查看顶部最近数值、时间、来源及下方周趋势布局，沿用明确标注的开发演示数据。未取得横向滑动过程中顶部稳定性的自动化验收证据，手势体验留待用户确认；未操作真机或上传 TestFlight。
