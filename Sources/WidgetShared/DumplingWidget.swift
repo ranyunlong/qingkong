@@ -87,14 +87,17 @@ struct DumplingWidgetView: View {
                         Text(mood?.label ?? "待记录").font(.caption2).foregroundStyle(.secondary)
                     }
                     mascot.frame(maxHeight: .infinity)
-                    HStack(spacing: 6) {
+                    HStack(alignment: .top, spacing: 6) {
                         ForEach(HealthMetric.allCases) { metric in
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(metric.name).font(.system(size: 8)).foregroundStyle(.secondary)
-                                Text("\(value(metric)) \(metric.unit)")
-                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                            VStack(spacing: 2) {
+                                Text(metric.name).font(.system(size: 9)).foregroundStyle(.secondary)
+                                Text(value(metric))
+                                    .font(.system(size: 16, weight: .medium, design: .rounded))
                                     .monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
-                            }.frame(maxWidth: .infinity, alignment: .leading)
+                                Text(metric.unit).font(.system(size: 8)).foregroundStyle(.secondary)
+                            }
+                            .lineLimit(1).multilineTextAlignment(.center)
+                            .frame(minWidth: 0, maxWidth: .infinity)
                         }
                     }
                     sampleTime.font(.system(size: 8)).foregroundStyle(.secondary)

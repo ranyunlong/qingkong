@@ -265,3 +265,9 @@ xcodebuild -project QingkongECGPreview.xcodeproj -scheme Qingkong \
 - 按用户进一步要求，将最近数值、采样时间、来源、HRV 基线及说明、刷新按钮移出横向分页。详情页只保留一层纵向滚动，固定高度的分页区域仅包含日／周／月标签与对应折线图；上方信息不随横向切换滑走，默认仍为周趋势。
 - Mac 共享逻辑 55 项测试通过：`artifacts/test-core-watch-chart-only.log`；完整 iPhone／Watch／两端组件 Debug 编译通过：`artifacts/build-watch-chart-only.log`。差异空白检查通过。
 - 已更新正在使用的 Series 11 46mm／watchOS 26.5 模拟器，打开 HRV 详情并查看顶部最近数值、时间、来源及下方周趋势布局，沿用明确标注的开发演示数据。未取得横向滑动过程中顶部稳定性的自动化验收证据，手势体验留待用户确认；未操作真机或上传 TestFlight。
+
+## iPhone 正方形组件三列居中（2026-11-21）
+
+- 正方形心情团子组件底部由「指标名／数值与单位」两行改为「指标名／数值／单位」三行，HRV、心率、血氧三列等宽居中、顶部对齐；数值独占一行并适当放大，保留单行缩放及无数据占位。中号组件与 Watch 组件布局不变。
+- Mac 共享逻辑 55 项测试通过：`artifacts/test-core-square-widget-columns.log`；完整 iPhone／Watch／两端组件 Debug 编译通过：`artifacts/build-square-widget-columns.log`。差异空白检查通过。
+- 遵循用户本轮要求，不添加、操作或调试模拟器小组件。仅启动 iPhone 17／iOS 26.5 模拟器并更新安装包，显示效果由用户手动确认；未进行组件显示验收，未操作真机或上传 TestFlight。
