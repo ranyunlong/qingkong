@@ -7,11 +7,15 @@ struct WatchDumplingView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let characterSize = max(60, min(geometry.size.width * 0.95, geometry.size.height - 74))
+            let characterSize = max(60, min(geometry.size.width * 0.95, geometry.size.height - 94))
             VStack(spacing: 0) {
                 DumplingGreeting(mood: mood?.value ?? 3, label: mood?.label ?? "心情待记录")
                     .frame(width: characterSize, height: characterSize)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .offset(y: -8)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                Text(mood?.label ?? "心情待记录")
+                    .font(.system(size: 11)).foregroundStyle(.secondary)
+                    .lineLimit(1).padding(.top, 2).padding(.bottom, 8)
                 HStack(spacing: 0) {
                     ForEach(HealthMetric.allCases) { metric in
                         NavigationLink(value: WatchRoute.trend(metric)) {

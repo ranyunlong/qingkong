@@ -67,14 +67,19 @@ struct PersonalizationView: View {
 
             Section {
                 watchPreview
-                Picker("显示指标", selection: Binding(get: { app.store.preferences.complicationMetric }, set: { value in app.store.updatePreferences { $0.complicationMetric = value } })) {
-                    ForEach(HealthMetric.allCases) { Text($0.name).tag($0) }
-                }
-                Toggle("显示迷你趋势", isOn: Binding(get: { app.store.preferences.showComplicationTrend }, set: { value in app.store.updatePreferences { $0.showComplicationTrend = value } }))
                 Button("在系统中添加表盘组件", systemImage: "applewatch") { faceGuide = true }
                 Label(app.link.syncMessage, systemImage: "arrow.triangle.2.circlepath").font(.footnote).foregroundStyle(Color.readableSecondary)
                 if let error = app.link.error { Text(error).font(.footnote).foregroundStyle(Color.readableSecondary) }
-            } header: { Text("手腕上的晴空") } footer: { Text("团子预览对应手表 App 页面；系统表盘中的「心情团子」是进入页面的入口。下面的指标与趋势设置用于原有健康组件。组件按系统调度更新。") }
+            } header: { Text("手腕上的晴空") } footer: { Text("团子页面始终显示 HRV、心率和血氧三项数值。点按系统表盘中的「心情团子」可进入手表 App 的动画页面。") }
+
+            Section {
+                Picker("默认显示指标", selection: Binding(get: { app.store.preferences.complicationMetric }, set: { value in app.store.updatePreferences { $0.complicationMetric = value } })) {
+                    ForEach(HealthMetric.allCases) { Text($0.name).tag($0) }
+                }
+                Toggle("允许矩形组件显示趋势", isOn: Binding(get: { app.store.preferences.showComplicationTrend }, set: { value in app.store.updatePreferences { $0.showComplicationTrend = value } }))
+            } header: { Text("健康指标组件") } footer: {
+                Text("默认指标仅用于手表上选择了「跟随 iPhone 配置」的健康组件；单独选择 HRV、心率或血氧的组件保持原指标。矩形健康组件需同时开启自身的「显示迷你趋势」。设置会同步到手表，组件按系统调度刷新，不影响心情团子。")
+            }
 
             Section("数据与隐私") {
                 Button("检查 Apple 健康连接", systemImage: "heart.text.clipboard") { Task { await app.health.authorize() } }
@@ -94,22 +99,35 @@ struct PersonalizationView: View {
         let mood = MoodSummary.latest(in: app.store.records)
         return VStack(spacing: 10) {
             Text("手表团子页面预览").font(.caption).foregroundStyle(Color.readableSecondary)
-            VStack(spacing: 8) {
+            VStack(spacing: 0) {
                 HStack { Spacer(); Text(Date.now, style: .time).font(.caption2.monospacedDigit()) }
-                Image("mood-\(mood?.value ?? 3)").resizable().scaledToFit().frame(height: 100)
-                Text(mood?.label ?? "心情待记录").font(.caption2).foregroundStyle(.secondary)
-                HStack(spacing: 8) {
+                Image("mood-\(mood?.value ?? 3)")
+                    .resizable().scaledToFit().frame(width: 112, height: 112)
+                    .offset(y: -6)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .accessibilityHidden(true)
+                Text(mood?.label ?? "心情待记录")
+                    .font(.system(size: 10)).foregroundStyle(.secondary)
+                    .lineLimit(1).padding(.top, 2).padding(.bottom, 8)
+                HStack(spacing: 0) {
                     ForEach(HealthMetric.allCases) { metric in
-                        VStack(spacing: 3) {
-                            Text(metric.name).font(.system(size: 9)).foregroundStyle(.secondary)
+                        VStack(spacing: 2) {
+                            Label(metric.name, systemImage: metric.symbol).font(.system(size: 9)).foregroundStyle(.secondary)
                             Text(app.health.latest(metric).map { $0.value.formatted(.number.precision(.fractionLength(0))) } ?? "—")
                                 .font(.system(size: 18, weight: .medium, design: .rounded))
+                                .monospacedDigit().minimumScaleFactor(0.6).lineLimit(1)
                             Text(metric.unit).font(.system(size: 8)).foregroundStyle(.secondary)
                         }.frame(maxWidth: .infinity)
                     }
                 }
-            }.foregroundStyle(.white).padding(20).frame(width: 176).background(.black, in: RoundedRectangle(cornerRadius: 38))
-            Text("健康数值取自 iPhone；真实表盘使用手表上的可读记录。 ").font(.caption2).foregroundStyle(Color.readableSecondary).multilineTextAlignment(.center)
+            }
+            .dynamicTypeSize(.medium)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10).padding(.top, 10).padding(.bottom, 18)
+            .frame(width: 184, height: 224)
+            .background(.black, in: RoundedRectangle(cornerRadius: 40))
+            .clipShape(RoundedRectangle(cornerRadius: 40))
+            Text("预览数值取自 iPhone；手表页面使用手表上可读取的记录。").font(.caption2).foregroundStyle(Color.readableSecondary).multilineTextAlignment(.center)
         }.frame(maxWidth: .infinity).padding(.vertical, 12)
     }
 }
@@ -161,7 +179,7 @@ struct WatchFaceGuideView: View {
                     Label("先在配对的 Apple Watch 安装晴空并打开一次。", systemImage: "1.circle")
                     Label("长按当前表盘，点「编辑」，滑到复杂功能。", systemImage: "2.circle")
                     Label("选一个圆形、大矩形或单行文字位置，在「所有 App」中找到「小晴空」，再选 HRV、心率或血氧。", systemImage: "3.circle")
-                    Label("若选择「跟随 iPhone 配置」，此页的指标与趋势设置会在连接后同步到手表。", systemImage: "4.circle")
+                    Label("若选择「跟随 iPhone 配置」，将使用个性化中「健康指标组件」的默认指标；趋势开关只作用于矩形健康组件。设置会在连接后同步到手表。", systemImage: "4.circle")
                 }
                 Section("心情团子") {
                     Text("选择系统表盘中的圆形或大矩形位置，在小晴空里选择「心情团子」。圆形显示团子与 HRV，矩形显示团子和三项健康摘要。")

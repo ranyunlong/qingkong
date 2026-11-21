@@ -246,3 +246,9 @@ xcodebuild -project QingkongECGPreview.xcodeproj -scheme Qingkong \
 - 播放回执新增可选更新时间，与主动推送使用同一合并入口，防止迟到旧回执覆盖新状态；可解码没有该字段的旧包。Watch 页面收到状态即更新曲目和播放按钮，连接恢复时主动查询；本地正在播放或激活时保持本地音频，接收手机状态不启动手表音频。
 - Mac 本地回归先复现旧消息缺少更新时间：`artifacts/test-audio-state-sync-red.log`；修复后共享逻辑 55 项通过：`artifacts/test-audio-state-sync-core.log`，新增覆盖新消息时间戳及旧协议兼容。
 - 完整 iPhone／Watch／两端组件及测试包编译通过：`artifacts/build-audio-state-sync.log`。新增三项服务用例覆盖主动状态消息更新、迟到回执不回退、曲目／定时／音量变化通知，仅完成编译，未运行。遵循用户此前要求未做模拟器界面测试，未使用配对真机验证实际传输时延、锁屏遥控或独立音频路由；需同时更新 iPhone 与 Watch App 后复测。
+
+## 个性化设置与团子页面比例（2026-11-21）
+
+- 将原本混在团子预览下的指标、趋势选项移至独立的「健康指标组件」分区，明确默认指标只影响「跟随 iPhone 配置」的健康组件；趋势仅用于同时启用自身趋势选项的矩形健康组件。保留既有偏好与同步行为，团子页面继续同时显示三项健康数值。
+- iPhone 手表预览屏幕改为固定 184 × 224 pt，团子保持正方形等比显示，调整内边距与底部读数布局。按用户补充要求保留预览心情文字，并在真实 Watch 团子页面增加相同心情文字；团子分别上移 6／8 pt，为文字留出间距，Watch 布局为新增文字预留高度。
+- Mac 共享逻辑 55 项测试通过：`artifacts/test-core-watch-preview.log`。最终完整 iPhone／Watch／两端组件 Debug 编译通过：`artifacts/build-watch-preview.log`。差异空白检查通过。遵循用户此前要求，未启动模拟器做界面验收，未操作真机或上传 TestFlight；比例及文字视觉效果仍需安装新版本后确认。
