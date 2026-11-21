@@ -88,7 +88,8 @@ struct MetricWidgetView: View {
                 }
             }
         }.privacySensitive()
-            .containerBackground(.black, for: .widget)
+            .background { AccessoryWidgetBackground() }
+            .containerBackground(.clear, for: .widget)
             .widgetURL(URL(string: "qingkong://trend/\(metric.rawValue)"))
             .accessibilityLabel("\(metric.name)，\(reading == nil ? "暂无数据" : "\(value) \(metric.unit)")，\(reading.map { "采样于" + $0.date.formatted(date: .complete, time: .shortened) } ?? "打开晴空连接健康")，点按查看趋势")
     }

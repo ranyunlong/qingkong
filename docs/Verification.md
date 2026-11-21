@@ -284,3 +284,10 @@ xcodebuild -project QingkongECGPreview.xcodeproj -scheme Qingkong \
 - 完整 iPhone／Watch／两端组件 Debug 编译通过；最终服务测试构建包含 Watch 及共享模块的最新修改，架构为 x86_64 模拟器。工程采用现有生成器增量加入 Watch 服务引用，保留本机签名和版本设置；未签名安装真机，未归档或上传 TestFlight。
 - **未验收**：Series 11／watchOS 27 的真实后台投递与耗时、手机解锁／锁屏镜像、断连本地通知、用户实际样本能否满足规则、Watch 系统通知授权与重启恢复。模拟器不能证明以上行为。Apple 当前 HealthKit 文档仍对 watchOS 大多数类型施加小时级后台频率上限，不能承诺迁移后实时或一定更快。
 - 两端升级后需各打开一次；手表完成健康连接并允许通知，手机「通知检查 → 检测设备」显示 Apple Watch 后才算交接完成。之后离线仍由 Watch 检测，手机不根据临时可达状态抢回检测权。
+
+## Watch 组件系统自适应背景（2026-11-21）
+
+- 健康指标组件与心情团子组件原先在 Watch 分支固定使用黑色容器背景。改用 WidgetKit 的 `AccessoryWidgetBackground` 绘制系统自适应背景，并将容器底色设为透明，避免黑色遮挡系统背景效果；单行组件由系统决定背景显示。iPhone 团子组件的场景底色及两端数据、布局保持不变。
+- 实现依据为 Apple 官方 `AccessoryWidgetBackground` 与《Displaying the right widget background》文档：前者按组件环境提供标准背景；后者说明 Watch Smart Stack 的系统材质背景及容器背景移除规则。不添加自定义模糊或额外玻璃图层。
+- Mac 共享逻辑 **66 项测试通过**：`artifacts/test-core-watch-widget-background.log`；完整 iPhone／Watch／两端组件 Debug 编译通过：`artifacts/build-watch-widget-background.log`。已确认两端组件均编译到修改后的共享视图；差异空白检查通过。
+- 遵循用户要求，未在模拟器添加、操作或调试小组件，未操作真机或上传 TestFlight。watchOS 27 的玻璃视觉效果尚未实测，需重新构建并更新 Watch App 及其组件扩展后由用户确认。

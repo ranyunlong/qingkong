@@ -105,11 +105,14 @@ struct DumplingWidgetView: View {
             }
         }
         .privacySensitive()
+        #if os(watchOS)
+        .background { AccessoryWidgetBackground() }
+        #endif
         .containerBackground(for: .widget) {
             #if os(iOS)
             Color(.systemBackground).overlay(accent.opacity(0.07))
             #else
-            Color.black
+            Color.clear
             #endif
         }
         .widgetURL(URL(string: "qingkong://dumpling"))
