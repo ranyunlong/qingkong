@@ -63,6 +63,11 @@ struct WatchRootView: View {
                 }
         }.task { await app.start() }
             .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await app.activate() } } }
+            .onChange(of: app.watchReminders.destination, initial: true) { _, kind in
+                guard let kind else { return }
+                path = [.trend(kind.metric)]
+                app.watchReminders.destination = nil
+            }
             .onOpenURL { url in
                 if url.scheme == "qingkong", url.host == "dumpling" { path = [.dumpling]; return }
                 guard url.scheme == "qingkong", url.host == "trend",
@@ -163,8 +168,19 @@ struct WatchSetupView: View {
         List {
             Section("Apple 健康") {
                 Text("只读取你允许的健康记录，无数据不代表你拒绝了访问。 ").font(.caption2)
-                Button(app.health.requested ? "检查健康连接" : "连接健康") { Task { await app.health.authorize() } }
+                Button(app.health.requested ? "检查健康连接" : "连接健康") { Task { await app.health.authorize(); await app.watchReminders.activate(healthConnected: app.health.requested) } }
                 if let error = app.health.error { Text(error).font(.caption2) }
+            }
+            Section("健康变化提醒") {
+                Text(app.watchReminders.statusText).font(.caption2)
+                Text("连接时由 iPhone 提交通知，系统按锁屏状态选择显示设备；联系不到 iPhone 时在手表通知。").font(.caption2)
+                if let date = app.watchReminders.lastCheckedAt {
+                    LabeledContent("最近检查") { Text(date, style: .time) }.font(.caption2)
+                }
+                if let error = app.watchReminders.error { Text(error).font(.caption2) }
+                if let warning = app.health.backgroundDeliveryWarning { Text(warning).font(.caption2) }
+                Button("检查提醒连接") { Task { await app.watchReminders.activate(healthConnected: app.health.requested); await app.health.refreshReminderReadings() } }
+                Text("开关和阈值在 iPhone 个性化中设置。后台更新由系统安排，不保证实时提醒。").font(.caption2)
             }
             Section("配对同步") {
                 Text(app.link.syncMessage).font(.caption2)

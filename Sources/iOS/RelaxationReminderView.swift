@@ -85,7 +85,25 @@ struct NotificationDiagnosticsView: View {
                 }.buttonStyle(.automatic).disabled(testing).accessibilityIdentifier("send-test-notification")
                 if let status = app.reminders.testStatus { Text(status).font(.footnote) }
             }
-            Section("最近一次数据检查") {
+            Section("检测设备") {
+                Text(app.reminders.monitoringText).font(.subheadline)
+                Text("手表接手前继续由 iPhone 检测。请在手表连接 Apple 健康并允许通知；两端更新后打开一次应用以完成交接。")
+                    .font(.footnote).foregroundStyle(Color.readableSecondary)
+            }
+            if app.reminders.relayConfiguration.watchOwnerID != nil {
+                Section("手表最近检查") {
+                    if let report = app.reminders.lastWatchReport, report.configurationID == app.reminders.relayConfiguration.id {
+                        Text(report.checkedAt, format: .dateTime.month().day().hour().minute().second())
+                        LabeledContent("HRV", value: report.results["hrv"] ?? "等待记录")
+                        ForEach(VitalReminderKind.allCases) { kind in
+                            LabeledContent(kind.title, value: report.results[kind.rawValue] ?? "等待记录")
+                        }
+                    } else { Text("等待手表按当前设置完成检查") }
+                    Text("断连时检查继续在手表进行，这里会在恢复连接后更新。后台采样、应用唤醒和通知显示均由系统安排。")
+                        .font(.footnote).foregroundStyle(Color.readableSecondary)
+                }
+            }
+            Section("iPhone 最近数据检查") {
                 if let date = app.reminders.lastCheckedAt {
                     Text(date, format: .dateTime.month().day().hour().minute().second())
                 } else { Text("尚未完成健康数据检查") }
@@ -150,7 +168,7 @@ struct RelaxationAdviceView: View {
                 Text("最新一条自动 HRV 读数比个人基线低至少 30%，且距当前不超过 1 小时，就会考虑提醒，不再要求多条读数跨度达到十分钟。最新读数已恢复时不提醒。")
                 Text("30% 是首版的产品参考规则，未经临床验证，不能判断你是否有心理压力。活动、呼吸和睡眠等也会影响 HRV。")
                 Text("每天最多两次，至少间隔四小时。后台更新由系统安排；没有足够的新记录时不会提醒，不补发旧提醒。")
-                Text("通知按 iPhone 的系统规则显示在手机或配对手表上，遵循专注模式与通知设置。无需两端各发一次。")
+                Text("手表接手检测后，连接时交给 iPhone 提交通知，由系统按锁屏状态选择手机或手表显示；断连时在手表本地通知。同一条提醒只交给一端发送，遵循系统专注与通知设置。")
             }.font(.subheadline)
             Section("提醒样例") {
                 Text("给自己一点放松时间").font(.headline)

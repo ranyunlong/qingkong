@@ -40,6 +40,9 @@ final class HealthService {
     private(set) var observerWarning: String?
     var available: Bool { HKHealthStore.isHealthDataAvailable() }
     @ObservationIgnored var didRefresh: (() async -> Void)?
+    @ObservationIgnored var didUpdateForReminders: (([HealthReading]) async -> Void)?
+    @ObservationIgnored private var reminderRefreshRequested = false
+    @ObservationIgnored private var reminderTask: Task<Void, Never>?
     @ObservationIgnored private let store = HKHealthStore()
     @ObservationIgnored private var observers: [HKObserverQuery] = []
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
@@ -112,20 +115,65 @@ final class HealthService {
             for metric in HealthMetric.allCases {
                 let since = Calendar.current.date(byAdding: .day, value: -38, to: .now)!
                 let samples = try await query(type: quantityType(metric), since: since)
-                for case let sample as HKQuantitySample in samples {
-                    let value = sample.quantity.doubleValue(for: unit(metric))
-                    let motion = (sample.metadata?[HKMetadataKeyHeartRateMotionContext] as? NSNumber).flatMap { HKHeartRateMotionContext(rawValue: $0.intValue) }
-                    let resting: Bool? = motion == .sedentary ? true : motion == .active ? false : nil
-                    let reading = HealthReading(id: sample.uuid, metric: metric, date: sample.startDate, value: metric == .oxygen ? value * 100 : value, source: sample.sourceRevision.source.name, sourceIdentifier: sample.sourceRevision.source.bundleIdentifier, wasUserEntered: sample.metadata?[HKMetadataKeyWasUserEntered] as? Bool, isAtRest: resting)
-                    if reading.isValid { collected.append(reading) }
-                }
+                collected += samples.compactMap { ($0 as? HKQuantitySample).flatMap { reading(from: $0, metric: metric) } }
             }
-            let ecgSamples = try await query(type: HKObjectType.electrocardiogramType(), since: nil, limit: 100)
             readings = collected
+            // Reminders must not wait for the unrelated ECG history query.
+            await didUpdateForReminders?(collected)
+            let ecgSamples = try await query(type: HKObjectType.electrocardiogramType(), since: nil, limit: 100)
             ecgs = ecgSamples.compactMap { ($0 as? HKElectrocardiogram).map { ECGRecord(sample: $0) } }
             await didRefresh?()
             installObservers()
         } catch { self.error = "暂时无法更新健康记录，请稍后刷新。" }
+    }
+
+    /// Small, independent observer path: seven calendar days for the HRV baseline,
+    /// thirty minutes for vital confirmation. ECG/monthly charts cannot block it.
+    func refreshReminderReadings() async {
+        if let reminderTask { reminderRefreshRequested = true; await reminderTask.value; return }
+        let task = Task {
+            repeat {
+                self.reminderRefreshRequested = false
+                await self.loadReminderReadings()
+            } while self.reminderRefreshRequested
+        }
+        reminderTask = task
+        await task.value
+        reminderTask = nil
+    }
+
+    private func loadReminderReadings() async {
+        guard available && requested && !testing && !isDemo else { return }
+        let now = Date.now
+        var collected: [HealthReading] = []
+        var failed: [String] = []
+        for metric in HealthMetric.allCases {
+            let since = metric == .hrv
+                ? Calendar.current.date(byAdding: .day, value: -7, to: Calendar.current.startOfDay(for: now))!
+                : now.addingTimeInterval(-30 * 60)
+            do {
+                let samples = try await query(type: quantityType(metric), since: since)
+                let recent = samples.compactMap { ($0 as? HKQuantitySample).flatMap { reading(from: $0, metric: metric) } }
+                collected += recent
+                readings.removeAll { $0.metric == metric && $0.date >= since }
+                readings += recent
+            } catch { failed.append(metric.name) }
+        }
+        observerWarning = failed.isEmpty ? nil : "\(failed.joined(separator: "、"))本次提醒检查未能读取，等待后续健康更新。"
+        defaults.set(observerWarning, forKey: "health.observerWarning")
+        // Failed types contribute no stale cached samples to the decision.
+        await didUpdateForReminders?(collected)
+        await didRefresh?()
+    }
+
+    private func reading(from sample: HKQuantitySample, metric: HealthMetric) -> HealthReading? {
+        let value = sample.quantity.doubleValue(for: unit(metric))
+        let motion = (sample.metadata?[HKMetadataKeyHeartRateMotionContext] as? NSNumber).flatMap { HKHeartRateMotionContext(rawValue: $0.intValue) }
+        let resting: Bool? = motion == .sedentary ? true : motion == .active ? false : nil
+        let reading = HealthReading(id: sample.uuid, metric: metric, date: sample.startDate, value: metric == .oxygen ? value * 100 : value,
+                                    source: sample.sourceRevision.source.name, sourceIdentifier: sample.sourceRevision.source.bundleIdentifier,
+                                    wasUserEntered: sample.metadata?[HKMetadataKeyWasUserEntered] as? Bool, isAtRest: resting)
+        return reading.isValid ? reading : nil
     }
 
     func waveform(for record: ECGRecord) async throws -> [VoltagePoint] {
@@ -184,7 +232,7 @@ final class HealthService {
                         self.observerWarning = error == nil ? nil : "最近一次健康更新回调未完成，请打开应用刷新；若仍无数据，请检查 Apple 健康连接。"
                         self.defaults.set(self.observerWarning, forKey: "health.observerWarning")
                     }
-                    if error == nil { await self?.refresh() }
+                    if error == nil { await self?.refreshReminderReadings() }
                     completion()
                 }
             }

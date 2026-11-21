@@ -168,6 +168,70 @@ final class ServiceTests: XCTestCase {
     }
 
     @MainActor
+    func testWatchHandoffStopsPhoneEvaluationAndSurvivesRelaunch() async throws {
+        let suite = "qingkong.watch-handoff-test." + UUID().uuidString
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let center = UNUserNotificationCenter.current()
+        let delegate = center.delegate
+        defer { center.delegate = delegate; defaults.removePersistentDomain(forName: suite) }
+        let service = RelaxationReminderService(defaultsOverride: defaults)
+        let watchID = UUID()
+        let original = service.relayConfiguration.id
+        service.acceptWatchMonitoring(.init(watchID: watchID, configurationID: UUID()))
+        XCTAssertNil(service.relayConfiguration.watchOwnerID, "旧设置不能发起交接")
+        service.acceptWatchMonitoring(.init(watchID: watchID, configurationID: original))
+        XCTAssertEqual(service.relayConfiguration.watchOwnerID, watchID)
+        XCTAssertNotEqual(service.relayConfiguration.id, original)
+        await service.evaluate(readings: [], isDemo: false)
+        XCTAssertNil(service.lastCheckedAt, "交接后手机不再独立评估同一批健康数据")
+        let restored = RelaxationReminderService(defaultsOverride: defaults)
+        XCTAssertEqual(restored.relayConfiguration.watchOwnerID, watchID)
+        XCTAssertEqual(restored.relayConfiguration.id, service.relayConfiguration.id)
+        restored.setVitalThreshold(.highHeartRate, 125)
+        XCTAssertEqual(restored.relayConfiguration.watchOwnerID, watchID)
+        XCTAssertEqual(restored.relayConfiguration.vitalRules[.highHeartRate]?.threshold, 125)
+        XCTAssertNotEqual(restored.relayConfiguration.id, service.relayConfiguration.id)
+        XCTAssertNil(restored.lastSubmittedAt)
+    }
+
+    @MainActor
+    func testOldWatchSignalCannotNotifyAfterPhoneSettingsChange() throws {
+        let suite = "qingkong.watch-revision-test." + UUID().uuidString
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let center = UNUserNotificationCenter.current()
+        let delegate = center.delegate
+        defer { center.delegate = delegate; defaults.removePersistentDomain(forName: suite) }
+        let service = RelaxationReminderService(defaultsOverride: defaults)
+        service.acceptWatchMonitoring(.init(watchID: UUID(), configurationID: service.relayConfiguration.id))
+        let old = service.relayConfiguration.id
+        service.setVitalThreshold(.lowOxygen, 89)
+        let stale = ReminderSignal(kind: .lowOxygen, sampleID: UUID(), sampleDate: .now, detectedAt: .now, configurationID: old)
+        service.receiveWatchSignal(stale)
+        XCTAssertNil(service.lastWatchSignalAt)
+        XCTAssertNil(service.lastSubmittedAt)
+    }
+
+    @MainActor
+    func testReminderContextPreservesPreferencesAndAcceptsReportWithoutPreferences() async throws {
+        let store = try LocalStore(testing: true, reset: true)
+        let link = Connectivity(store: store, player: AudioPlayer())
+        var preferences = Preferences()
+        preferences.selectScene(.forest)
+        let report = WatchReminderReport(configurationID: UUID(), checkedAt: .now, results: ["hrv": "基线不足"], signals: [], newestSamples: [:])
+        let received = expectation(description: "Report and preferences both received")
+        received.expectedFulfillmentCount = 2
+        link.watchReminderReportReceived = { value in
+            XCTAssertEqual(value.configurationID, report.configurationID)
+            received.fulfill()
+        }
+        let data = try JSONEncoder().encode(report)
+        link.session(WCSession.default, didReceiveApplicationContext: ["preferences": try JSONEncoder().encode(preferences), "watchReminderReport": data])
+        link.session(WCSession.default, didReceiveApplicationContext: ["watchReminderReport": data])
+        await fulfillment(of: [received], timeout: 2)
+        XCTAssertEqual(store.preferences.manualScene, .forest)
+    }
+
+    @MainActor
     func testOfflineRecordAndDeletionRemainPendingAfterReopening() throws {
         let store = try LocalStore(testing: true, reset: true)
         try store.add(mood: 4, stress: 2, note: "留在设备上")

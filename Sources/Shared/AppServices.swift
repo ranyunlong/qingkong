@@ -9,6 +9,9 @@ final class AppServices {
     let health: HealthService
     let player: AudioPlayer
     let link: Connectivity
+    #if os(watchOS)
+    let watchReminders: WatchHealthReminderService
+    #endif
     #if os(iOS)
     let reminders: RelaxationReminderService
     var healthIntroductionActive = false
@@ -31,6 +34,9 @@ final class AppServices {
         #endif
         store = try LocalStore(testing: testing, reset: args.contains("--ui-reset"))
         health = HealthService(testing: testing, demo: args.contains("--demo-health"))
+        #if os(watchOS)
+        watchReminders = WatchHealthReminderService(disabled: testing || health.isDemo)
+        #endif
         #if os(iOS)
         reminders = RelaxationReminderService(disabledForTesting: testing || health.isDemo)
         #endif
@@ -42,10 +48,34 @@ final class AppServices {
         health.didRefresh = { [weak self] in
             guard let self else { return }
             self.writeSnapshot()
+        }
+        health.didUpdateForReminders = { [weak self] readings in
+            guard let self else { return }
             #if os(iOS)
-            await self.reminders.evaluate(readings: self.health.readings, isDemo: self.health.isDemo)
+            await self.reminders.evaluate(readings: readings, isDemo: self.health.isDemo)
+            #else
+            await self.watchReminders.evaluate(readings: readings, healthConnected: self.health.requested, isDemo: self.health.isDemo)
             #endif
         }
+        #if os(iOS)
+        reminders.configurationDidChange = { [weak self] configuration in self?.link.publishReminderConfiguration(configuration) }
+        link.reminderReadyReceived = { [weak self] ready in self?.reminders.acceptWatchMonitoring(ready) }
+        link.reminderSignalReceived = { [weak self] signal in self?.reminders.receiveWatchSignal(signal) }
+        link.watchReminderReportReceived = { [weak self] report in self?.reminders.receiveWatchReport(report) }
+        link.reminderProbe = { [weak self] id in await self?.reminders.canDispatchWatchReminder(configurationID: id) ?? false }
+        if !testing && !health.isDemo { link.publishReminderConfiguration(reminders.relayConfiguration) }
+        #else
+        watchReminders.requestOwnership = { [weak self] ready in self?.link.requestWatchMonitoring(ready) }
+        watchReminders.probePhone = { [weak self] id in await self?.link.confirmPhoneForReminder(configurationID: id) ?? .unavailable }
+        watchReminders.delegateToPhone = { [weak self] signal in self?.link.enqueueReminderSignal(signal) }
+        watchReminders.publishReport = { [weak self] report in self?.link.publishWatchReminderReport(report) }
+        link.reminderConfigurationReceived = { [weak self] configuration in
+            guard let self else { return }
+            if self.watchReminders.receive(configuration) {
+                Task { await self.health.refreshReminderReadings() }
+            }
+        }
+        #endif
         link.preferencesReceived = { [weak self] in self?.writeSnapshot() }
         // Activate at process launch so background transfers do not depend on a visible screen.
         if !testing { link.start() }
@@ -59,9 +89,11 @@ final class AppServices {
         today = .now
         #if os(watchOS)
         refreshComplications()
+        await watchReminders.activate(healthConnected: health.requested)
         #endif
         #if os(iOS)
         await reminders.refreshAuthorization()
+        await reminders.resumePendingDispatches()
         if !needsHealthIntroduction && !healthIntroductionActive { await reminders.requestPermissionIfNeeded() }
         #endif
         player.reconcileDeadline()

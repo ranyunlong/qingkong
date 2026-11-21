@@ -23,7 +23,7 @@ open QingkongPhonePreview.xcodeproj
 - 四套场景主题、原创五款心情表情；主动压力记录与应用内换景联动。
 - SwiftData 心情日记、历史、删除；持久化待同步记录与删除墓碑。
 - HealthKit 只读心率、血氧、SDNN HRV、心电图及波形。趋势不补零，基线不足明确展示。
-- 默认开启、可关闭的本地放松提醒：HRV 持续明显下降后温和建议休息，限制频率并遵循系统专注规则；iPhone 发起，系统管理 Watch 镜像。规则见 [放松提醒](docs/RelaxationReminders.md)。
+- 默认开启、可关闭的本地放松提醒：HRV 明显下降后温和建议休息，限制频率并遵循系统专注规则；Watch 接手检测后，连接时交给 iPhone 通知并由系统选择显示位置，断连或探测超时由 Watch 本地通知。规则见 [放松提醒](docs/RelaxationReminders.md)。
 - 两端离线循环音频、切歌、播放音量、停止定时、音频中断与输出设备变化处理。
 - Watch 自动选择 iPhone 遥控或手表独立播放，无手动位置入口；断连后下次点播放才在可用设备开始，遥控等待回执并设超时。
 - WatchConnectivity 队列补传；记录保存后回执、版本核对、重复合并与删除同步。

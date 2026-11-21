@@ -22,6 +22,15 @@ final class Connectivity: NSObject, WCSessionDelegate {
     @ObservationIgnored private var immediateRecords: [SyncReceipt] = []
     @ObservationIgnored private var remoteStateUpdatedAt: Date?
     @ObservationIgnored var preferencesReceived: (() -> Void)?
+    @ObservationIgnored var reminderConfigurationReceived: ((ReminderRelayConfiguration) -> Void)?
+    @ObservationIgnored var reminderReadyReceived: ((WatchReminderReady) -> Void)?
+    @ObservationIgnored var reminderSignalReceived: ((ReminderSignal) -> Void)?
+    @ObservationIgnored var watchReminderReportReceived: ((WatchReminderReport) -> Void)?
+    @ObservationIgnored var reminderProbe: ((UUID) async -> Bool)?
+    @ObservationIgnored private var reminderConfigurationData: Data?
+    @ObservationIgnored private var watchReminderReportData: Data?
+    @ObservationIgnored private var watchReadyData: Data?
+    @ObservationIgnored private var pendingReminderSignals: [ReminderSignal] = []
     #if os(iOS)
     @ObservationIgnored private var volumeObservation: NSKeyValueObservation?
     #endif
@@ -29,6 +38,11 @@ final class Connectivity: NSObject, WCSessionDelegate {
     init(store: LocalStore, player: AudioPlayer) {
         self.store = store; self.player = player
         super.init()
+        #if os(watchOS)
+        if let data = UserDefaults.standard.data(forKey: "qingkong.reminder-outbox.v1") {
+            pendingReminderSignals = (try? JSONDecoder().decode([ReminderSignal].self, from: data)) ?? []
+        }
+        #endif
         #if os(iOS)
         player.didChangeState = { [weak self] state in self?.sendAudioState(state) }
         // Native companion volume control changes system output, not AudioState.volume.
@@ -84,8 +98,112 @@ final class Connectivity: NSObject, WCSessionDelegate {
                 sendRecordImmediately(data, record: record, session: session)
             }
             syncMessage = pending.isEmpty ? "记录已同步" : "\(pending.count) 条记录等待系统传送"
-            try session.updateApplicationContext(["preferences": JSONEncoder().encode(store.preferences)])
+            var context: [String: Any] = ["preferences": try JSONEncoder().encode(store.preferences)]
+            #if os(iOS)
+            if let reminderConfigurationData { context["reminderConfiguration"] = reminderConfigurationData }
+            #else
+            if let watchReminderReportData { context["watchReminderReport"] = watchReminderReportData }
+            if let watchReadyData { context["reminderReady"] = watchReadyData }
+            flushReminderSignals(session)
+            #endif
+            try session.updateApplicationContext(context)
+            if session.isReachable {
+                let reminderContext = context.filter { $0.key != "preferences" }
+                if !reminderContext.isEmpty { session.sendMessage(reminderContext, replyHandler: nil, errorHandler: { _ in }) }
+            }
         } catch { self.error = "同步暂未完成，记录已保存在本机，将在下次连接时重试。" }
+    }
+
+    func publishReminderConfiguration(_ configuration: ReminderRelayConfiguration) {
+        reminderConfigurationData = try? JSONEncoder().encode(configuration)
+        flush()
+    }
+
+    func publishWatchReminderReport(_ report: WatchReminderReport) {
+        watchReminderReportData = try? JSONEncoder().encode(report)
+        flush()
+    }
+
+    func requestWatchMonitoring(_ ready: WatchReminderReady) {
+        watchReadyData = try? JSONEncoder().encode(ready)
+        flush()
+    }
+
+    /// Persist before returning; WC's user-info queue survives disconnection/process exit.
+    func enqueueReminderSignal(_ signal: ReminderSignal) {
+        #if os(watchOS)
+        if !pendingReminderSignals.contains(where: { $0.id == signal.id }) { pendingReminderSignals.append(signal) }
+        persistReminderOutbox()
+        flush()
+        #endif
+    }
+
+    private func persistReminderOutbox() {
+        if let data = try? JSONEncoder().encode(pendingReminderSignals) {
+            UserDefaults.standard.set(data, forKey: "qingkong.reminder-outbox.v1")
+        }
+    }
+
+    private func flushReminderSignals(_ session: WCSession) {
+        let queued = session.outstandingUserInfoTransfers.compactMap { transfer in
+            (transfer.userInfo["reminderSignal"] as? Data).flatMap { try? JSONDecoder().decode(ReminderSignal.self, from: $0) }?.id
+        }
+        for signal in pendingReminderSignals where Date.now.timeIntervalSince(signal.sampleDate) <= signal.kind.maximumAge {
+            guard let data = try? JSONEncoder().encode(signal) else { continue }
+            if !queued.contains(signal.id) { session.transferUserInfo(["reminderSignal": data]) }
+            if session.isReachable { session.sendMessage(["reminderSignal": data], replyHandler: nil, errorHandler: { _ in }) }
+        }
+        pendingReminderSignals.removeAll()
+        persistReminderOutbox()
+    }
+
+    /// Probe has no notification side effects. Once delegated, an event never falls back locally.
+    func confirmPhoneForReminder(configurationID: UUID) async -> ReminderProbeResult {
+        guard let session else { return .unavailable }
+        let deadline = Date.now.addingTimeInterval(3)
+        while session.activationState != .activated && Date.now < deadline {
+            if session.activationState == .notActivated { session.activate() }
+            do { try await Task.sleep(for: .milliseconds(100)) } catch { return .unavailable }
+        }
+        guard session.activationState == .activated else { return .unavailable }
+        guard reminderProbeReply == nil else { return .rejected }
+        let remaining = max(0.05, deadline.timeIntervalSinceNow)
+        return await withCheckedContinuation { continuation in
+            let probeID = UUID()
+            let timeout = Task { @MainActor in
+                do { try await Task.sleep(for: .seconds(remaining)) } catch { return }
+                self.finishReminderProbe(.unavailable, id: probeID)
+            }
+            // Watch serializes dispatches; only one probe can be in flight.
+            reminderProbeID = probeID
+            reminderProbeReply = { result in timeout.cancel(); continuation.resume(returning: result) }
+            session.sendMessage(["reminderProbe": configurationID.uuidString], replyHandler: { [weak self] reply in
+                let accepted = reply["accepted"] as? Bool == true
+                Task { @MainActor in self?.finishReminderProbe(accepted ? .accepted : .rejected, id: probeID) }
+            }, errorHandler: { [weak self] _ in
+                Task { @MainActor in self?.finishReminderProbe(.unavailable, id: probeID) }
+            })
+        }
+    }
+
+    @ObservationIgnored private var reminderProbeID: UUID?
+    @ObservationIgnored private var reminderProbeReply: ((ReminderProbeResult) -> Void)?
+    private func finishReminderProbe(_ result: ReminderProbeResult, id: UUID) {
+        guard id == reminderProbeID else { return }
+        reminderProbeID = nil
+        let reply = reminderProbeReply
+        reminderProbeReply = nil
+        reply?(result)
+    }
+
+    private func receiveReminderPayload(_ payload: [String: Any]) {
+        #if os(iOS)
+        if let data = payload["reminderReady"] as? Data, let ready = try? JSONDecoder().decode(WatchReminderReady.self, from: data) { reminderReadyReceived?(ready) }
+        if let data = payload["reminderSignal"] as? Data, let signal = try? JSONDecoder().decode(ReminderSignal.self, from: data) { reminderSignalReceived?(signal) }
+        if let data = payload["watchReminderReport"] as? Data, let report = try? JSONDecoder().decode(WatchReminderReport.self, from: data), report.version == 1 { watchReminderReportReceived?(report) }
+        #else
+        if let data = payload["reminderConfiguration"] as? Data, let configuration = try? JSONDecoder().decode(ReminderRelayConfiguration.self, from: data), configuration.version == 1 { reminderConfigurationReceived?(configuration) }
+        #endif
     }
 
     private func sendRecordImmediately(_ data: Data, record: MoodRecord, session: WCSession) {
@@ -189,11 +307,12 @@ final class Connectivity: NSObject, WCSessionDelegate {
 
     nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         let connected = session.isReachable
-        let context = session.receivedApplicationContext["preferences"] as? Data
+        let context = session.receivedApplicationContext
         Task { @MainActor [weak self] in
             guard let self else { return }
             self.reachable = connected
-            if let context { self.receivePreferences(context) }
+            if let preferences = context["preferences"] as? Data { self.receivePreferences(preferences) }
+            self.receiveReminderPayload(context)
             if let error { self.error = "设备同步暂不可用：\(error.localizedDescription)" }
             else { self.flush(); self.sendAudioState(self.player.state) }
         }
@@ -210,8 +329,10 @@ final class Connectivity: NSObject, WCSessionDelegate {
     }
 
     nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        guard let data = applicationContext["preferences"] as? Data else { return }
-        Task { @MainActor [weak self] in self?.receivePreferences(data) }
+        Task { @MainActor [weak self] in
+            if let data = applicationContext["preferences"] as? Data { self?.receivePreferences(data) }
+            self?.receiveReminderPayload(applicationContext)
+        }
     }
 
     private func receivePreferences(_ data: Data) {
@@ -221,6 +342,10 @@ final class Connectivity: NSObject, WCSessionDelegate {
     }
 
     nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
+        if userInfo["reminderSignal"] != nil || userInfo["reminderReady"] != nil {
+            Task { @MainActor [weak self] in self?.receiveReminderPayload(userInfo) }
+            return
+        }
         if let data = userInfo["receipt"] as? Data {
             Task { @MainActor [weak self] in
                 guard let self else { return }
@@ -243,6 +368,16 @@ final class Connectivity: NSObject, WCSessionDelegate {
     }
 
     nonisolated func session(_ session: WCSession, didFinish userInfoTransfer: WCSessionUserInfoTransfer, error: Error?) {
+        if error != nil, let data = userInfoTransfer.userInfo["reminderSignal"] as? Data,
+           let signal = try? JSONDecoder().decode(ReminderSignal.self, from: data) {
+            Task { @MainActor [weak self] in
+                guard let self, Date.now.timeIntervalSince(signal.sampleDate) <= signal.kind.maximumAge else { return }
+                if !self.pendingReminderSignals.contains(where: { $0.id == signal.id }) { self.pendingReminderSignals.append(signal) }
+                self.persistReminderOutbox()
+                // Retry on the next activation/connection, never spin on transport failures.
+            }
+            return
+        }
         guard let data = userInfoTransfer.userInfo["record"] as? Data else { return }
         Task { @MainActor [weak self] in
             guard let self else { return }
@@ -259,17 +394,25 @@ final class Connectivity: NSObject, WCSessionDelegate {
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         let data = message["audioState"] as? Data
         let volumeChanged = message["volumeChanged"] as? Bool == true
-        guard data != nil || volumeChanged else { return }
+        let hasReminder = message.keys.contains { $0.hasPrefix("reminder") || $0 == "watchReminderReport" }
+        guard data != nil || volumeChanged || hasReminder else { return }
         Task { @MainActor [weak self] in
             guard let self else { return }
             if let data, let reply = try? JSONDecoder().decode(AudioReply.self, from: data) {
                 self.receiveAudioState(reply)
             }
             if volumeChanged { self.remoteVolumeRevision &+= 1 }
+            self.receiveReminderPayload(message)
         }
     }
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
+        if let value = message["reminderProbe"] as? String, let id = UUID(uuidString: value) {
+            Task { @MainActor [weak self] in
+                replyHandler(["accepted": await self?.reminderProbe?(id) ?? false])
+            }
+            return
+        }
         if let data = message["record"] as? Data {
             Task { @MainActor [weak self] in
                 guard let self else { replyHandler([:]); return }

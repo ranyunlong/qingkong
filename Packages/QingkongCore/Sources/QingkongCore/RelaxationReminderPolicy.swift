@@ -57,6 +57,13 @@ public struct RelaxationReminderState: Codable, Sendable {
         consumedThrough = now
     }
     public mutating func consume(through date: Date) { consumedThrough = max(date, consumedThrough) }
+    /// Merge processing/limit history without overwriting the user's latest settings.
+    public mutating func mergeProgress(from previous: RelaxationReminderState) {
+        consume(through: previous.consumedThrough)
+        // Watch is the sole evaluator after handoff. Its reservations already include
+        // delegated decisions; unioning iPhone submission times would count one twice.
+        deliveries = previous.deliveries
+    }
     public mutating func resetWindow(now: Date = .now) { eligibleSince = now; consumedThrough = now }
     public mutating func recordDelivery(_ candidate: RelaxationReminderCandidate, now: Date = .now) {
         recordDelivery(sampleDate: candidate.sampleDate, now: now)
