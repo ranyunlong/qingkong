@@ -83,7 +83,13 @@ struct WatchMusicView: View {
                 if phase == .active, !busy { Task { try? await chooseLocation() } }
             }
             .onChange(of: app.link.remoteState) { _, value in
-                if remote, let value { lastRemoteState = value }
+                guard let value else { return }
+                lastRemoteState = value
+                // A phone status update changes the display, never starts Watch playback.
+                if !app.player.state.playing && !app.player.activating && !switching { remote = true }
+            }
+            .onChange(of: app.link.reachable) { _, connected in
+                if connected, scenePhase == .active, !busy { Task { try? await chooseLocation() } }
             }
     }
 

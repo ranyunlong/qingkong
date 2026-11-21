@@ -8,7 +8,10 @@ import MediaPlayer
 
 @MainActor @Observable
 final class AudioPlayer: NSObject, AVAudioPlayerDelegate {
-    private(set) var state = AudioState()
+    private(set) var state = AudioState() {
+        didSet { if state != oldValue { didChangeState?(state) } }
+    }
+    @ObservationIgnored var didChangeState: ((AudioState) -> Void)?
     private(set) var error: String?
     private(set) var activating = false
     @ObservationIgnored private var player: AVAudioPlayer?

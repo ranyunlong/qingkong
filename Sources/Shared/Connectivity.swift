@@ -20,6 +20,7 @@ final class Connectivity: NSObject, WCSessionDelegate {
     @ObservationIgnored private var replies: [UUID: CheckedContinuation<AudioReply, Error>] = [:]
     @ObservationIgnored private var timeouts: [UUID: Task<Void, Never>] = [:]
     @ObservationIgnored private var immediateRecords: [SyncReceipt] = []
+    @ObservationIgnored private var remoteStateUpdatedAt: Date?
     @ObservationIgnored var preferencesReceived: (() -> Void)?
     #if os(iOS)
     @ObservationIgnored private var volumeObservation: NSKeyValueObservation?
@@ -29,6 +30,7 @@ final class Connectivity: NSObject, WCSessionDelegate {
         self.store = store; self.player = player
         super.init()
         #if os(iOS)
+        player.didChangeState = { [weak self] state in self?.sendAudioState(state) }
         // Native companion volume control changes system output, not AudioState.volume.
         // Forward only interaction activity so the watch can keep its volume row visible.
         volumeObservation = AVAudioSession.sharedInstance().observe(\.outputVolume, options: [.new]) { [weak self] _, _ in
@@ -38,6 +40,21 @@ final class Connectivity: NSObject, WCSessionDelegate {
             }
         }
         #endif
+    }
+
+    private func sendAudioState(_ state: AudioState) {
+        #if os(iOS)
+        guard let session, session.activationState == .activated, session.isReachable,
+              let data = try? JSONEncoder().encode(AudioReply(id: UUID(), state: state)) else { return }
+        // Playback status is ephemeral. Never queue old play/pause states for later delivery.
+        session.sendMessage(["audioState": data], replyHandler: nil, errorHandler: { _ in })
+        #endif
+    }
+
+    func receiveAudioState(_ reply: AudioReply) {
+        if let previous = remoteStateUpdatedAt, (reply.updatedAt ?? .distantPast) < previous { return }
+        remoteStateUpdatedAt = reply.updatedAt
+        remoteState = reply.state
     }
 
     func start() {
@@ -155,7 +172,7 @@ final class Connectivity: NSObject, WCSessionDelegate {
                     Task { @MainActor in self?.finish(request.id, result: .failure(error)) }
                 })
             }
-            remoteState = reply.state
+            receiveAudioState(reply)
             error = reply.error
             return reply.error == nil
         } catch {
@@ -178,13 +195,18 @@ final class Connectivity: NSObject, WCSessionDelegate {
             self.reachable = connected
             if let context { self.receivePreferences(context) }
             if let error { self.error = "设备同步暂不可用：\(error.localizedDescription)" }
-            else { self.flush() }
+            else { self.flush(); self.sendAudioState(self.player.state) }
         }
     }
 
     nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
         let connected = session.isReachable
-        Task { @MainActor [weak self] in self?.reachable = connected; self?.flush() }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.reachable = connected
+            self.flush()
+            if connected { self.sendAudioState(self.player.state) }
+        }
     }
 
     nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
@@ -235,13 +257,16 @@ final class Connectivity: NSObject, WCSessionDelegate {
     }
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        #if os(watchOS)
-        guard message["volumeChanged"] as? Bool == true else { return }
+        let data = message["audioState"] as? Data
+        let volumeChanged = message["volumeChanged"] as? Bool == true
+        guard data != nil || volumeChanged else { return }
         Task { @MainActor [weak self] in
             guard let self else { return }
-            self.remoteVolumeRevision &+= 1
+            if let data, let reply = try? JSONDecoder().decode(AudioReply.self, from: data) {
+                self.receiveAudioState(reply)
+            }
+            if volumeChanged { self.remoteVolumeRevision &+= 1 }
         }
-        #endif
     }
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {

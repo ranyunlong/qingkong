@@ -7,6 +7,63 @@ import QingkongCore
 
 final class ServiceTests: XCTestCase {
     @MainActor
+    func testPhoneAudioPushUpdatesWatchDisplayWithoutStartingLocalPlayer() async throws {
+        let store = try LocalStore(testing: true, reset: true)
+        let player = AudioPlayer()
+        let link = Connectivity(store: store, player: player)
+        var phone = AudioState()
+        phone.track = .ocean
+        phone.playing = true
+        let received = expectation(description: "Phone playback status becomes observable")
+        withObservationTracking { _ = link.remoteState } onChange: { received.fulfill() }
+        let data = try JSONEncoder().encode(AudioReply(id: UUID(), state: phone))
+        link.session(WCSession.default, didReceiveMessage: ["audioState": data])
+        await fulfillment(of: [received], timeout: 2)
+        XCTAssertEqual(link.remoteState?.track, .ocean)
+        XCTAssertEqual(link.remoteState?.playing, true)
+        XCTAssertFalse(player.state.playing, "同步状态不能在手表启动本地播放")
+        XCTAssertEqual(player.state.track, .rain)
+    }
+
+    @MainActor
+    func testDelayedAudioReplyCannotOverwriteNewerPhonePause() throws {
+        let store = try LocalStore(testing: true, reset: true)
+        let player = AudioPlayer()
+        let link = Connectivity(store: store, player: player)
+        let now = Date.now
+        var phone = AudioState()
+        phone.track = .night
+        phone.deadline = SleepDeadline(minutes: 15, now: now)
+        link.receiveAudioState(AudioReply(id: UUID(), state: phone, updatedAt: now))
+        var old = AudioState()
+        old.playing = true
+        link.receiveAudioState(AudioReply(id: UUID(), state: old, updatedAt: now.addingTimeInterval(-1)))
+        link.receiveAudioState(AudioReply(id: UUID(), state: old, updatedAt: nil))
+        XCTAssertEqual(link.remoteState, phone)
+        XCTAssertFalse(player.state.playing)
+    }
+
+    @MainActor
+    func testAudioStateChangesNotifyForTrackTimerAndVolume() async {
+        let player = AudioPlayer()
+        var updates: [AudioState] = []
+        player.didChangeState = { updates.append($0) }
+        defer { player.didChangeState = nil; player.setTimer(minutes: 0); player.pause() }
+        await player.select(.ocean)
+        player.setTimer(minutes: 15)
+        player.setVolume(0.7)
+        XCTAssertEqual(updates.count, 3)
+        guard updates.count == 3 else { return }
+        XCTAssertEqual(updates.map(\.track), [.ocean, .ocean, .ocean])
+        XCTAssertNil(updates[0].deadline)
+        XCTAssertNotNil(updates[1].deadline)
+        XCTAssertEqual(updates[2].volume, 0.7)
+        let count = updates.count
+        player.pause()
+        XCTAssertEqual(updates.count, count, "相同播放状态不重复通知")
+    }
+
+    @MainActor
     func testForegroundMoodMessageUpdatesObservedRecordBeforeReply() async throws {
         let store = try LocalStore(testing: true, reset: true)
         let link = Connectivity(store: store, player: AudioPlayer())

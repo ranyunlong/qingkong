@@ -156,7 +156,10 @@ public struct AudioReply: Codable, Sendable {
     public var id: UUID
     public var state: AudioState
     public var error: String?
-    public init(id: UUID, state: AudioState, error: String? = nil) { self.id = id; self.state = state; self.error = error }
+    public var updatedAt: Date?
+    public init(id: UUID, state: AudioState, error: String? = nil, updatedAt: Date? = .now) {
+        self.id = id; self.state = state; self.error = error; self.updatedAt = updatedAt
+    }
 }
 
 public struct SyncPayload: Codable, Equatable, Sendable {
