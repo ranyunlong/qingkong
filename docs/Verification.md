@@ -291,3 +291,13 @@ xcodebuild -project QingkongECGPreview.xcodeproj -scheme Qingkong \
 - 实现依据为 Apple 官方 `AccessoryWidgetBackground` 与《Displaying the right widget background》文档：前者按组件环境提供标准背景；后者说明 Watch Smart Stack 的系统材质背景及容器背景移除规则。不添加自定义模糊或额外玻璃图层。
 - Mac 共享逻辑 **66 项测试通过**：`artifacts/test-core-watch-widget-background.log`；完整 iPhone／Watch／两端组件 Debug 编译通过：`artifacts/build-watch-widget-background.log`。已确认两端组件均编译到修改后的共享视图；差异空白检查通过。
 - 遵循用户要求，未在模拟器添加、操作或调试小组件，未操作真机或上传 TestFlight。watchOS 27 的玻璃视觉效果尚未实测，需重新构建并更新 Watch App 及其组件扩展后由用户确认。
+
+## Watch 心情记录到 iPhone 桌面团子组件（2026-11-21）
+
+- 用户明确本次未及时更新的是 iPhone 桌面团子小组件。检查确认已有即时消息、持久队列、保存后回执及记录变化回调；旧代码在两端均以 `isReachable` 阻挡即时发送。新增的服务回归以不可达状态复现：手表分支即时发送次数为零。本结果是发送策略回归，不是用户配对真机症状的完整复现。
+- 手表分支改为尝试通过即时消息唤醒后台 iPhone App；iPhone 发往 Watch 的分支仍检查可达状态。失败保留持久队列与本地待同步记录，仍只在收到匹配修订的保存回执后确认，不因尝试即时发送丢弃记录。测试使用窄的消息传输接口隔离真实设备，不启动另一端音频或发送健康提醒。
+- 心情新增、收到及删除使用独立摘要更新：保留本地组件文件中的既有健康数值与趋势，替换最近心情与偏好，并定向请求刷新 `QingkongDumpling`。避免后台进程尚未加载健康数据时把组件的健康摘要写空。
+- 摘要按真实内容去重，只有生成时间变化或重复投递时不重复写入和请求刷新；健康数值、心情或偏好改变仍刷新。重新激活 App 与用户明确刷新手表组件保留主动刷新请求，避免内容去重阻挡用户主动重试。摘要仍为原有 Codable 格式，仅新增 Equatable 比较能力。
+- 修复前服务回归按预期失败：`artifacts/test-watch-widget-sync-red.log`。修复后 iPhone 17／iOS 26.5 模拟器 **23 项服务测试通过**，含六项新增用例：`artifacts/test-services-watch-widget-sync.log`。覆盖后台手机唤醒尝试、反向不可达保护、在途去重与匹配回执持久化、后台队列接收后摘要落盘、心情更新／删除保留健康摘要、相同内容抑制重复刷新，并回归原同步和提醒服务。未运行实际播放 65 秒的音频截止用例。
+- 本轮 Mac 共享逻辑 **66 项测试通过**：`artifacts/test-core-watch-widget-sync.log`；最终完整 iPhone／Watch／两端组件 Debug 编译通过：`artifacts/build-watch-widget-sync-final.log`；差异空白检查通过。
+- 遵循用户要求，未在模拟器添加、操作或调试小组件，未操作真机或上传 TestFlight。真实唤醒成功率、跨设备传输耗时、iPhone 桌面渲染及 watchOS 27 行为尚未验收；WidgetKit 最终刷新由系统调度，不能把发出刷新请求表述为已即时显示。需重新构建并更新 iPhone、Watch 及随包组件后由用户真机确认。

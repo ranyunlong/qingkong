@@ -43,7 +43,7 @@ final class AppServices {
         player = AudioPlayer()
         link = Connectivity(store: store, player: player)
         store.didChange = { [weak self] in self?.link.flush() }
-        store.didChangeRecords = { [weak self] in self?.writeSnapshot() }
+        store.didChangeRecords = { [weak self] in self?.writeMoodSnapshot() }
         store.didChangePreferences = { [weak self] in self?.link.flush(); self?.writeSnapshot() }
         health.didRefresh = { [weak self] in
             guard let self else { return }
@@ -100,7 +100,7 @@ final class AppServices {
         if !testing { link.flush() }
         await health.restoreBackgroundDelivery()
         await health.refresh()
-        writeSnapshot()
+        writeSnapshot(forceReload: true)
     }
 
     func updateClock() { today = .now; player.reconcileDeadline() }
@@ -109,19 +109,29 @@ final class AppServices {
     func refreshComplications() {
         guard !testing else { return }
         WidgetCenter.shared.invalidateConfigurationRecommendations()
-        writeSnapshot()
+        writeSnapshot(forceReload: true)
     }
     #endif
 
-    private func writeSnapshot() {
+    private func writeMoodSnapshot() {
+        guard !health.isDemo else { return }
+        do {
+            if try SnapshotStorage.saveMood(MoodSummary.latest(in: store.records), preferences: store.preferences) {
+                WidgetCenter.shared.reloadTimelines(ofKind: "QingkongDumpling")
+            }
+            snapshotError = nil
+        } catch { snapshotError = "心情组件暂未更新，请重新打开应用后重试。" }
+    }
+
+    private func writeSnapshot(forceReload: Bool = false) {
         guard !health.isDemo else { return }
         let latest = HealthMetric.allCases.compactMap { health.latest($0) }
         let trends = Dictionary(uniqueKeysWithValues: HealthMetric.allCases.map { metric in
             (metric, HealthMath.buckets(health.readings, metric: metric, period: .week))
         })
         do {
-            try SnapshotStorage.save(ComplicationSnapshot(readings: latest, trends: trends, preferences: store.preferences, mood: MoodSummary.latest(in: store.records)))
-            WidgetCenter.shared.reloadAllTimelines()
+            let changed = try SnapshotStorage.save(ComplicationSnapshot(readings: latest, trends: trends, preferences: store.preferences, mood: MoodSummary.latest(in: store.records)))
+            if changed || forceReload { WidgetCenter.shared.reloadAllTimelines() }
             snapshotError = nil
         } catch { snapshotError = "表盘数据暂未保存，请重新打开应用后重试。" }
     }

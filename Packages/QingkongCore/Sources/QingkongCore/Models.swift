@@ -175,7 +175,7 @@ public struct SyncReceipt: Codable, Equatable, Sendable {
     public func matches(_ record: MoodRecord) -> Bool { id == record.id && updatedAt == record.updatedAt }
 }
 
-public struct ComplicationSnapshot: Codable, Sendable {
+public struct ComplicationSnapshot: Codable, Equatable, Sendable {
     public var generatedAt: Date
     public var readings: [HealthReading]
     public var trends: [HealthMetric: [TrendBucket]]

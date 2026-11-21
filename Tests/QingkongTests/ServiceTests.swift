@@ -7,6 +7,118 @@ import QingkongCore
 
 final class ServiceTests: XCTestCase {
     @MainActor
+    func testWatchMoodAttemptsToWakeBackgroundPhoneAndKeepsDurableCopy() throws {
+        let store = try LocalStore(testing: true, reset: true)
+        let record = MoodRecord(mood: 5, stress: 1, note: "")
+        try store.save(record)
+        let link = Connectivity(store: store, player: AudioPlayer())
+        let transport = TestMoodMessageSession(reachable: false)
+        let data = try JSONEncoder().encode(SyncPayload(record: record))
+
+        link.sendRecordImmediately(data, record: record, session: transport, wakePhone: true)
+
+        XCTAssertEqual(transport.messages.count, 1, "手表应尝试通过即时消息唤醒后台手机，不能只等待后台队列")
+        XCTAssertEqual(transport.messages.first?["record"] as? Data, data)
+        XCTAssertEqual(try store.pendingRecords(), [record], "手机保存回执到达前保留持久副本")
+    }
+
+    @MainActor
+    func testPhoneMoodDoesNotTryToWakeUnreachableWatch() throws {
+        let store = try LocalStore(testing: true, reset: true)
+        let record = MoodRecord(mood: 4, stress: 2, note: "")
+        try store.save(record)
+        let link = Connectivity(store: store, player: AudioPlayer())
+        let transport = TestMoodMessageSession(reachable: false)
+
+        link.sendRecordImmediately(try JSONEncoder().encode(SyncPayload(record: record)), record: record, session: transport, wakePhone: false)
+
+        XCTAssertTrue(transport.messages.isEmpty)
+        XCTAssertEqual(try store.pendingRecords(), [record])
+    }
+
+    @MainActor
+    func testImmediateMoodDeduplicatesInFlightAndPersistsMatchingReceipt() async throws {
+        let store = try LocalStore(testing: true, reset: true)
+        let record = MoodRecord(mood: 4, stress: 3, note: "")
+        try store.save(record)
+        let link = Connectivity(store: store, player: AudioPlayer())
+        let transport = TestMoodMessageSession(reachable: true)
+        let data = try JSONEncoder().encode(SyncPayload(record: record))
+
+        link.sendRecordImmediately(data, record: record, session: transport, wakePhone: true)
+        link.sendRecordImmediately(data, record: record, session: transport, wakePhone: true)
+        XCTAssertEqual(transport.messages.count, 1)
+        let acknowledged = expectation(description: "Matching receipt persisted")
+        withObservationTracking { _ = link.syncMessage } onChange: { acknowledged.fulfill() }
+        transport.replyHandler?(["receipt": try JSONEncoder().encode(SyncReceipt(record: record))])
+
+        await fulfillment(of: [acknowledged], timeout: 2)
+        XCTAssertTrue(try store.pendingRecords().isEmpty)
+        XCTAssertTrue(try LocalStore(testing: true).pendingRecords().isEmpty)
+    }
+
+    @MainActor
+    func testQueuedWatchMoodPersistsWidgetSummaryWithoutForegroundRefresh() async throws {
+        let store = try LocalStore(testing: true, reset: true)
+        let link = Connectivity(store: store, player: AudioPlayer())
+        let record = MoodRecord(mood: 2, stress: 4, note: "", createdAt: .now.addingTimeInterval(-1))
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let published = expectation(description: "Background record publishes new widget summary")
+        store.didChangeRecords = {
+            do { try SnapshotStorage.saveMood(MoodSummary.latest(in: store.records), preferences: store.preferences, to: url) }
+            catch { XCTFail("组件摘要未保存：\(error)") }
+            published.fulfill()
+        }
+
+        link.session(WCSession.default, didReceiveUserInfo: ["record": try JSONEncoder().encode(SyncPayload(record: record))])
+
+        await fulfillment(of: [published], timeout: 2)
+        XCTAssertEqual(SnapshotStorage.load(from: url)?.mood?.value, 2)
+        XCTAssertEqual(SnapshotStorage.load(from: url)?.mood?.date, record.createdAt)
+        XCTAssertEqual(try LocalStore(testing: true).entries, [record])
+        XCTAssertTrue(try store.pendingRecords().isEmpty)
+    }
+
+    @MainActor
+    func testMoodOnlyWidgetUpdatePreservesHealthAndHandlesDeletion() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let now = Date.now
+        let reading = HealthReading(metric: .hrv, date: now.addingTimeInterval(-60), value: 45, source: "测试")
+        let trends: [HealthMetric: [TrendBucket]] = [.hrv: [TrendBucket(date: reading.date, value: 45, segment: 0)]]
+        let original = ComplicationSnapshot(readings: [reading], trends: trends, preferences: Preferences())
+        try SnapshotStorage.save(original, to: url)
+        let record = MoodRecord(mood: 5, stress: 1, note: "不进入组件的文字", createdAt: now)
+        let mood = try XCTUnwrap(MoodSummary.latest(in: [record]))
+        var preferences = Preferences()
+        preferences.manualScene = .ocean
+
+        XCTAssertTrue(try SnapshotStorage.saveMood(mood, preferences: preferences, to: url))
+        let updated = try XCTUnwrap(SnapshotStorage.load(from: url))
+        XCTAssertEqual(updated.mood, mood)
+        XCTAssertEqual(updated.readings, [reading])
+        XCTAssertEqual(updated.trends, trends)
+        XCTAssertEqual(updated.preferences, preferences)
+        XCTAssertFalse(try SnapshotStorage.saveMood(mood, preferences: preferences, to: url), "重复投递不重复请求组件刷新")
+        XCTAssertTrue(try SnapshotStorage.saveMood(nil, preferences: preferences, to: url))
+        XCTAssertNil(SnapshotStorage.load(from: url)?.mood)
+        XCTAssertEqual(SnapshotStorage.load(from: url)?.readings, [reading])
+    }
+
+    @MainActor
+    func testUnchangedSnapshotDoesNotConsumeAnotherWidgetReload() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        var snapshot = ComplicationSnapshot(readings: [], trends: [:], preferences: Preferences())
+        XCTAssertTrue(try SnapshotStorage.save(snapshot, to: url))
+        snapshot.generatedAt = snapshot.generatedAt.addingTimeInterval(60)
+        XCTAssertFalse(try SnapshotStorage.save(snapshot, to: url), "仅刷新时间变化不应反复刷新相同内容")
+        snapshot.readings = [HealthReading(metric: .heartRate, date: .now, value: 65, source: "测试")]
+        XCTAssertTrue(try SnapshotStorage.save(snapshot, to: url), "真实健康数据变化仍需刷新")
+    }
+
+    @MainActor
     func testPhoneAudioPushUpdatesWatchDisplayWithoutStartingLocalPlayer() async throws {
         let store = try LocalStore(testing: true, reset: true)
         let player = AudioPlayer()
@@ -330,5 +442,19 @@ final class ServiceTests: XCTestCase {
         try await Task.sleep(for: .seconds(65))
         XCTAssertFalse(player.state.playing)
         XCTAssertNil(player.state.deadline)
+    }
+}
+
+@MainActor
+private final class TestMoodMessageSession: MoodMessageSession {
+    let isReachable: Bool
+    private(set) var messages: [[String: Any]] = []
+    private(set) var replyHandler: (([String: Any]) -> Void)?
+
+    init(reachable: Bool) { isReachable = reachable }
+
+    func sendMessage(_ message: [String: Any], replyHandler: (([String: Any]) -> Void)?, errorHandler: ((Error) -> Void)?) {
+        messages.append(message)
+        self.replyHandler = replyHandler
     }
 }

@@ -6,6 +6,14 @@ import QingkongCore
 import AVFoundation
 #endif
 
+@MainActor
+protocol MoodMessageSession {
+    var isReachable: Bool { get }
+    func sendMessage(_ message: [String: Any], replyHandler: (([String: Any]) -> Void)?, errorHandler: ((Error) -> Void)?)
+}
+
+extension WCSession: MoodMessageSession {}
+
 @MainActor @Observable
 final class Connectivity: NSObject, WCSessionDelegate {
     private(set) var reachable = false
@@ -95,7 +103,11 @@ final class Connectivity: NSObject, WCSessionDelegate {
             for record in pending {
                 let data = try JSONEncoder().encode(SyncPayload(record: record))
                 if !queued.contains(SyncPayload(record: record)) { session.transferUserInfo(["record": data]) }
-                sendRecordImmediately(data, record: record, session: session)
+                #if os(watchOS)
+                sendRecordImmediately(data, record: record, session: session, wakePhone: true)
+                #else
+                sendRecordImmediately(data, record: record, session: session, wakePhone: false)
+                #endif
             }
             syncMessage = pending.isEmpty ? "记录已同步" : "\(pending.count) 条记录等待系统传送"
             var context: [String: Any] = ["preferences": try JSONEncoder().encode(store.preferences)]
@@ -206,9 +218,11 @@ final class Connectivity: NSObject, WCSessionDelegate {
         #endif
     }
 
-    private func sendRecordImmediately(_ data: Data, record: MoodRecord, session: WCSession) {
+    func sendRecordImmediately(_ data: Data, record: MoodRecord, session: any MoodMessageSession, wakePhone: Bool) {
         let expectedReceipt = SyncReceipt(record: record)
-        guard session.isReachable, !immediateRecords.contains(expectedReceipt) else { return }
+        // An active Watch app can use sendMessage to wake its background iPhone app.
+        // Reachability remains required in the opposite direction; failures keep the queue.
+        guard wakePhone || session.isReachable, !immediateRecords.contains(expectedReceipt) else { return }
         immediateRecords.append(expectedReceipt)
         session.sendMessage(["record": data], replyHandler: { [weak self] response in
             let receiptData = response["receipt"] as? Data
