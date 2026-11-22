@@ -1,0 +1,719 @@
+{
+  "verifiedAt": "2026-11-20",
+  "brand": "小晴空",
+  "watch": {
+    "device": "Apple Watch Series 11 (46mm)",
+    "simulator": "watchOS 26.5",
+    "capture": "Native simctl screenshots",
+    "size": [
+      416,
+      496
+    ]
+  },
+  "duo": {
+    "status": "layout-drafts-only",
+    "reason": "Installed Xcode 26.6 / iOS 26.5 has no iPhone Duo runtime or device type",
+    "nativeCaptureVerified": false,
+    "uploadReady": false,
+    "dimensions": {
+      "outer": [
+        2034,
+        1398
+      ],
+      "inner": [
+        2853,
+        2007
+      ]
+    }
+  },
+  "files": [
+    {
+      "file": "screenshots/apple-watch/01-today-416x496.png",
+      "kind": "native-watch-screenshot",
+      "width": 416,
+      "height": 496,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb"
+    },
+    {
+      "file": "screenshots/apple-watch/02-trends-416x496.png",
+      "kind": "native-watch-screenshot",
+      "width": 416,
+      "height": 496,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb"
+    },
+    {
+      "file": "screenshots/apple-watch/03-mood-416x496.png",
+      "kind": "native-watch-screenshot",
+      "width": 416,
+      "height": 496,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb"
+    },
+    {
+      "file": "screenshots/apple-watch/04-sleep-416x496.png",
+      "kind": "native-watch-screenshot",
+      "width": 416,
+      "height": 496,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb"
+    },
+    {
+      "file": "drafts/iphone-duo-outer/01-today-2034x1398-DRAFT.png",
+      "kind": "duo-layout-draft-not-native-capture",
+      "width": 2034,
+      "height": 1398,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "brand",
+          "x": 120,
+          "y": 93,
+          "width": 171.875,
+          "height": 48
+        },
+        {
+          "name": "headline",
+          "x": 120,
+          "y": 346,
+          "width": 602.484375,
+          "height": 263.65625
+        },
+        {
+          "name": "subtitle",
+          "x": 125,
+          "y": 706,
+          "width": 399.46875,
+          "height": 105.59375
+        },
+        {
+          "name": "phone",
+          "x": 1340,
+          "y": 121,
+          "width": 540,
+          "height": 1149.8125
+        },
+        {
+          "name": "draft notice",
+          "x": 124,
+          "y": 1320,
+          "width": 616.65625,
+          "height": 33
+        }
+      ]
+    },
+    {
+      "file": "drafts/iphone-duo-outer/02-mood-2034x1398-DRAFT.png",
+      "kind": "duo-layout-draft-not-native-capture",
+      "width": 2034,
+      "height": 1398,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "brand",
+          "x": 120,
+          "y": 93,
+          "width": 171.875,
+          "height": 48
+        },
+        {
+          "name": "headline",
+          "x": 120,
+          "y": 346,
+          "width": 702.890625,
+          "height": 263.65625
+        },
+        {
+          "name": "subtitle",
+          "x": 125,
+          "y": 706,
+          "width": 332.890625,
+          "height": 105.59375
+        },
+        {
+          "name": "phone",
+          "x": 1340,
+          "y": 121,
+          "width": 540,
+          "height": 1149.8125
+        },
+        {
+          "name": "draft notice",
+          "x": 124,
+          "y": 1320,
+          "width": 616.65625,
+          "height": 33
+        }
+      ]
+    },
+    {
+      "file": "drafts/iphone-duo-outer/03-sleep-2034x1398-DRAFT.png",
+      "kind": "duo-layout-draft-not-native-capture",
+      "width": 2034,
+      "height": 1398,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "brand",
+          "x": 120,
+          "y": 93,
+          "width": 171.875,
+          "height": 48
+        },
+        {
+          "name": "headline",
+          "x": 120,
+          "y": 346,
+          "width": 602.484375,
+          "height": 263.65625
+        },
+        {
+          "name": "subtitle",
+          "x": 125,
+          "y": 706,
+          "width": 332.890625,
+          "height": 105.59375
+        },
+        {
+          "name": "phone",
+          "x": 1340,
+          "y": 121,
+          "width": 540,
+          "height": 1149.8125
+        },
+        {
+          "name": "draft notice",
+          "x": 124,
+          "y": 1320,
+          "width": 616.65625,
+          "height": 33
+        }
+      ]
+    },
+    {
+      "file": "drafts/iphone-duo-outer/04-trends-2034x1398-DRAFT.png",
+      "kind": "duo-layout-draft-not-native-capture",
+      "width": 2034,
+      "height": 1398,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "brand",
+          "x": 120,
+          "y": 93,
+          "width": 171.875,
+          "height": 48
+        },
+        {
+          "name": "headline",
+          "x": 120,
+          "y": 346,
+          "width": 803.296875,
+          "height": 263.65625
+        },
+        {
+          "name": "subtitle",
+          "x": 125,
+          "y": 706,
+          "width": 332.890625,
+          "height": 105.59375
+        },
+        {
+          "name": "phone",
+          "x": 1340,
+          "y": 121,
+          "width": 540,
+          "height": 1149.8125
+        },
+        {
+          "name": "draft notice",
+          "x": 124,
+          "y": 1320,
+          "width": 616.65625,
+          "height": 33
+        }
+      ]
+    },
+    {
+      "file": "drafts/iphone-duo-outer/05-scenes-2034x1398-DRAFT.png",
+      "kind": "duo-layout-draft-not-native-capture",
+      "width": 2034,
+      "height": 1398,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "brand",
+          "x": 120,
+          "y": 93,
+          "width": 171.875,
+          "height": 48
+        },
+        {
+          "name": "headline",
+          "x": 120,
+          "y": 346,
+          "width": 502.0625,
+          "height": 263.65625
+        },
+        {
+          "name": "subtitle",
+          "x": 125,
+          "y": 706,
+          "width": 399.46875,
+          "height": 105.59375
+        },
+        {
+          "name": "phone",
+          "x": 1340,
+          "y": 121,
+          "width": 540,
+          "height": 1149.8125
+        },
+        {
+          "name": "draft notice",
+          "x": 124,
+          "y": 1320,
+          "width": 616.65625,
+          "height": 33
+        }
+      ]
+    },
+    {
+      "file": "drafts/iphone-duo-outer/06-privacy-2034x1398-DRAFT.png",
+      "kind": "duo-layout-draft-not-native-capture",
+      "width": 2034,
+      "height": 1398,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "brand",
+          "x": 120,
+          "y": 93,
+          "width": 171.875,
+          "height": 48
+        },
+        {
+          "name": "headline",
+          "x": 120,
+          "y": 346,
+          "width": 502.0625,
+          "height": 263.65625
+        },
+        {
+          "name": "subtitle",
+          "x": 125,
+          "y": 706,
+          "width": 432.765625,
+          "height": 105.59375
+        },
+        {
+          "name": "phone",
+          "x": 1340,
+          "y": 121,
+          "width": 540,
+          "height": 1149.8125
+        },
+        {
+          "name": "draft notice",
+          "x": 124,
+          "y": 1320,
+          "width": 616.65625,
+          "height": 33
+        }
+      ]
+    },
+    {
+      "file": "drafts/iphone-duo-inner/01-today-2853x2007-DRAFT.png",
+      "kind": "duo-layout-draft-not-native-capture",
+      "width": 2853,
+      "height": 2007,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "brand",
+          "x": 168.31858825683594,
+          "y": 130.4468994140625,
+          "width": 241.08131408691406,
+          "height": 67.32743835449219
+        },
+        {
+          "name": "headline",
+          "x": 168.31858825683594,
+          "y": 485.318603515625,
+          "width": 845.07763671875,
+          "height": 369.8187255859375
+        },
+        {
+          "name": "subtitle",
+          "x": 175.3318634033203,
+          "y": 990.2743530273438,
+          "width": 560.3168334960938,
+          "height": 148.11163330078125
+        },
+        {
+          "name": "phone",
+          "x": 1879.5574951171875,
+          "y": 169.7212371826172,
+          "width": 757.4337158203125,
+          "height": 1612.7901611328125
+        },
+        {
+          "name": "draft notice",
+          "x": 173.92919921875,
+          "y": 1897.5728759765625,
+          "width": 864.9559326171875,
+          "height": 46.28759765625
+        }
+      ]
+    },
+    {
+      "file": "drafts/iphone-duo-inner/02-mood-2853x2007-DRAFT.png",
+      "kind": "duo-layout-draft-not-native-capture",
+      "width": 2853,
+      "height": 2007,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "brand",
+          "x": 168.31858825683594,
+          "y": 130.4468994140625,
+          "width": 241.08131408691406,
+          "height": 67.32743835449219
+        },
+        {
+          "name": "headline",
+          "x": 168.31858825683594,
+          "y": 485.318603515625,
+          "width": 985.9129638671875,
+          "height": 369.8187255859375
+        },
+        {
+          "name": "subtitle",
+          "x": 175.3318634033203,
+          "y": 990.2743530273438,
+          "width": 466.9306640625,
+          "height": 148.11163330078125
+        },
+        {
+          "name": "phone",
+          "x": 1879.5574951171875,
+          "y": 169.7212371826172,
+          "width": 757.4337158203125,
+          "height": 1612.7901611328125
+        },
+        {
+          "name": "draft notice",
+          "x": 173.92919921875,
+          "y": 1897.5728759765625,
+          "width": 864.9559326171875,
+          "height": 46.28759765625
+        }
+      ]
+    },
+    {
+      "file": "drafts/iphone-duo-inner/03-sleep-2853x2007-DRAFT.png",
+      "kind": "duo-layout-draft-not-native-capture",
+      "width": 2853,
+      "height": 2007,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "brand",
+          "x": 168.31858825683594,
+          "y": 130.4468994140625,
+          "width": 241.08131408691406,
+          "height": 67.32743835449219
+        },
+        {
+          "name": "headline",
+          "x": 168.31858825683594,
+          "y": 485.318603515625,
+          "width": 845.07763671875,
+          "height": 369.8187255859375
+        },
+        {
+          "name": "subtitle",
+          "x": 175.3318634033203,
+          "y": 990.2743530273438,
+          "width": 466.9306640625,
+          "height": 148.11163330078125
+        },
+        {
+          "name": "phone",
+          "x": 1879.5574951171875,
+          "y": 169.7212371826172,
+          "width": 757.4337158203125,
+          "height": 1612.7901611328125
+        },
+        {
+          "name": "draft notice",
+          "x": 173.92919921875,
+          "y": 1897.5728759765625,
+          "width": 864.9559326171875,
+          "height": 46.28759765625
+        }
+      ]
+    },
+    {
+      "file": "drafts/iphone-duo-inner/04-trends-2853x2007-DRAFT.png",
+      "kind": "duo-layout-draft-not-native-capture",
+      "width": 2853,
+      "height": 2007,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "brand",
+          "x": 168.31858825683594,
+          "y": 130.4468994140625,
+          "width": 241.08131408691406,
+          "height": 67.32743835449219
+        },
+        {
+          "name": "headline",
+          "x": 168.31858825683594,
+          "y": 485.318603515625,
+          "width": 1126.748291015625,
+          "height": 369.8187255859375
+        },
+        {
+          "name": "subtitle",
+          "x": 175.3318634033203,
+          "y": 990.2743530273438,
+          "width": 466.9306640625,
+          "height": 148.11163330078125
+        },
+        {
+          "name": "phone",
+          "x": 1879.5574951171875,
+          "y": 169.7212371826172,
+          "width": 757.4337158203125,
+          "height": 1612.7901611328125
+        },
+        {
+          "name": "draft notice",
+          "x": 173.92919921875,
+          "y": 1897.5728759765625,
+          "width": 864.9559326171875,
+          "height": 46.28759765625
+        }
+      ]
+    },
+    {
+      "file": "drafts/iphone-duo-inner/05-scenes-2853x2007-DRAFT.png",
+      "kind": "duo-layout-draft-not-native-capture",
+      "width": 2853,
+      "height": 2007,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "brand",
+          "x": 168.31858825683594,
+          "y": 130.4468994140625,
+          "width": 241.08131408691406,
+          "height": 67.32743835449219
+        },
+        {
+          "name": "headline",
+          "x": 168.31858825683594,
+          "y": 485.318603515625,
+          "width": 704.2203979492188,
+          "height": 369.8187255859375
+        },
+        {
+          "name": "subtitle",
+          "x": 175.3318634033203,
+          "y": 990.2743530273438,
+          "width": 560.3168334960938,
+          "height": 148.11163330078125
+        },
+        {
+          "name": "phone",
+          "x": 1879.5574951171875,
+          "y": 169.7212371826172,
+          "width": 757.4337158203125,
+          "height": 1612.7901611328125
+        },
+        {
+          "name": "draft notice",
+          "x": 173.92919921875,
+          "y": 1897.5728759765625,
+          "width": 864.9559326171875,
+          "height": 46.28759765625
+        }
+      ]
+    },
+    {
+      "file": "drafts/iphone-duo-inner/06-privacy-2853x2007-DRAFT.png",
+      "kind": "duo-layout-draft-not-native-capture",
+      "width": 2853,
+      "height": 2007,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "brand",
+          "x": 168.31858825683594,
+          "y": 130.4468994140625,
+          "width": 241.08131408691406,
+          "height": 67.32743835449219
+        },
+        {
+          "name": "headline",
+          "x": 168.31858825683594,
+          "y": 485.318603515625,
+          "width": 704.2203979492188,
+          "height": 369.8187255859375
+        },
+        {
+          "name": "subtitle",
+          "x": 175.3318634033203,
+          "y": 990.2743530273438,
+          "width": 607.0208129882812,
+          "height": 148.11163330078125
+        },
+        {
+          "name": "phone",
+          "x": 1879.5574951171875,
+          "y": 169.7212371826172,
+          "width": 757.4337158203125,
+          "height": 1612.7901611328125
+        },
+        {
+          "name": "draft notice",
+          "x": 173.92919921875,
+          "y": 1897.5728759765625,
+          "width": 864.9559326171875,
+          "height": 46.28759765625
+        }
+      ]
+    },
+    {
+      "file": "previews/watch-promo-01-today.png",
+      "kind": "watch-promotion-preview-not-upload-size",
+      "width": 1320,
+      "height": 1600,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "headline",
+          "x": 108,
+          "y": 190,
+          "width": 690.828125,
+          "height": 228.78125
+        },
+        {
+          "name": "watch",
+          "x": 350,
+          "y": 550,
+          "width": 620,
+          "height": 739
+        }
+      ]
+    },
+    {
+      "file": "previews/watch-promo-02-trends.png",
+      "kind": "watch-promotion-preview-not-upload-size",
+      "width": 1320,
+      "height": 1600,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "headline",
+          "x": 108,
+          "y": 190,
+          "width": 690.828125,
+          "height": 228.78125
+        },
+        {
+          "name": "watch",
+          "x": 350,
+          "y": 550,
+          "width": 620,
+          "height": 739
+        }
+      ]
+    },
+    {
+      "file": "previews/watch-promo-03-mood.png",
+      "kind": "watch-promotion-preview-not-upload-size",
+      "width": 1320,
+      "height": 1600,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "headline",
+          "x": 108,
+          "y": 190,
+          "width": 518.125,
+          "height": 228.78125
+        },
+        {
+          "name": "watch",
+          "x": 350,
+          "y": 550,
+          "width": 620,
+          "height": 739
+        }
+      ]
+    },
+    {
+      "file": "previews/watch-promo-04-sleep.png",
+      "kind": "watch-promotion-preview-not-upload-size",
+      "width": 1320,
+      "height": 1600,
+      "channels": 3,
+      "hasAlpha": false,
+      "colourspace": "srgb",
+      "bounds": [
+        {
+          "name": "headline",
+          "x": 108,
+          "y": 190,
+          "width": 518.125,
+          "height": 228.78125
+        },
+        {
+          "name": "watch",
+          "x": 350,
+          "y": 550,
+          "width": 620,
+          "height": 739
+        }
+      ]
+    }
+  ]
+}

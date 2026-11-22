@@ -6,6 +6,7 @@ enum AppTab: Hashable { case today, trends, mood, sleep }
 struct RootView: View {
     @Environment(AppServices.self) private var app
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var tab: AppTab = .today
     @State private var sleepRootVisible = true
     @State private var mood = 3
@@ -106,10 +107,18 @@ struct RootView: View {
                 }
         }
         .safeAreaInset(edge: .bottom, spacing: 8) {
-            if (app.player.state.playing || app.player.buffering) && (tab != .sleep || !sleepRootVisible) {
-                MiniPlayer { tab = .sleep }.padding(.horizontal, 22).padding(.bottom, 8)
+            VStack(spacing: 0) {
+                if miniPlayerVisible {
+                    MiniPlayer { tab = .sleep }.padding(.horizontal, 22).padding(.bottom, 8)
+                        .transition(reduceMotion ? .opacity : .scale(scale: 0.08, anchor: .bottom).combined(with: .opacity))
+                }
             }
+            .animation(.easeInOut(duration: 0.25), value: miniPlayerVisible)
         }
+    }
+
+    private var miniPlayerVisible: Bool {
+        (app.player.state.playing || app.player.buffering) && (tab != .sleep || !sleepRootVisible)
     }
 }
 

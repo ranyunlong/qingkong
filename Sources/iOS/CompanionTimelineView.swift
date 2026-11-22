@@ -11,6 +11,7 @@ struct CompanionTimelineView: View {
         let title: String
         let detail: String
         let symbol: String
+        var heartRate: HealthReading? = nil
         let delete: () throws -> Void
     }
 
@@ -22,7 +23,9 @@ struct CompanionTimelineView: View {
         }
         result += app.companion.practices.map { record in
             Item(id: record.id.uuidString, date: record.completedAt, title: "\(record.duration.name) · \(record.mode.name)",
-                detail: record.feedback?.name ?? "未记录感受", symbol: "leaf", delete: { try app.companion.deletePractice(record.id) })
+                detail: record.feedback?.name ?? "未记录感受", symbol: "leaf", heartRate: record.finalHeartRate.flatMap {
+                    RelaxationHeartRate.latest(in: [$0], startedAt: record.startedAt, endedAt: record.completedAt)
+                }, delete: { try app.companion.deletePractice(record.id) })
         }
         result += app.companion.events.map { event in
             Item(id: event.id, date: event.date, title: event.title, detail: event.detail,
@@ -43,6 +46,12 @@ struct CompanionTimelineView: View {
                     Label(item.title, systemImage: item.symbol).font(.headline)
                     Text(item.date.formatted(date: .abbreviated, time: .shortened)).font(.caption).foregroundStyle(.secondary)
                     Text(item.detail).font(.subheadline)
+                    if let reading = item.heartRate {
+                        Label("最后心率 \(reading.value.formatted(.number.precision(.fractionLength(0)))) 次/分", systemImage: "heart")
+                            .font(.caption).accessibilityIdentifier("practice-heart-rate")
+                        Text("采样 \(reading.date.formatted(.dateTime.hour().minute().second()))")
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
                 }.padding(.vertical, 6)
                     .swipeActions { Button("删除", role: .destructive) {
                         do { try item.delete() } catch { self.error = "记录暂未删除，请重试。" }

@@ -2,6 +2,35 @@ import XCTest
 
 final class FeatureCompletionUITests: XCTestCase {
     @MainActor
+    func testTodayDumplingSurvivesMoodChanges() {
+        let app = launch()
+        let dumpling = app.images["today-dumpling"]
+        XCTAssertTrue(dumpling.waitForExistence(timeout: 5))
+        let initialFrame = dumpling.frame
+        capture(app, name: "团子-初始")
+        for mood in [1, 2, 4, 5, 3] {
+            app.tabBars.buttons["心情"].tap()
+            let choice = app.buttons["mood-\(mood)"]
+            for _ in 0..<6 where !choice.isHittable { app.swipeDown() }
+            choice.tap()
+            app.tabBars.buttons["今日"].tap()
+            XCTAssertTrue(dumpling.isHittable, "只切换心情、尚未保存时也应保留团子")
+            capture(app, name: "团子-未保存心情\(mood)")
+            app.tabBars.buttons["心情"].tap()
+            reveal(app.buttons["save-mood"], in: app)
+            app.buttons["save-mood"].tap()
+            XCTAssertTrue(app.staticTexts["mood-saved"].waitForExistence(timeout: 5))
+            app.tabBars.buttons["今日"].tap()
+            XCTAssertTrue(dumpling.waitForExistence(timeout: 5))
+            XCTAssertTrue(dumpling.isHittable)
+            XCTAssertEqual(dumpling.value as? String, ["低落", "疲惫", "平静", "不错", "开心"][mood - 1])
+            XCTAssertEqual(dumpling.frame.width, initialFrame.width, accuracy: 1)
+            XCTAssertEqual(dumpling.frame.minY, initialFrame.minY, accuracy: 1)
+            capture(app, name: "团子-心情\(mood)")
+        }
+    }
+
+    @MainActor
     func testHomeMoreButtonsAndLifeTagSpacing() {
         let app = launch()
         let albums = app.buttons["open-album-library"]
@@ -147,10 +176,15 @@ final class FeatureCompletionUITests: XCTestCase {
         let start = app.buttons["start-relaxation"]
         reveal(start, in: app)
         start.tap()
-        XCTAssertTrue(app.buttons["pause-relaxation"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["pause-relaxation"].exists)
+        XCTAssertFalse(app.buttons["结束并离开"].exists)
+        XCTAssertTrue(app.navigationBars["陪伴完成"].waitForExistence(timeout: 80))
         XCTAssertTrue(app.buttons["暂时不想记录感受"].waitForExistence(timeout: 80))
+        capture(app, name: "手机-独立陪伴结果与感受反馈")
         app.buttons["暂时不想记录感受"].tap()
-        app.buttons["完成"].tap()
+        XCTAssertTrue(app.buttons["start-relaxation"].waitForExistence(timeout: 5), "选择感受后回到陪伴准备页")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["open-relaxation"].waitForExistence(timeout: 5), "结果页返回应退出陪伴流程")
         app.tabBars.buttons["心情"].tap()
         reveal(app.buttons["心情明信片"], in: app)
         app.buttons["心情明信片"].tap()
@@ -167,5 +201,27 @@ final class FeatureCompletionUITests: XCTestCase {
         app.buttons["preview-postcard"].tap()
         XCTAssertTrue(app.navigationBars["分享前预览"].waitForExistence(timeout: 10))
         capture(app, name: "手机-完成陪伴解锁月下湖畔")
+    }
+
+    @MainActor
+    func testQuietPracticeBackKeepsUnrecordedFeedback() {
+        let app = launch()
+        app.buttons["open-relaxation"].tap()
+        let quiet = app.segmentedControls["relaxation-mode"].buttons["安静陪伴"]
+        reveal(quiet, in: app)
+        quiet.tap()
+        reveal(app.buttons["start-relaxation"], in: app)
+        app.buttons["start-relaxation"].tap()
+        XCTAssertTrue(app.navigationBars["陪伴完成"].waitForExistence(timeout: 80))
+        XCTAssertTrue(app.staticTexts["relaxation-no-heart-rate"].exists)
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["open-relaxation"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["心情"].tap()
+        let history = app.buttons["身体与心情时间线"]
+        reveal(history, in: app)
+        history.tap()
+        XCTAssertTrue(app.staticTexts["未记录感受"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["practice-heart-rate"].exists)
+        capture(app, name: "手机-安静陪伴返回与无心率回顾")
     }
 }

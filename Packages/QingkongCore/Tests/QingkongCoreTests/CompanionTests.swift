@@ -3,6 +3,39 @@ import Testing
 @testable import QingkongCore
 
 struct CompanionTests {
+    @Test func practiceRetainsLocalHeartRateWhenFeedbackChangesAndReadsLegacyRecords() throws {
+        let heartRate = HealthReading(metric: .heartRate, date: start.addingTimeInterval(58), value: 68, source: "Apple Watch")
+        var record = RelaxationRecord(duration: .oneMinute, mode: .quiet, startedAt: start, completedAt: start.addingTimeInterval(60), finalHeartRate: heartRate)
+        record.feedback = .better
+        let encoded = try JSONEncoder().encode(record)
+        let restored = try JSONDecoder().decode(RelaxationRecord.self, from: encoded)
+        #expect(restored.finalHeartRate == heartRate)
+        #expect(restored.feedback == .better)
+        var legacy = try #require(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        legacy.removeValue(forKey: "finalHeartRate")
+        let oldRecord = try JSONDecoder().decode(RelaxationRecord.self, from: JSONSerialization.data(withJSONObject: legacy))
+        #expect(oldRecord.finalHeartRate == nil)
+        #expect(oldRecord.id == record.id)
+    }
+
+    @Test func relaxationHeartRateOnlyUsesValidSamplesFromThisSession() {
+        let end = start.addingTimeInterval(60)
+        let samples: [HealthReading] = [
+            .init(metric: .heartRate, date: start.addingTimeInterval(-1), value: 80, source: "Watch"),
+            .init(metric: .heartRate, date: start.addingTimeInterval(12), value: 72, source: "Watch"),
+            .init(metric: .heartRate, date: start.addingTimeInterval(58), value: 68, source: "Watch"),
+            .init(metric: .heartRate, date: end, value: .nan, source: "Watch"),
+            .init(metric: .oxygen, date: end, value: 98, source: "Watch"),
+            .init(metric: .heartRate, date: end.addingTimeInterval(1), value: 90, source: "Watch")
+        ]
+        #expect(RelaxationHeartRate.latest(in: samples, startedAt: start, endedAt: end)?.value == 68)
+        #expect(RelaxationHeartRate.latest(in: [samples[0]], startedAt: start, endedAt: end) == nil)
+        #expect(RelaxationHeartRate.latest(in: samples, startedAt: end, endedAt: start) == nil)
+        let decrease = RelaxationHeartRate.decreaseFraction(in: samples, startedAt: start, endedAt: end)
+        #expect(abs((decrease ?? 0) - 4.0 / 72) < 0.0001)
+        #expect(RelaxationHeartRate.decreaseFraction(in: [samples[2]], startedAt: start, endedAt: end) == nil)
+    }
+
     @Test func breathingHapticsFollowTheSessionAndStopWhenUnavailable() {
         var session = RelaxationSession(duration: .oneMinute, mode: .breathing)
         #expect(session.hapticCue(at: start) == nil)

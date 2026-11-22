@@ -24,10 +24,13 @@ final class CompanionStoreTests: XCTestCase {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
         defer { try? FileManager.default.removeItem(at: url) }
         let store = try CompanionStore(url: url)
-        let record = RelaxationRecord(duration: .oneMinute, mode: .quiet, startedAt: Date(timeIntervalSince1970: 100), completedAt: Date(timeIntervalSince1970: 160))
+        let reading = HealthReading(metric: .heartRate, date: Date(timeIntervalSince1970: 158), value: 68, source: "Apple Watch")
+        var record = RelaxationRecord(duration: .oneMinute, mode: .quiet, startedAt: Date(timeIntervalSince1970: 100), completedAt: Date(timeIntervalSince1970: 160), finalHeartRate: reading)
         try store.savePractice(record)
+        record.feedback = .better
         try store.savePractice(record)
         XCTAssertEqual(try CompanionStore(url: url).practices, [record])
+        XCTAssertEqual(try CompanionStore(url: url).practices.first?.finalHeartRate, reading)
         try store.deletePractice(record.id)
         XCTAssertTrue(try CompanionStore(url: url).practices.isEmpty)
     }

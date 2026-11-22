@@ -1,0 +1,367 @@
+{
+  "verifiedAt": "2026-11-20",
+  "screenshotCapture": {
+    "method": "XCTest screenshot attachments",
+    "simulator": "iPhone 17 Pro Max",
+    "healthData": "Explicitly labelled DEBUG demo data",
+    "testsPassed": 1
+  },
+  "safeAreas": {
+    "product-page-header": {
+      "x": 1097,
+      "y": 493,
+      "width": 1646,
+      "height": 661
+    },
+    "search-results": {
+      "x": 836,
+      "y": 765,
+      "width": 2168,
+      "height": 1030
+    }
+  },
+  "files": [
+    {
+      "file": "screenshots/iphone-large/01-today-1320x2868.png",
+      "width": 1320,
+      "height": 2868,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 449821,
+      "bounds": [
+        {
+          "name": "headline",
+          "safe": false,
+          "x": 108,
+          "y": 222,
+          "width": 716.984375,
+          "height": 302.53125
+        },
+        {
+          "name": "subtitle",
+          "safe": false,
+          "x": 112,
+          "y": 561,
+          "width": 435.46875,
+          "height": 115.1875
+        },
+        {
+          "name": "phone",
+          "safe": false,
+          "x": 180,
+          "y": 748,
+          "width": 960,
+          "height": 2048.28125
+        }
+      ]
+    },
+    {
+      "file": "screenshots/iphone-medium/01-today-1206x2622.png",
+      "width": 1206,
+      "height": 2622,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 649842
+    },
+    {
+      "file": "screenshots/iphone-large/02-mood-1320x2868.png",
+      "width": 1320,
+      "height": 2868,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 525279,
+      "bounds": [
+        {
+          "name": "headline",
+          "safe": false,
+          "x": 108,
+          "y": 222,
+          "width": 836.484375,
+          "height": 302.53125
+        },
+        {
+          "name": "subtitle",
+          "safe": false,
+          "x": 112,
+          "y": 561,
+          "width": 362.890625,
+          "height": 115.1875
+        },
+        {
+          "name": "phone",
+          "safe": false,
+          "x": 180,
+          "y": 748,
+          "width": 960,
+          "height": 2048.28125
+        }
+      ]
+    },
+    {
+      "file": "screenshots/iphone-medium/02-mood-1206x2622.png",
+      "width": 1206,
+      "height": 2622,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 768394
+    },
+    {
+      "file": "screenshots/iphone-large/03-sleep-1320x2868.png",
+      "width": 1320,
+      "height": 2868,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 2167830,
+      "bounds": [
+        {
+          "name": "headline",
+          "safe": false,
+          "x": 108,
+          "y": 222,
+          "width": 716.984375,
+          "height": 302.53125
+        },
+        {
+          "name": "subtitle",
+          "safe": false,
+          "x": 112,
+          "y": 561,
+          "width": 362.890625,
+          "height": 115.1875
+        },
+        {
+          "name": "phone",
+          "safe": false,
+          "x": 180,
+          "y": 748,
+          "width": 960,
+          "height": 2048.28125
+        }
+      ]
+    },
+    {
+      "file": "screenshots/iphone-medium/03-sleep-1206x2622.png",
+      "width": 1206,
+      "height": 2622,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 2083760
+    },
+    {
+      "file": "screenshots/iphone-large/04-trends-1320x2868.png",
+      "width": 1320,
+      "height": 2868,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 452618,
+      "bounds": [
+        {
+          "name": "headline",
+          "safe": false,
+          "x": 108,
+          "y": 222,
+          "width": 955.96875,
+          "height": 302.53125
+        },
+        {
+          "name": "subtitle",
+          "safe": false,
+          "x": 112,
+          "y": 561,
+          "width": 362.890625,
+          "height": 115.1875
+        },
+        {
+          "name": "phone",
+          "safe": false,
+          "x": 180,
+          "y": 748,
+          "width": 960,
+          "height": 2048.28125
+        }
+      ]
+    },
+    {
+      "file": "screenshots/iphone-medium/04-trends-1206x2622.png",
+      "width": 1206,
+      "height": 2622,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 701956
+    },
+    {
+      "file": "screenshots/iphone-large/05-scenes-1320x2868.png",
+      "width": 1320,
+      "height": 2868,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 735529,
+      "bounds": [
+        {
+          "name": "headline",
+          "safe": false,
+          "x": 108,
+          "y": 222,
+          "width": 597.484375,
+          "height": 302.53125
+        },
+        {
+          "name": "subtitle",
+          "safe": false,
+          "x": 112,
+          "y": 561,
+          "width": 435.46875,
+          "height": 115.1875
+        },
+        {
+          "name": "phone",
+          "safe": false,
+          "x": 180,
+          "y": 748,
+          "width": 960,
+          "height": 2048.28125
+        }
+      ]
+    },
+    {
+      "file": "screenshots/iphone-medium/05-scenes-1206x2622.png",
+      "width": 1206,
+      "height": 2622,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 966586
+    },
+    {
+      "file": "screenshots/iphone-large/06-privacy-1320x2868.png",
+      "width": 1320,
+      "height": 2868,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 647223,
+      "bounds": [
+        {
+          "name": "headline",
+          "safe": false,
+          "x": 108,
+          "y": 222,
+          "width": 597.484375,
+          "height": 302.53125
+        },
+        {
+          "name": "subtitle",
+          "safe": false,
+          "x": 112,
+          "y": 561,
+          "width": 471.75,
+          "height": 115.1875
+        },
+        {
+          "name": "phone",
+          "safe": false,
+          "x": 180,
+          "y": 748,
+          "width": 960,
+          "height": 2048.28125
+        }
+      ]
+    },
+    {
+      "file": "screenshots/iphone-medium/06-privacy-1206x2622.png",
+      "width": 1206,
+      "height": 2622,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 896341
+    },
+    {
+      "file": "creative/product-page-header-3840x1646.png",
+      "width": 3840,
+      "height": 1646,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 822756,
+      "bounds": [
+        {
+          "name": "copy",
+          "safe": true,
+          "x": 1190,
+          "y": 594,
+          "width": 930,
+          "height": 384
+        },
+        {
+          "name": "mascot",
+          "safe": true,
+          "x": 2125,
+          "y": 505,
+          "width": 610,
+          "height": 610
+        }
+      ]
+    },
+    {
+      "file": "creative/search-results-3840x2560.png",
+      "width": 3840,
+      "height": 2560,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false,
+      "bytes": 1233481,
+      "bounds": [
+        {
+          "name": "copy",
+          "safe": true,
+          "x": 936,
+          "y": 852,
+          "width": 1370,
+          "height": 630.78125
+        },
+        {
+          "name": "mascot",
+          "safe": true,
+          "x": 2060,
+          "y": 1160,
+          "width": 500,
+          "height": 500
+        },
+        {
+          "name": "phone",
+          "safe": true,
+          "x": 2500,
+          "y": 816,
+          "width": 430,
+          "height": 915.5
+        },
+        {
+          "name": "phone",
+          "safe": false,
+          "x": 2500,
+          "y": 816,
+          "width": 430,
+          "height": 915.5
+        }
+      ]
+    },
+    {
+      "file": "creative/app-icon-1024x1024.png",
+      "width": 1024,
+      "height": 1024,
+      "channels": 3,
+      "colourspace": "srgb",
+      "hasAlpha": false
+    }
+  ]
+}

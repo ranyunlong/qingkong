@@ -1,0 +1,109 @@
+{
+  "brand": "小晴空",
+  "generatedAt": "2026-11-19T17:06:42.407Z",
+  "method": "Existing SwiftUI views rendered at custom canvas sizes on iOS 26.5; not a Duo device capture",
+  "nativeDuoVerified": false,
+  "visibleMockupWatermark": false,
+  "files": [
+    {
+      "file": "outer/01-today-1398x2034.png",
+      "width": 1398,
+      "height": 2034,
+      "channels": 3,
+      "hasAlpha": false,
+      "space": "srgb"
+    },
+    {
+      "file": "outer/02-mood-1398x2034.png",
+      "width": 1398,
+      "height": 2034,
+      "channels": 3,
+      "hasAlpha": false,
+      "space": "srgb"
+    },
+    {
+      "file": "outer/03-sleep-1398x2034.png",
+      "width": 1398,
+      "height": 2034,
+      "channels": 3,
+      "hasAlpha": false,
+      "space": "srgb"
+    },
+    {
+      "file": "outer/04-trends-1398x2034.png",
+      "width": 1398,
+      "height": 2034,
+      "channels": 3,
+      "hasAlpha": false,
+      "space": "srgb"
+    },
+    {
+      "file": "outer/05-scenes-1398x2034.png",
+      "width": 1398,
+      "height": 2034,
+      "channels": 3,
+      "hasAlpha": false,
+      "space": "srgb"
+    },
+    {
+      "file": "outer/06-privacy-1398x2034.png",
+      "width": 1398,
+      "height": 2034,
+      "channels": 3,
+      "hasAlpha": false,
+      "space": "srgb"
+    },
+    {
+      "file": "inner/01-today-2007x2853.png",
+      "width": 2007,
+      "height": 2853,
+      "channels": 3,
+      "hasAlpha": false,
+      "space": "srgb"
+    },
+    {
+      "file": "inner/02-mood-2007x2853.png",
+      "width": 2007,
+      "height": 2853,
+      "channels": 3,
+      "hasAlpha": false,
+      "space": "srgb"
+    },
+    {
+      "file": "inner/03-sleep-2007x2853.png",
+      "width": 2007,
+      "height": 2853,
+      "channels": 3,
+      "hasAlpha": false,
+      "space": "srgb"
+    },
+    {
+      "file": "inner/04-trends-2007x2853.png",
+      "width": 2007,
+      "height": 2853,
+      "channels": 3,
+      "hasAlpha": false,
+      "space": "srgb"
+    },
+    {
+      "file": "inner/05-scenes-2007x2853.png",
+      "width": 2007,
+      "height": 2853,
+      "channels": 3,
+      "hasAlpha": false,
+      "space": "srgb"
+    },
+    {
+      "file": "inner/06-privacy-2007x2853.png",
+      "width": 2007,
+      "height": 2853,
+      "channels": 3,
+      "hasAlpha": false,
+      "space": "srgb"
+    }
+  ],
+  "visualReview": {
+    "completed": true,
+    "scope": "All 12 pages reviewed in the final overview; full-resolution samples inspected, including the corrected inner privacy page."
+  }
+}

@@ -56,7 +56,8 @@ struct TodayView: View {
     }
 
     private var homeIntro: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        let mood = MoodSummary.latest(in: app.store.records)?.value ?? 3
+        return VStack(alignment: .leading, spacing: 10) {
             Text(Date.now.formatted(.dateTime.month().day().weekday())).font(.caption).foregroundStyle(Color.readableSecondary)
             HStack(alignment: .lastTextBaseline, spacing: 16) {
                 Text("了解身体，\n也关心自己。")
@@ -64,10 +65,13 @@ struct TodayView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if app.companion.calmHome {
-                    Image("mood-\(MoodSummary.latest(in: app.store.records)?.value ?? 3)")
+                    Image("mood-\(mood)")
                         .resizable().scaledToFit().frame(width: 112, height: 112)
+                        .id(mood)
                         .alignmentGuide(.lastTextBaseline) { $0.height * 0.86 }
                         .accessibilityLabel("心情团子")
+                        .accessibilityIdentifier("today-dumpling")
+                        .accessibilityValue(MoodRecord.labels[mood - 1])
                 }
             }
             Text("不必时刻满分，舒服就很好。")

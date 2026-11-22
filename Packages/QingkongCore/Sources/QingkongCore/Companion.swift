@@ -39,6 +39,28 @@ public enum RelaxationStatus: String, Codable, Sendable {
     case ready, running, paused, completed, exited
 }
 
+public enum RelaxationHeartRate {
+    /// Never present a pre-session or future reading as this practice's result.
+    public static func latest(in readings: [HealthReading], startedAt: Date, endedAt: Date) -> HealthReading? {
+        guard endedAt >= startedAt else { return nil }
+        return readings.filter {
+            $0.metric == .heartRate && $0.isValid && $0.date >= startedAt && $0.date <= endedAt
+        }.max { $0.date < $1.date }
+    }
+
+    /// A descriptive change, not a recovery score. Widely separated samples
+    /// avoid comparing two measurements from the same instant.
+    public static func decreaseFraction(in readings: [HealthReading], startedAt: Date, endedAt: Date) -> Double? {
+        let valid = readings.filter {
+            $0.metric == .heartRate && $0.isValid && $0.date >= startedAt && $0.date <= endedAt
+        }
+        guard let first = valid.min(by: { $0.date < $1.date }),
+              let last = latest(in: valid, startedAt: startedAt, endedAt: endedAt),
+              last.date.timeIntervalSince(first.date) >= 20 else { return nil }
+        return (first.value - last.value) / first.value
+    }
+}
+
 /// A comfortable suggested rhythm, with no breath holding. Users can breathe naturally.
 public enum RelaxationPhase: String, Codable, Sendable {
     case inhale, exhale, quiet
@@ -64,11 +86,13 @@ public struct RelaxationRecord: Codable, Equatable, Identifiable, Sendable {
     public let startedAt: Date
     public let completedAt: Date
     public var feedback: RelaxationFeedback?
+    public let finalHeartRate: HealthReading?
     public var practicedSeconds: TimeInterval { duration.seconds }
 
-    public init(id: UUID = UUID(), duration: RelaxationDuration, mode: RelaxationMode, startedAt: Date, completedAt: Date, feedback: RelaxationFeedback? = nil) {
+    public init(id: UUID = UUID(), duration: RelaxationDuration, mode: RelaxationMode, startedAt: Date, completedAt: Date, feedback: RelaxationFeedback? = nil, finalHeartRate: HealthReading? = nil) {
         self.id = id; self.duration = duration; self.mode = mode
         self.startedAt = startedAt; self.completedAt = completedAt; self.feedback = feedback
+        self.finalHeartRate = finalHeartRate.flatMap { RelaxationHeartRate.latest(in: [$0], startedAt: startedAt, endedAt: completedAt) }
     }
 }
 
@@ -152,9 +176,9 @@ public struct RelaxationSession: Codable, Equatable, Identifiable, Sendable {
         activeStartedAt = nil; pausedAt = nil; status = .exited
     }
 
-    public func completedRecord(feedback: RelaxationFeedback? = nil) -> RelaxationRecord? {
+    public func completedRecord(feedback: RelaxationFeedback? = nil, finalHeartRate: HealthReading? = nil) -> RelaxationRecord? {
         guard status == .completed, let startedAt, let endedAt else { return nil }
-        return RelaxationRecord(id: id, duration: duration, mode: mode, startedAt: startedAt, completedAt: endedAt, feedback: feedback)
+        return RelaxationRecord(id: id, duration: duration, mode: mode, startedAt: startedAt, completedAt: endedAt, feedback: feedback, finalHeartRate: finalHeartRate)
     }
 }
 

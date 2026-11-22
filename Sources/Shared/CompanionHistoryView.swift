@@ -13,6 +13,13 @@ struct CompanionHistoryView: View {
                         Text("\(record.duration.name) · \(record.mode.name)").font(.headline)
                         Text(record.completedAt.formatted(date: .abbreviated, time: .shortened)).font(.caption)
                         Text(record.feedback?.name ?? "未记录感受").font(.caption)
+                        if let reading = record.finalHeartRate,
+                           RelaxationHeartRate.latest(in: [reading], startedAt: record.startedAt, endedAt: record.completedAt) != nil {
+                            Label("最后心率 \(reading.value.formatted(.number.precision(.fractionLength(0)))) 次/分", systemImage: "heart")
+                                .font(.caption).accessibilityIdentifier("practice-heart-rate")
+                            Text("采样 \(reading.date.formatted(.dateTime.hour().minute().second()))")
+                                .font(.caption2).foregroundStyle(.secondary)
+                        }
                     }.swipeActions { Button("删除", role: .destructive) {
                         do { try app.companion.deletePractice(record.id) } catch { self.error = "暂未删除，请重试。" }
                     } }

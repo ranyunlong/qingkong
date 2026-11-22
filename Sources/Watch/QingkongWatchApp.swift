@@ -246,7 +246,7 @@ struct WatchSetupView: View {
     var body: some View {
         List {
             Section("Apple 健康") {
-                Text("只读取你允许的健康记录，无数据不代表你拒绝了访问。 ").font(.caption2)
+                Text("健康记录经你允许后在本地读取。陪伴时另行申请体能训练权限以采集心率，结束后不保存训练；心率不上传。无数据不代表你拒绝了访问。").font(.caption2)
                 Button(app.health.requested ? "检查健康连接" : "连接健康") { Task { await app.health.authorize(); await app.watchReminders.activate(healthConnected: app.health.requested) } }
                 if let error = app.health.error { Text(error).font(.caption2) }
             }
