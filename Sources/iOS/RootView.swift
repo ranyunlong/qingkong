@@ -7,6 +7,7 @@ struct RootView: View {
     @Environment(AppServices.self) private var app
     @Environment(\.scenePhase) private var scenePhase
     @State private var tab: AppTab = .today
+    @State private var sleepRootVisible = true
     @State private var mood = 3
     @State private var settings = false
     @State private var reminderSheet: ReminderDestination?
@@ -45,6 +46,7 @@ struct RootView: View {
             .onOpenURL { url in
                 guard url.scheme == "qingkong" else { return }
                 if url.host == "dumpling" { tab = .mood }
+                else if url.host == "music" { tab = .sleep }
                 else if url.host == "trend", let metric = HealthMetric(rawValue: url.lastPathComponent) {
                     trendMetric = metric; tab = .trends
                 }
@@ -64,25 +66,21 @@ struct RootView: View {
         }
     }
 
-    @ViewBuilder private var tabShell: some View {
-        if #available(iOS 26.1, *) {
-            tabs.tabViewBottomAccessory(isEnabled: app.player.state.playing) { MiniPlayer { tab = .sleep } }
-        } else {
-            tabs.safeAreaInset(edge: .bottom, spacing: 0) {
-                if app.player.state.playing { MiniPlayer { tab = .sleep }.padding(.horizontal).padding(.vertical, 6).background(.bar) }
-            }
-        }
-    }
+    private var tabShell: some View { tabs }
 
     private var tabs: some View {
         TabView(selection: $tab) {
-            navigation("今日") { TodayView(selectedMood: $mood, openMood: { tab = .mood }, openSleep: { tab = .sleep }) }
+            navigation("今日") { TodayView(selectedMood: $mood, openMood: { tab = .mood }) }
                 .tabItem { tabLabel("今日", systemImage: "sun.max") }.tag(AppTab.today)
             navigation("趋势") { TrendsView(metric: $trendMetric) }
                 .tabItem { tabLabel("趋势", systemImage: "chart.bar") }.tag(AppTab.trends)
             navigation("心情") { MoodView(selectedMood: $mood) }
                 .tabItem { tabLabel("心情", systemImage: "face.smiling") }.tag(AppTab.mood)
-            navigation("助眠") { SleepView() }
+            navigation("助眠") {
+                SleepView()
+                    .onAppear { sleepRootVisible = true }
+                    .onDisappear { sleepRootVisible = false }
+            }
                 .tabItem { tabLabel("助眠", systemImage: "moon.stars") }.tag(AppTab.sleep)
         }
     }
@@ -107,6 +105,11 @@ struct RootView: View {
                     }
                 }
         }
+        .safeAreaInset(edge: .bottom, spacing: 8) {
+            if (app.player.state.playing || app.player.buffering) && (tab != .sleep || !sleepRootVisible) {
+                MiniPlayer { tab = .sleep }.padding(.horizontal, 22).padding(.bottom, 8)
+            }
+        }
     }
 }
 
@@ -121,7 +124,7 @@ private struct HealthConnectionIntroductionView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     Image(systemName: "heart.text.clipboard").font(.system(size: 48)).foregroundStyle(app.scene.accent).accessibilityHidden(true)
                     Text("连接健康，\n了解自己的日常。").font(.largeTitle.bold())
-                    Text("允许晴空读取 Apple 健康中的心率、血氧、HRV 和已有的心电图记录，查看趋势并接收你开启的健康提醒。")
+                    Text("允许小晴空读取 Apple 健康中的心率、血氧、HRV 和已有的心电图记录，查看趋势并接收你开启的健康提醒。")
                     Label("只申请读取，不写入或修改记录", systemImage: "checkmark.shield")
                     Label("健康与日记保留在设备上", systemImage: "iphone")
                     Text("你可以逐项选择允许读取的数据，也可以稍后在个性化设置中连接。没有可读取数据时，仍能记录心情和听自然声音。")
@@ -137,7 +140,7 @@ private struct HealthConnectionIntroductionView: View {
                     }.qingkongGlassButton(prominent: true).disabled(connecting).accessibilityIdentifier("initial-connect-health")
                     Button("稍后再说") { dismiss() }.qingkongGlassButton().disabled(connecting).accessibilityIdentifier("skip-initial-health")
                 }.padding(24)
-            }.navigationTitle("欢迎来到晴空").navigationBarTitleDisplayMode(.inline)
+            }.navigationTitle("欢迎来到小晴空").navigationBarTitleDisplayMode(.inline)
         }.tint(app.scene.accent).interactiveDismissDisabled(connecting)
     }
 }
@@ -145,24 +148,39 @@ private struct HealthConnectionIntroductionView: View {
 struct MiniPlayer: View {
     @Environment(AppServices.self) private var app
     let open: () -> Void
-    var body: some View {
+    @ViewBuilder var body: some View {
+        if #available(iOS 26, *) { controls.glassEffect(.regular, in: .capsule) }
+        else { controls.background(.bar, in: .capsule) }
+    }
+
+    private var controls: some View {
         HStack(spacing: 12) {
             Button(action: open) {
                 HStack(spacing: 10) {
-                    Image(app.player.state.track.image).resizable().scaledToFill().frame(width: 36, height: 36).clipShape(RoundedRectangle(cornerRadius: 10))
+                    AudioArtworkView(state: app.player.state).frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(app.player.state.track.name).font(.subheadline.weight(.medium))
-                        Text("正在播放 · 点按展开").font(.caption2).foregroundStyle(Color.readableSecondary)
+                        Text(app.player.state.displayTitle).font(.subheadline.weight(.medium)).lineLimit(1)
+                        Text(app.player.buffering ? "正在加载 · 点按展开" : (app.player.state.playing ? "正在播放 · 点按展开" : "已暂停 · 点按展开"))
+                            .font(.caption2).foregroundStyle(Color.readableSecondary).lineLimit(1)
                     }
                     Spacer(minLength: 0)
                 }.contentShape(Rectangle())
-            }.accessibilityLabel("展开播放器")
-            Button("暂停", systemImage: "pause.fill") { app.player.pause() }
-                .labelStyle(.iconOnly).frame(minWidth: 44, minHeight: 44)
+            }.accessibilityLabel("展开播放器").accessibilityIdentifier("mini-player-open")
+            Button {
+                Task { await app.player.toggle() }
+            } label: {
+                Image(systemName: app.player.state.playing || app.player.buffering ? "pause.fill" : "play.fill")
+                    .font(.system(size: 19, weight: .semibold)).frame(width: 48, height: 48).contentShape(Rectangle())
+            }
+            .accessibilityLabel(app.player.state.playing || app.player.buffering ? "暂停播放" : "继续播放")
+            .accessibilityIdentifier("mini-player-toggle")
         }
-        // The system bottom accessory (or legacy bar) supplies the background.
         .buttonStyle(.plain)
-        .padding(.horizontal, 12).padding(.vertical, 4)
+        .padding(.horizontal, 16).padding(.vertical, 14)
+        .frame(minHeight: 76)
+        .background {
+            Capsule().fill(.clear).contentShape(Capsule()).onTapGesture(perform: open).accessibilityHidden(true)
+        }
     }
 }
 

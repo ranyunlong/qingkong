@@ -9,6 +9,7 @@ struct PersonalizationView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var wallpaper = false
     @State private var faceGuide = false
+    @State private var homePreferenceError: String?
     var body: some View {
         Form {
             Section {
@@ -35,6 +36,15 @@ struct PersonalizationView: View {
                 }.scrollIndicators(.hidden)
                 Button("预览与保存桌面图片", systemImage: "photo") { wallpaper = true }
             } header: { Text("换一种日常") } footer: { Text("按钮、开关和重点文字与场景协调变化。手动选择主题会关闭压力联动。") }
+
+            Section {
+                Toggle("安心首页", isOn: Binding(get: { app.companion.calmHome }, set: { enabled in
+                    do { try app.companion.setCalmHome(enabled); homePreferenceError = nil }
+                    catch { homePreferenceError = "首页偏好暂未保存，请重试。" }
+                }))
+                .accessibilityIdentifier("calm-home")
+                if let homePreferenceError { Text(homePreferenceError).font(.footnote).foregroundStyle(Color.readableSecondary) }
+            } header: { Text("按自己的节奏") } footer: { Text("默认开启，首页突出团子、心情与放松。关闭后显示首页健康数据，趋势页始终可主动查看。") }
 
             Section {
                 Toggle("跟随压力感受换景", isOn: Binding(get: { app.store.preferences.automaticScene }, set: { value in app.store.updatePreferences { $0.automaticScene = value } }))
@@ -70,7 +80,7 @@ struct PersonalizationView: View {
                 Button("在系统中添加表盘组件", systemImage: "applewatch") { faceGuide = true }
                 Label(app.link.syncMessage, systemImage: "arrow.triangle.2.circlepath").font(.footnote).foregroundStyle(Color.readableSecondary)
                 if let error = app.link.error { Text(error).font(.footnote).foregroundStyle(Color.readableSecondary) }
-            } header: { Text("手腕上的晴空") } footer: { Text("团子页面始终显示 HRV、心率和血氧三项数值。点按系统表盘中的「心情团子」可进入手表 App 的动画页面。") }
+            } header: { Text("手腕上的小晴空") } footer: { Text("团子页面始终显示 HRV、心率和血氧三项数值。点按系统表盘中的「心情团子」可进入手表 App 的动画页面。") }
 
             Section {
                 Picker("默认显示指标", selection: Binding(get: { app.store.preferences.complicationMetric }, set: { value in app.store.updatePreferences { $0.complicationMetric = value } })) {
@@ -88,6 +98,16 @@ struct PersonalizationView: View {
                 }
                 NavigationLink("隐私说明") { PrivacyView() }
                 LabeledContent("版本", value: "0.1.0 · 开发版")
+            }
+            Section {
+                Link(destination: URL(string: "https://github.com/ranyunlong/qingkong")!) {
+                    Label("GitHub · ranyunlong/qingkong", systemImage: "chevron.left.forwardslash.chevron.right")
+                }.accessibilityIdentifier("open-github-repository")
+                Link(destination: URL(string: "https://github.com/ranyunlong/qingkong/issues")!) {
+                    Label("问题反馈 · Issues", systemImage: "bubble.left.and.bubble.right")
+                }.accessibilityIdentifier("open-github-issues")
+            } header: { Text("开源与反馈") } footer: {
+                Text("小晴空是 GitHub 开源项目。服务端仅提供文章与音乐，不同步你的健康、心情或日记数据；这些个人数据保留在你的设备上。")
             }
         }.tint(app.scene.accent).navigationTitle("个性化").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() }.buttonStyle(.automatic) } }
@@ -175,8 +195,8 @@ struct WatchFaceGuideView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("把晴空放到表盘上") {
-                    Label("先在配对的 Apple Watch 安装晴空并打开一次。", systemImage: "1.circle")
+                Section("把小晴空放到表盘上") {
+                    Label("先在配对的 Apple Watch 安装小晴空并打开一次。", systemImage: "1.circle")
                     Label("长按当前表盘，点「编辑」，滑到复杂功能。", systemImage: "2.circle")
                     Label("选一个圆形、大矩形或单行文字位置，在「所有 App」中找到「小晴空」，再选 HRV、心率或血氧。", systemImage: "3.circle")
                     Label("若选择「跟随 iPhone 配置」，将使用个性化中「健康指标组件」的默认指标；趋势开关只作用于矩形健康组件。设置会在连接后同步到手表。", systemImage: "4.circle")
@@ -193,7 +213,7 @@ struct WatchFaceGuideView: View {
                 }
                 Section {
                     Button("添加已有的 .watchface 文件", systemImage: "square.and.arrow.down") { importing = true }
-                } footer: { Text("若你保存过系统分享的表盘文件，可以交给系统添加。晴空不会直接重写系统表盘布局。") }
+                } footer: { Text("若你保存过系统分享的表盘文件，可以交给系统添加。小晴空不会直接重写系统表盘布局。") }
                 if let message { Text(message).font(.footnote).foregroundStyle(Color.readableSecondary) }
             }.navigationTitle("添加表盘组件").navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() }.buttonStyle(.automatic) } }
@@ -225,15 +245,23 @@ struct PrivacyView: View {
     var body: some View {
         List {
             Section("你掌握自己的记录") {
-                Text("晴空不要求注册，不展示广告，不将健康数据和日记上传至服务器。应用没有云端 AI 或广告分析服务。")
-                Text("健康数据保留在 Apple 健康中，晴空只读取你允许的数据。心情、日记和偏好保存在本机；配对设备通过 Apple WatchConnectivity 同步心情与偏好。")
-                Text("iPhone 与手表会在各自本地共享容器保存最少量的健康摘要及最近心情档位、时间，供屏幕或表盘组件显示；不包含日记或压力评分。原始健康记录不通过晴空跨设备传送。")
+                Text("小晴空不要求注册，不展示广告，不将健康数据和日记上传至服务器。应用没有云端 AI 或广告分析服务。")
+                Text("健康数据保留在 Apple 健康中，小晴空只读取你允许的数据。心情、日记和偏好保存在本机；配对设备通过 Apple WatchConnectivity 同步心情与偏好。")
+                Text("iPhone 与手表会在各自本地共享容器保存最少量的健康摘要及最近心情档位、时间，供屏幕或表盘组件显示；不包含日记或压力评分。原始健康记录不通过小晴空跨设备传送。")
             }
             Section("权限与删除") {
                 Text("你可以在「健康」App 中调整数据访问，在「心情日记」中删除记录。删除标记会在配对设备恢复连接后同步，防止旧记录再次出现。")
                 Text("健康提醒在 iPhone 本地分析你允许读取的 HRV、心率及血氧；各类开关默认开启，系统通知仍需你授权。提醒账本只保留必要时间，不上传健康数据，通知不包含具体健康值或日记。可在个性化中关闭提醒，并在系统设置中调整通知和专注规则。")
-                Text("保存壁纸时仅请求向照片添加图片的权限。晴空不读取你的照片库。")
-                Text("系统备份是否包含本地应用数据由你的设备备份设置决定。晴空不建立自己的云端副本。")
+                Text("保存壁纸时仅请求向照片添加图片的权限。小晴空不读取你的照片库。")
+                Text("系统备份是否包含本地应用数据由你的设备备份设置决定。小晴空不建立自己的云端副本。")
+                Text("睡眠记录在你主动连接后单独请求读取，只在本机生成概览与周回顾。你可以在 Apple 健康管理睡眠访问与源记录。练习、时间线摘要和睡前方案可在对应页面删除。")
+                Text("团子动作只在本机保存点头、摇摆是否解锁的两个标记，不保留对应记录内容、不跨端同步。删除记录不会收回已解锁动作；清除该设备应用数据会清除标记。")
+            }
+            Section("公共内容与网络") {
+                Text("小晴空的服务端仅提供公共文章与音乐。打开知识库、刷新曲库及播放或下载线上音频时，会向公共内容服务或媒体地址发起网络请求。请求不携带健康、心情、日记、生活标签或练习记录。收藏、已读与下载索引仅保存在本机。")
+                Text("iPhone 与手表默认使用同一公共内容服务，无需填写地址；手表自行获取目录和下载音轨，两端缓存分开验证与保存。手表默认下载避开蜂窝与昂贵网络，实际路由由系统选择，可能经手机代理；关闭限制可能使用移动数据。手表下载需保持曲库页面在前台，离页或退后台会中断，可返回重试。")
+                Text("公共内容服务 https://xqk.geckoai.cn 运行于阿里云 ECS，由应用自动连接。服务器会记录 IP、请求时间、路径、来源页及浏览器／系统信息；访问与错误日志配置按日轮转，最多保留 52 份历史归档，空日志不轮转，未设置固定天数上限。云平台及正式媒体提供方的日志规则仍待确认。")
+                Text("内容后端不记录请求正文或个人健康记录。离线文章显示上次检查时间，联网后同步修订与撤回；正式媒体服务及其日志规则在音源发布前补充说明。")
             }
             Section("健康提示") { Text("趋势、HRV 个人基线与心情解读用于日常参考，不构成疾病诊断。出现持续不适时，请联系医疗专业人士。") }
         }.navigationTitle("隐私说明")

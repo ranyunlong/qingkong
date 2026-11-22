@@ -15,7 +15,7 @@ struct QingkongWatchApp: App {
     private func initialize() { services = try? AppServices() }
 }
 
-enum WatchRoute: Hashable { case trend(HealthMetric), mood, music, setup, dumpling }
+enum WatchRoute: Hashable { case trend(HealthMetric), mood, music, setup, dumpling, relaxation, relaxationSettings, companionHistory }
 
 struct WatchRootView: View {
     @Environment(AppServices.self) private var app
@@ -24,6 +24,16 @@ struct WatchRootView: View {
     var body: some View {
         NavigationStack(path: $path) {
             List {
+                HStack(spacing: 0) {
+                    Button { path.append(.relaxation) } label: {
+                        Label("陪我缓一缓", systemImage: "leaf")
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                            .contentShape(Rectangle())
+                    }.accessibilityIdentifier("open-watch-relaxation")
+                    Button { path.append(.relaxationSettings) } label: {
+                        Image(systemName: "ellipsis.circle").font(.title3).frame(width: 44, height: 44).contentShape(Rectangle())
+                    }.accessibilityLabel("陪伴设置").accessibilityIdentifier("open-watch-relaxation-settings")
+                }.buttonStyle(.plain)
                 NavigationLink(value: WatchRoute.dumpling) {
                     HStack(spacing: 8) {
                         Image("mood-\(MoodSummary.latest(in: app.store.records)?.value ?? 3)")
@@ -50,8 +60,10 @@ struct WatchRootView: View {
                 }
                 NavigationLink(value: WatchRoute.mood) { Label("记下此刻", systemImage: "face.smiling") }
                 NavigationLink(value: WatchRoute.music) { Label("听听自然", systemImage: "moon") }
+                NavigationLink { WatchAudioLibraryView() } label: { Label("手表曲库与下载", systemImage: "arrow.down.circle") }
+                NavigationLink(value: WatchRoute.companionHistory) { Label("陪伴回顾", systemImage: "clock") }
                 NavigationLink(value: WatchRoute.setup) { Label("连接与设置", systemImage: "gearshape") }
-            }.navigationTitle("晴空")
+            }.navigationTitle("小晴空")
                 .navigationDestination(for: WatchRoute.self) { route in
                     switch route {
                     case .dumpling: WatchDumplingView()
@@ -59,10 +71,16 @@ struct WatchRootView: View {
                     case .mood: WatchMoodView()
                     case .music: WatchMusicView()
                     case .setup: WatchSetupView()
+                    case .relaxation: RelaxationView()
+                    case .relaxationSettings: WatchRelaxationSettingsView()
+                    case .companionHistory: CompanionHistoryView()
                     }
                 }
         }.task { await app.start() }
-            .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await app.activate() } } }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { Task { await app.activate() } }
+                else { app.downloads.interruptForegroundDownloads() }
+            }
             .onChange(of: app.watchReminders.destination, initial: true) { _, kind in
                 guard let kind else { return }
                 path = [.trend(kind.metric)]
@@ -74,6 +92,67 @@ struct WatchRootView: View {
                       let metric = HealthMetric(rawValue: url.lastPathComponent) else { return }
                 path = [.trend(metric)]
             }
+    }
+}
+
+private struct WatchRelaxationSettingsView: View {
+    private var preferences = WatchRelaxationPreferences()
+    var body: some View {
+        List {
+            NavigationLink {
+                WatchRelaxationDurationView(selection: preferences.$duration)
+            } label: {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("陪伴时长")
+                    Text(preferences.duration.name).font(.caption).foregroundStyle(.secondary)
+                }
+            }.accessibilityIdentifier("watch-relaxation-duration")
+            NavigationLink {
+                WatchRelaxationModeView(selection: preferences.$mode)
+            } label: {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("陪伴方式")
+                    Text(preferences.mode.name).font(.caption).foregroundStyle(.secondary)
+                }
+            }.accessibilityIdentifier("watch-relaxation-mode")
+            Toggle("引导声音", isOn: preferences.$sound).accessibilityIdentifier("watch-relaxation-sound")
+            Toggle("手表触感", isOn: preferences.$haptics).accessibilityIdentifier("watch-relaxation-haptics")
+            Text("按舒服的节奏自然呼吸，不需要憋气；若不舒服，请点结束。").font(.footnote).foregroundStyle(.secondary)
+        }.navigationTitle("陪伴设置")
+    }
+}
+
+private struct WatchRelaxationDurationView: View {
+    @Binding var selection: RelaxationDuration
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        List(RelaxationDuration.allCases) { value in
+            Button { selection = value; dismiss() } label: {
+                HStack {
+                    Text(value.name)
+                    Spacer()
+                    if selection == value { Image(systemName: "checkmark") }
+                }.frame(minHeight: 32).contentShape(Rectangle())
+            }.buttonStyle(.plain)
+                .accessibilityAddTraits(selection == value ? .isSelected : [])
+        }.navigationTitle("陪伴时长")
+    }
+}
+
+private struct WatchRelaxationModeView: View {
+    @Binding var selection: RelaxationMode
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        List(RelaxationMode.allCases) { value in
+            Button { selection = value; dismiss() } label: {
+                HStack {
+                    Text(value.name)
+                    Spacer()
+                    if selection == value { Image(systemName: "checkmark") }
+                }.frame(minHeight: 32).contentShape(Rectangle())
+            }.buttonStyle(.plain)
+                .accessibilityAddTraits(selection == value ? .isSelected : [])
+        }.navigationTitle("陪伴方式")
     }
 }
 
@@ -190,7 +269,7 @@ struct WatchSetupView: View {
             }
             Section("表盘组件") {
                 Text("添加「心情团子」圆形或矩形组件，点按进入团子页面。该页面亮屏活跃时播放一次表情动作，随后静止；系统仍会按设置返回表盘。").font(.caption2)
-                Text("长按系统表盘 → 编辑 → 复杂功能，选择晴空。可在 iPhone 晴空中配置默认指标和迷你趋势。 ").font(.caption2)
+                Text("长按系统表盘 → 编辑 → 复杂功能，选择小晴空。可在 iPhone 小晴空中配置默认指标和迷你趋势。 ").font(.caption2)
                 Button("刷新表盘组件") {
                     app.refreshComplications()
                     complicationRefreshRequested = true

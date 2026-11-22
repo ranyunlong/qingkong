@@ -65,7 +65,7 @@ struct ECGListView: View {
     var body: some View {
         List {
             Section {
-                Text("显示「健康」中已有的心电图记录和系统分类。晴空不主动测量或诊断。 ").font(.footnote).foregroundStyle(Color.readableSecondary)
+                Text("显示「健康」中已有的心电图记录和系统分类。小晴空不主动测量或诊断。 ").font(.footnote).foregroundStyle(Color.readableSecondary)
             }
             if app.health.ecgs.isEmpty {
                 ContentUnavailableView("暂无心电图记录", systemImage: "waveform.path.ecg", description: Text("记录可用性取决于设备、地区及你允许读取的数据。"))
@@ -96,7 +96,7 @@ struct ECGDetailView: View {
             VStack(alignment: .leading, spacing: 24) {
                 Text(record.date.formatted(date: .complete, time: .shortened)).font(.subheadline).foregroundStyle(Color.readableSecondary)
                 Text(record.classification).font(.title2.weight(.semibold))
-                Text("以上为健康记录中的系统分类，非晴空的诊断结论。 ").font(.footnote).foregroundStyle(Color.readableSecondary)
+                Text("以上为健康记录中的系统分类，非小晴空的诊断结论。 ").font(.footnote).foregroundStyle(Color.readableSecondary)
                 if loading { ProgressView("正在读取波形").frame(maxWidth: .infinity) }
                 else if !points.isEmpty {
                     ECGWaveformChart(points: points, color: app.scene.accent)

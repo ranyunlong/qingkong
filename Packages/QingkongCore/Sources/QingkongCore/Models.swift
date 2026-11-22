@@ -46,13 +46,15 @@ public struct MoodRecord: Identifiable, Codable, Equatable, Sendable {
     public var mood: Int
     public var stress: Int
     public var note: String
+    public var tags: [LifeTag]
     public var createdAt: Date
     public var updatedAt: Date
     public var isDeleted: Bool
-    public init(id: UUID = UUID(), mood: Int, stress: Int, note: String, createdAt: Date = .now) {
+    public init(id: UUID = UUID(), mood: Int, stress: Int, note: String, createdAt: Date = .now, tags: [LifeTag] = []) {
         precondition((1...5).contains(mood) && (1...5).contains(stress))
         self.id = id; self.mood = mood; self.stress = stress; self.note = String(note.prefix(1000))
         self.createdAt = createdAt; self.updatedAt = createdAt; self.isDeleted = false
+        self.tags = LifeTag.allCases.filter { tags.contains($0) }
     }
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -60,6 +62,7 @@ public struct MoodRecord: Identifiable, Codable, Equatable, Sendable {
         mood = try c.decode(Int.self, forKey: .mood)
         stress = try c.decode(Int.self, forKey: .stress)
         note = try c.decode(String.self, forKey: .note)
+        tags = try c.decodeIfPresent([LifeTag].self, forKey: .tags) ?? []
         createdAt = try c.decode(Date.self, forKey: .createdAt)
         updatedAt = try c.decode(Date.self, forKey: .updatedAt)
         isDeleted = try c.decode(Bool.self, forKey: .isDeleted)
@@ -135,11 +138,25 @@ public struct SleepDeadline: Codable, Equatable, Sendable {
     public func remaining(at now: Date = .now) -> TimeInterval { max(0, date.timeIntervalSince(now)) }
 }
 
+public enum AudioArtwork: Equatable, Sendable {
+    case bundled(String), remote(URL), placeholder
+}
+
 public struct AudioState: Codable, Equatable, Sendable {
     public var track: Track = .rain
     public var playing = false
     public var volume: Float = 0.45
     public var deadline: SleepDeadline?
+    public var onlineTrackID: String?
+    public var onlineTitle: String?
+    public var onlineArtworkURL: URL?
+    public var buffering: Bool?
+    public var displayTitle: String { onlineTitle ?? track.name }
+    public var artwork: AudioArtwork {
+        guard onlineTrackID != nil else { return .bundled(track.image) }
+        if let onlineArtworkURL, PublicContentURL.isHTTPS(onlineArtworkURL) { return .remote(onlineArtworkURL) }
+        return .placeholder
+    }
     public init() {}
 }
 

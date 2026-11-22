@@ -21,6 +21,7 @@ final class WatchHealthReminderService: NSObject, UNUserNotificationCenterDelega
     @ObservationIgnored var probePhone: ((UUID) async -> ReminderProbeResult)?
     @ObservationIgnored var delegateToPhone: ((ReminderSignal) -> Void)?
     @ObservationIgnored var publishReport: ((WatchReminderReport) -> Void)?
+    @ObservationIgnored var didSubmit: ((String, Date, Date, String) -> Void)?
     @ObservationIgnored private let center = UNUserNotificationCenter.current()
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let disabled: Bool
@@ -160,7 +161,10 @@ final class WatchHealthReminderService: NSObject, UNUserNotificationCenterDelega
                     if saved.configuration?.id != signal.configurationID {
                         center.removeDeliveredNotifications(withIdentifiers: ["qingkong.watch." + signal.id])
                         center.removePendingNotificationRequests(withIdentifiers: ["qingkong.watch." + signal.id])
-                    } else { updateReport(signal, result: "手表本地提醒已交给系统"); error = nil }
+                    } else {
+                        didSubmit?("qingkong.watch." + signal.id, .now, signal.sampleDate, notification(for: signal).title)
+                        updateReport(signal, result: "手表本地提醒已交给系统"); error = nil
+                    }
                 } catch {
                     self.error = "本次手表提醒未能提交，等待新记录后再判断。"
                     updateReport(signal, result: self.error!)

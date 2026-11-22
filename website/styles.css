@@ -52,3 +52,186 @@
   .button-primary:hover{box-shadow:0 9px 24px #477fa92a}
 }
 @media print{.site-header,.policy-sidebar,.policy-mobile-toc,.site-footer,.policy-back{display:none}.policy-layout{display:block}.privacy-hero{padding:20px 0;background:white}.container{width:100%}.policy-section{break-inside:avoid}.privacy-hero h1{font-size:30px}}
+
+/* Animated mood artwork follows Design/Previews/dumpling-watch.html. */
+.dumpling{padding:0;border:0;background:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.dumpling svg{width:100%;height:100%;overflow:visible;pointer-events:none}
+.watch{width:164px;height:204px;border-radius:44px}
+.watch-screen{border-radius:38px;padding:12px 10px 11px}
+.watch-time{line-height:1.2}
+.watch-character{display:block;width:98px;height:94px;flex-shrink:0}
+.watch-caption{font-size:7px;line-height:1.5;margin-top:-3px;white-space:nowrap}
+.watch-readings{display:grid;grid-template-columns:repeat(3,1fr);width:100%;margin-top:auto;text-align:center;font-size:13px;line-height:1.1;font-variant-numeric:tabular-nums}
+.watch-readings>span+span{border-left:1px solid #53677455}
+.watch-readings small{display:block;color:#92abb9;font-size:6px;line-height:1.5;font-weight:400}
+.watch-readings small:first-child{margin-bottom:3px}
+.mood-main{margin:5px auto -8px;filter:drop-shadow(0 8px 16px #ab967518)}
+.mood-response{text-align:center;color:#7f7568;font-size:12px;min-height:22px}
+.mood-choices{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:20px}
+.mood-choice{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 2px 9px;min-width:0;min-height:76px;border:1px solid transparent;border-radius:16px;background:transparent;color:#897f72;font-size:10px;cursor:pointer;transition:background .25s,border-color .25s,translate .25s}
+.mood-choice>.dumpling{display:block;width:min(100%,58px);aspect-ratio:1;cursor:inherit}
+.mood-choice[aria-pressed=true]{background:#ffffffb3;border-color:#dccfbd;color:#655748}
+.mood-hint{text-align:center;margin-top:14px;font-size:10px;color:#9a8e7c}
+.dumpling-stage:not(.dumplings-in-view) .dumpling *{animation-play-state:paused}
+@media(hover:hover){.mood-choice:hover{background:#ffffff80;translate:0 -3px}}
+@media(max-width:760px){.mood-main{width:190px;height:190px;margin-top:0}.mood-choices{gap:4px;margin-top:15px}.mood-choice{border-radius:13px}.mood-hint{margin-top:12px}}
+.dumpling .creature{transform-origin:128px 209px;animation:dumpling-breathe 5s ease-in-out infinite}.dumpling .eyes,.dumpling .mouth,.dumpling .brows,.dumpling .hands,.dumpling .hand-left,.dumpling .hand-right,.dumpling .cheek{transform-box:view-box}.dumpling .eyes{transform-origin:128px 131px;animation:dumpling-blink 6.7s ease-in-out infinite}.dumpling .mouth{transform-origin:128px 158px}.dumpling .brows{transform-origin:128px 113px}.dumpling .hand-left{transform-origin:63px 156px}.dumpling .hand-right{transform-origin:193px 156px}.dumpling .floor{opacity:.07}.dumpling .ornaments{animation:dumpling-glimmer 5s ease-in-out infinite}.dumpling[data-mood="1"] .eyes{animation:dumpling-downcast 7s ease-in-out infinite}.dumpling[data-mood="1"] .brows{animation:dumpling-brow-soften 7s ease-in-out infinite}.dumpling[data-mood="1"] .mouth{animation:dumpling-small-sigh 7s ease-in-out infinite}.dumpling[data-mood="1"] .tear{animation:dumpling-tear-glint 7s ease-in-out infinite}.dumpling[data-mood="2"] .mouth{animation:dumpling-yawn 7s ease-in-out infinite}.dumpling[data-mood="2"] .eyes{animation:dumpling-drowsy-eyes 7s ease-in-out infinite}.dumpling[data-mood="2"] .hands{transform-origin:174px 171px;animation:dumpling-sleepy-hands 7s ease-in-out infinite}.dumpling[data-mood="3"] .creature{animation:dumpling-calm 4.8s ease-in-out infinite}.dumpling[data-mood="3"] .hands{transform-origin:128px 151px;animation:dumpling-calm-hands 4.8s ease-in-out infinite}.dumpling[data-mood="4"] .hand-left{animation:dumpling-hello-hand 6s ease-in-out infinite}.dumpling[data-mood="4"] .mouth{animation:dumpling-smile 6s ease-in-out infinite}.dumpling[data-mood="4"] .cheek{animation:dumpling-blush 6s ease-in-out infinite}.dumpling[data-mood="5"] .eyes{animation:dumpling-happy-eyes 4.8s ease-in-out infinite}.dumpling[data-mood="5"] .mouth{animation:dumpling-laugh 4.8s ease-in-out infinite}.dumpling[data-mood="5"] .hand-left{animation:dumpling-happy-left 4.8s ease-in-out infinite}.dumpling[data-mood="5"] .hand-right{animation:dumpling-happy-right 4.8s ease-in-out infinite}.dumpling[data-mood="5"] .cheek{animation:dumpling-blush 4.8s ease-in-out infinite}.dumpling.greeting .hands{transform-origin:128px 166px;animation:dumpling-salute 1.2s ease-in-out!important}.dumpling.greeting .eyes{animation:dumpling-greet-eyes 1.2s ease-in-out!important}
+@keyframes dumpling-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.008,1.014)}}
+@keyframes dumpling-calm{0%,100%{transform:translateY(1px) scale(1,1)}50%{transform:translateY(-5px) scale(1.018,1.035)}}
+@keyframes dumpling-blink{0%,40%,43%,75%,78%,100%{transform:scaleY(1)}41.5%,76.5%{transform:scaleY(.12)}}
+@keyframes dumpling-calm-hands{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+@keyframes dumpling-downcast{0%,25%,60%,100%{transform:translate(0,0) scaleY(1)}32%,52%{transform:translate(2px,2px) scaleY(.7)}42%{transform:translate(2px,2px) scaleY(.12)}}
+@keyframes dumpling-brow-soften{0%,20%,65%,100%{transform:rotate(0)}35%,50%{transform:rotate(-3deg)}}
+@keyframes dumpling-small-sigh{0%,30%,65%,100%{transform:scale(1)}40%,50%{transform:scale(.75,.6)}}
+@keyframes dumpling-tear-glint{0%,70%,100%{opacity:.5}35%,55%{opacity:1}}
+@keyframes dumpling-yawn{0%,15%,65%,100%{transform:scale(.65,.3)}30%,46%{transform:scale(1.2,1.65)}52%{transform:scale(.9,.9)}}
+@keyframes dumpling-drowsy-eyes{0%,15%,70%,100%{transform:scaleY(1)}30%,50%{transform:scaleY(.32)}}
+@keyframes dumpling-sleepy-hands{0%,15%,65%,100%{transform:rotate(0)}30%,50%{transform:rotate(7deg)}}
+@keyframes dumpling-hello-hand{0%,20%,55%,100%{transform:rotate(0)}28%,40%{transform:rotate(17deg)}34%,46%{transform:rotate(-10deg)}}
+@keyframes dumpling-smile{0%,20%,65%,100%{transform:scale(1)}30%,50%{transform:scale(1.08,1.25)}}
+@keyframes dumpling-happy-eyes{0%,15%,70%,100%{transform:scaleY(1)}25%,35%,45%,55%{transform:scaleY(.65)}30%,40%,50%{transform:scaleY(1.12)}}
+@keyframes dumpling-laugh{0%,15%,70%,100%{transform:scale(1,.8)}25%,39%,53%{transform:scale(1.08,1.15)}32%,46%,60%{transform:scale(.98,.87)}}
+@keyframes dumpling-happy-left{0%,15%,75%,100%{transform:rotate(0)}25%,45%,65%{transform:rotate(13deg)}35%,55%{transform:rotate(-9deg)}}
+@keyframes dumpling-happy-right{0%,15%,75%,100%{transform:rotate(0)}25%,45%,65%{transform:rotate(-13deg)}35%,55%{transform:rotate(9deg)}}
+@keyframes dumpling-blush{0%,15%,75%,100%{opacity:.7}30%,60%{opacity:1}}
+@keyframes dumpling-glimmer{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes dumpling-salute{0%,100%{transform:rotate(0)}25%,65%{transform:rotate(6deg)}45%,80%{transform:rotate(-5deg)}}
+@keyframes dumpling-greet-eyes{0%,30%,55%,100%{transform:scaleY(1)}42%{transform:scaleY(.1)}}
+
+/* Daily companionship uses the existing sky palette and approved character outline. */
+.companion-section{background:#edf4f7}
+.companion-layout,.postcard-layout{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:100px}
+.companion-copy h2,.postcard-copy h2{font-size:46px;line-height:1.4;letter-spacing:-1.7px;font-weight:550}
+.companion-copy .eyebrow,.postcard-copy .eyebrow{color:#718c9e;margin-bottom:23px}
+.section-intro{font-size:14px;color:#687e8b;line-height:2;margin-top:24px}
+.companion-notes{list-style:none;padding:0;margin:35px 0 0;display:grid;gap:24px}
+.companion-notes li{display:flex;gap:18px;align-items:baseline}
+.companion-notes li>span{font-size:10px;color:#8da7b7;letter-spacing:1px;font-variant-numeric:tabular-nums}
+.companion-notes h3{font-size:14px;font-weight:550;color:#405969}
+.companion-notes p{font-size:12px;line-height:1.9;color:#748591;margin-top:5px}
+.soft-note{font-size:11px;color:#8796a0;margin-top:29px;line-height:1.9}
+.companion-demo{position:relative;padding:27px 30px 26px;border:1px solid #fff;border-radius:32px;background:#ffffff9c;box-shadow:0 28px 70px #577e9210;text-align:center}
+.demo-topline{display:flex;align-items:center;justify-content:space-between;gap:15px;font-size:10px;color:#8497a2}
+.demo-topline .demo-label{font-size:9px;white-space:nowrap;background:#edf4f7;border:0}
+.companion-modes{display:flex;gap:4px;background:#e8eff3;padding:4px;border-radius:15px;max-width:280px;margin:30px auto 0}
+.companion-modes button{flex:1;border:0;min-height:42px;padding:8px 15px;border-radius:11px;color:#788d9a;background:transparent;font-size:12px;cursor:pointer}
+.companion-modes button[aria-pressed=true]{background:#fff;box-shadow:0 2px 6px #4b6c8010;color:#3b657f}
+.companion-modes button:disabled,.postcard-choices button:disabled{cursor:default;opacity:1}
+.companion-character{width:248px;max-width:100%;aspect-ratio:1;margin:12px auto 0}
+.companion-character svg{width:100%;height:100%;overflow:visible}
+.companion-instruction{font-size:17px;color:#415e70;min-height:31px;font-weight:500;margin-top:4px}
+.companion-detail{font-size:11px;color:#8a9aa5;margin-top:8px}
+.companion-start{margin:25px auto 0;border:0;cursor:pointer;min-width:164px;font-size:12px}
+.companion-start[hidden]{display:none}
+.demo-footnote{font-size:9px;color:#9aa9b2;margin-top:22px;letter-spacing:.4px}
+.companion-exhale-mouth,.companion-air{opacity:0}
+.companion-left-arm{transform-origin:64px 157px}.companion-right-arm{transform-origin:192px 157px}
+.companion-eyes{transform-origin:128px 130px;animation:companion-blink 7s infinite}
+.companion-demo[data-state=running][data-mode=breathing] .companion-face{animation:companion-face-breath 10s ease-in-out infinite}
+.companion-demo[data-state=running][data-mode=breathing] .companion-left-arm{animation:companion-arm-left 10s ease-in-out infinite}
+.companion-demo[data-state=running][data-mode=breathing] .companion-right-arm{animation:companion-arm-right 10s ease-in-out infinite}
+.companion-demo[data-state=running][data-mode=breathing] .companion-smile{animation:companion-mouth-smile 10s infinite}
+.companion-demo[data-state=running][data-mode=breathing] .companion-exhale-mouth{animation:companion-mouth-exhale 10s infinite}
+.companion-demo[data-state=running][data-mode=breathing] .companion-air{animation:companion-airflow 10s ease-in-out infinite}
+.companion-demo[data-state=running][data-mode=quiet] .companion-figure{transform-origin:128px 210px;animation:companion-quiet-tilt 8s ease-in-out infinite}
+.companion-demo[data-state=running][data-mode=quiet] .companion-right-arm{animation:companion-wave 8s ease-in-out infinite}
+.companion-demo.is-offscreen *{animation-play-state:paused!important}
+@keyframes companion-blink{0%,40%,44%,100%{transform:scaleY(1)}42%{transform:scaleY(.12)}}
+@keyframes companion-face-breath{0%,100%{transform:translateY(0)}40%{transform:translateY(-4px)}}
+@keyframes companion-arm-left{0%,100%{transform:rotate(0)}40%{transform:rotate(-20deg)}}
+@keyframes companion-arm-right{0%,100%{transform:rotate(0)}40%{transform:rotate(20deg)}}
+@keyframes companion-mouth-smile{0%,39%,100%{opacity:1}44%,94%{opacity:0}}
+@keyframes companion-mouth-exhale{0%,39%,100%{opacity:0}44%,94%{opacity:1}}
+@keyframes companion-airflow{0%,40%,100%{opacity:0;transform:translateX(0)}52%,72%,90%{opacity:.65;transform:translateX(6px)}62%,82%,96%{opacity:0;transform:translateX(18px)}}
+@keyframes companion-quiet-tilt{0%,30%,80%,100%{transform:rotate(0)}50%,65%{transform:rotate(-3deg)}}
+@keyframes companion-wave{0%,10%,55%,100%{transform:rotate(0)}18%,34%{transform:rotate(28deg)}26%,42%{transform:rotate(12deg)}}
+.scene-copy{max-width:560px}
+.album-preview{position:absolute;right:52px;top:69px;width:280px;padding:23px;border:1px solid #ffffff45;border-radius:22px;background:#f7fcf3ed;box-shadow:0 20px 50px #122c3530;transform:rotate(3deg);color:#3d584d}
+.album-preview-heading{display:flex;gap:12px;align-items:center;padding-bottom:17px;border-bottom:1px solid #65807225}
+.album-preview-heading img{width:52px;height:52px;object-fit:cover;border-radius:11px}
+.album-preview-heading>div>span{font-size:14px;font-weight:550}.album-preview-heading p{font-size:9px;color:#819186;margin-top:5px}
+.album-disc{font-size:24px;color:#92a897;margin-left:auto}
+.album-preview ol{list-style:none;padding:5px 0 0;margin:0}
+.album-preview li{display:flex;align-items:center;gap:13px;padding:12px 0;font-size:11px;border-bottom:1px solid #65807216}
+.album-preview li>span{font-size:9px;color:#93a096}.album-preview li>i{margin-left:auto;color:#96af9b;font-size:16px;font-style:normal}
+.album-preview-note{font-size:8px;color:#93a096;text-align:center;margin-top:14px}
+.listening-details{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:35px}
+.listening-details>div+div{border-left:1px solid #dce5e9;padding-left:30px}
+.listening-details h3{font-size:13px;font-weight:550;color:#4e6676}.listening-details p{font-size:11px;color:#7a8b96;margin-top:10px;line-height:1.95}
+.bedtime-strip{display:flex;align-items:center;gap:55px;margin-top:43px;padding:32px 38px;background:#edf1f6;border:1px solid #e1e7ee;border-radius:23px}
+.bedtime-strip>div:first-child{flex:1}.bedtime-strip .card-label{font-size:10px;color:#8b8ba3;margin-bottom:10px}
+.bedtime-strip h3{font-size:20px;letter-spacing:-.4px;font-weight:550;color:#536176}
+.bedtime-strip p:not(.card-label){font-size:11px;line-height:1.95;color:#7a8494;margin-top:12px;max-width:580px}
+.bedtime-options{display:flex;gap:8px}.bedtime-options>span{width:62px;padding:13px 5px;border:1px solid #d7dfeb;background:#ffffff80;border-radius:16px;text-align:center;font-size:22px;color:#78859c;font-weight:400;font-variant-numeric:tabular-nums}
+.bedtime-options small{display:block;font-size:9px;color:#9ba5b5;margin-top:5px}
+.everyday-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:28px}
+.reading-feature,.review-feature{border:1px solid #e3e9e9;border-radius:28px;overflow:hidden;min-width:0}
+.reading-feature{background:#f2f5ee}.review-feature{background:#f1f5f7;display:flex;flex-direction:column}
+.reading-art{position:relative;height:237px;overflow:hidden;background:#dae5d5}
+.reading-art>img{width:100%;height:100%;object-fit:cover;filter:brightness(.88)}
+.reading-art>span{position:absolute;left:29px;top:26px;color:#fff;font-size:11px;letter-spacing:2px}
+.reading-paper{position:absolute;width:210px;right:42px;top:57px;bottom:-15px;padding:27px 28px;background:#fffef7;border-radius:4px;transform:rotate(-7deg);box-shadow:0 12px 30px #25382730}
+.reading-paper>span{display:block;font-family:"Songti SC","STSong",serif;font-size:19px;line-height:1.7;color:#5b6a53;margin-bottom:22px}
+.reading-paper i{display:block;height:1px;background:#dce1d3;margin-top:11px}.reading-paper i:nth-of-type(3){width:65%}
+.reading-paper small{display:block;font-size:9px;color:#9ca38d;margin-top:24px}
+.everyday-card-copy{padding:35px 37px 30px}.everyday-card-copy .card-label{font-size:10px;color:#84937d;margin-bottom:15px}
+.everyday-card-copy h3{font-size:29px;line-height:1.5;font-weight:550;letter-spacing:-.8px}
+.everyday-card-copy>p:not(.card-label){font-size:12px;color:#798579;line-height:2;margin-top:18px}
+.feature-caption{display:block;font-size:10px;color:#929e88;margin-top:22px}
+.review-feature .card-label{color:#8198a6}.review-feature .everyday-card-copy>p:not(.card-label){color:#7c8c97}
+.review-timeline{margin:2px 37px 32px;padding-left:22px;border-left:1px solid #cbd9e1;display:grid;gap:29px}
+.review-timeline>div{position:relative}.timeline-dot{position:absolute;left:-27px;top:4px;width:9px;height:9px;border-radius:50%;background:#b0c5cf;box-shadow:0 0 0 5px #f1f5f7}
+.review-timeline>div:nth-child(2) .timeline-dot{background:#bac6b4}.review-timeline>div:nth-child(3) .timeline-dot{background:#c8c0cf}
+.review-timeline small{font-size:10px;color:#8a9ca7}.review-timeline p{font-size:12px;color:#526f80;margin-top:7px}
+.sleep-summary-note{font-size:11px;line-height:1.95;color:#8899a4;border-top:1px solid #e0e8ed;padding:21px 29px;margin-top:auto}
+.sleep-summary-note>span{font-size:17px;vertical-align:middle;margin-right:5px}
+.postcard-section{background:#f7f3ec;overflow:hidden}
+.postcard-layout{grid-template-columns:1fr 1.1fr;gap:110px}
+.postcard-art{position:relative;padding:25px 18px 25px 12px}
+.postcard-print{position:relative;background:#fffefa;padding:12px 12px 0;box-shadow:0 14px 42px #8f7d6020;transform:rotate(-5deg);border:1px solid #e9e1d2}
+.postcard-landscape{width:100%;height:auto;aspect-ratio:1.2}
+.postcard-print>img{position:absolute;top:21%;left:50%;width:47%;height:auto;transform:translateX(-50%);filter:drop-shadow(0 8px 8px #46605615)}
+.postcard-message{text-align:center;padding:22px 9px 25px;color:#827461}
+.postcard-message p{font-family:"Songti SC","STSong",serif;font-size:16px;line-height:1.8}
+.postcard-message span{display:block;font-size:8px;color:#aba18e;letter-spacing:1px;margin-top:11px}
+.postcard-stamp{position:absolute;right:-7px;top:2px;border:1px solid #b6a78f;border-radius:50%;width:78px;height:78px;display:grid;place-items:center;background:#f7f3eceb;color:#a3937c;font-size:10px;transform:rotate(14deg)}
+.postcard-stars,.postcard-lake{opacity:0;transition:opacity .5s}
+.postcard-art[data-scenery=moonlight] .postcard-landscape{background:#344c6c}
+.postcard-art[data-scenery=moonlight] .postcard-landscape>rect{opacity:0}
+.postcard-art[data-scenery=moonlight] .postcard-stars,.postcard-art[data-scenery=moonlight] .postcard-lake{opacity:1}
+.postcard-art[data-scenery=moonlight] .postcard-hill-back{fill:#536d86}.postcard-art[data-scenery=moonlight] .postcard-hill-front{fill:#46647d}
+.postcard-art[data-scenery=moonlight] .postcard-sun{fill:#fff7dd}
+.postcard-description{font-size:12px;line-height:2.1;color:#8e8476;margin-top:21px}
+.postcard-copy .eyebrow{color:#a08f77}.postcard-copy .section-intro{color:#8d806f}
+.postcard-choices{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.postcard-choices button{display:flex;align-items:center;gap:9px;border:1px solid #ded6c8;border-radius:22px;background:transparent;padding:11px 15px;min-height:44px;color:#9b8e7d;font-size:11px;cursor:pointer}
+.postcard-choices button[aria-pressed=true]{background:#fffefa;color:#706049;border-color:#bfb19b}
+.scenery-dot{width:10px;height:10px;border-radius:50%}.morning-dot{background:#b5c7a4}.moonlight-dot{background:#7d96b6}
+.postcard-copy .soft-note{color:#a69987}
+.open-source-links{display:flex;justify-content:center;flex-wrap:wrap;gap:24px;margin-top:25px;font-size:11px;color:#718e9f}
+.open-source-links a{min-height:36px;display:inline-flex;align-items:center;gap:9px}
+.open-source-links a:hover{text-decoration:underline;text-underline-offset:4px}
+.availability-inner>.development-note{font-size:10px!important;color:#8e9daa!important}
+@media(max-width:1050px){
+  .nav-links{gap:20px;font-size:11px}
+  .companion-layout,.postcard-layout{gap:45px}
+  .companion-copy h2,.postcard-copy h2{font-size:37px}
+  .companion-demo{padding:25px 22px}.companion-character{width:220px}
+  .scene-copy{max-width:53%;padding-left:38px;padding-right:0}.scene-copy h3{font-size:34px}
+  .album-preview{right:35px;width:250px;top:77px}
+  .postcard-message p{font-size:14px}.bedtime-strip{gap:25px;padding:27px}
+}
+@media(max-width:760px){
+  .companion-layout,.postcard-layout,.everyday-grid{grid-template-columns:1fr;gap:35px}
+  .companion-copy h2,.postcard-copy h2{font-size:32px;letter-spacing:-1px}
+  .companion-copy .eyebrow,.postcard-copy .eyebrow{margin-bottom:18px}.section-intro{font-size:12px;margin-top:19px}
+  .companion-notes{gap:19px;margin-top:26px}.companion-notes h3{font-size:13px}.companion-notes p{font-size:11px}.soft-note{font-size:10px;margin-top:23px}
+  .companion-demo{width:100%;max-width:450px;margin:auto;padding:23px 22px;border-radius:25px}.demo-topline{font-size:9px}.companion-modes{margin-top:24px}.companion-character{width:224px}.companion-instruction{font-size:16px}.companion-start{min-height:46px}
+  .scene-showcase{min-height:610px}.scene-copy{max-width:none;padding:33px 29px 0}.scene-copy h3{font-size:31px}.scene-copy .card-label{margin-bottom:17px}.scene-copy>p:not(.card-label){max-width:240px}.scene-tags{margin-top:18px;gap:7px;flex-wrap:wrap}.scene-tags span{font-size:8px;padding:4px 8px}
+  .album-preview{top:auto;bottom:85px;right:27px;left:27px;width:auto;padding:18px 21px;transform:rotate(2deg)}.album-preview-heading{padding-bottom:12px}.album-preview-heading img{width:44px;height:44px}.album-preview ol{padding-top:0}.album-preview li{padding:8px 0}.album-preview-note{margin-top:10px}
+  .scene-preview-label{display:none}.scene-switcher{bottom:21px}.scene-switcher button{min-height:38px;min-width:66px}.scene-shade{background:linear-gradient(180deg,#102029a6,transparent 150%)}
+  .listening-details{grid-template-columns:1fr;gap:19px;margin-top:28px}.listening-details>div+div{padding-left:0;border-left:0;border-top:1px solid #e0e7eb;padding-top:19px}.listening-details h3{font-size:13px}.listening-details p{margin-top:6px}
+  .bedtime-strip{flex-direction:column;align-items:flex-start;padding:25px;gap:23px;margin-top:30px;border-radius:21px}.bedtime-strip h3{font-size:20px;line-height:1.6}.bedtime-options{align-self:stretch;gap:10px}.bedtime-options>span{flex:1;width:auto;padding:11px 8px}.bedtime-options small{display:inline;margin-left:7px}
+  .reading-feature,.review-feature{border-radius:23px}.reading-art{height:210px}.reading-paper{right:30px;top:47px;width:190px;padding:25px}.reading-art>span{font-size:10px}.everyday-card-copy{padding:28px}.everyday-card-copy h3{font-size:26px}.everyday-card-copy>p:not(.card-label){font-size:12px}.review-timeline{margin:0 28px 30px}.sleep-summary-note{padding:20px 28px;font-size:10px}
+  .postcard-art{max-width:390px;margin:0 auto;order:2;width:100%;padding-inline:20px}.postcard-copy{order:1}.postcard-stamp{right:8px;width:69px;height:69px;font-size:9px}.postcard-print{padding:10px 10px 0}.postcard-message{padding:18px 7px 22px}.postcard-message p{font-size:14px}.postcard-description{font-size:11px}.postcard-choices{margin-top:22px}.postcard-copy .soft-note{margin-top:20px}.open-source-links{font-size:11px;gap:20px}
+}

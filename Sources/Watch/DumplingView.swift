@@ -74,6 +74,8 @@ struct DumplingArtworkView: View {
 struct DumplingGreeting: View {
     let mood: Int
     let label: String
+    var action: CompanionAction = .greeting
+    var replayRequest = 0
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var lowLuminance
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -84,14 +86,19 @@ struct DumplingGreeting: View {
         GeometryReader { geometry in
             Button(action: play) {
                 TimelineView(.animation(minimumInterval: 1.0 / 24, paused: startedAt == nil)) { context in
-                    DumplingArtworkView(mood: mood, progress: startedAt.map { DumplingMotion.progress(elapsed: context.date.timeIntervalSince($0)) } ?? 0)
+                    let elapsed = startedAt.map { context.date.timeIntervalSince($0) } ?? 0
+                    let transform = action.transform(elapsed: elapsed, reduceMotion: reduceMotion)
+                    DumplingArtworkView(mood: mood, progress: action == .greeting && !reduceMotion ? DumplingMotion.progress(elapsed: elapsed) : 0)
                         .frame(width: geometry.size.width, height: geometry.size.height)
+                        .scaleEffect(x: 1, y: transform.scaleY, anchor: .bottom)
+                        .rotationEffect(.degrees(transform.rotationDegrees))
+                        .offset(x: transform.offsetX, y: transform.offsetY)
                 }
             }
             .buttonStyle(.plain)
         }
         .accessibilityLabel("\(label)团子")
-        .accessibilityHint(reduceMotion ? "已跟随系统减少动态效果" : "点按再播放一次表情动作")
+        .accessibilityHint(reduceMotion ? "已跟随系统减少动态效果" : "点按重播\(action.name)，可从团子动作选择其他动作")
         .accessibilityValue(startedAt == nil ? "静止" : "播放中")
         .accessibilityIdentifier("watch-dumpling-character")
         .onAppear(perform: play)
@@ -99,10 +106,12 @@ struct DumplingGreeting: View {
         .onChange(of: lowLuminance) { _, reduced in if reduced { stop() } else { play() } }
         .onChange(of: reduceMotion) { _, reduced in if reduced { stop() } }
         .onChange(of: mood) { _, _ in play() }
+        .onChange(of: action) { _, _ in play() }
+        .onChange(of: replayRequest) { _, _ in play() }
         .onDisappear(perform: stop)
         .task(id: playbackID) {
             guard startedAt != nil else { return }
-            do { try await Task.sleep(for: .seconds(DumplingMotion.duration)) } catch { return }
+            do { try await Task.sleep(for: .seconds(action.duration)) } catch { return }
             startedAt = nil
         }
     }

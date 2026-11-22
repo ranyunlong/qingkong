@@ -1,0 +1,51 @@
+# 合并到已有 xqk.geckoai.cn 的 HTTPS server 块中，保留原有证书与网站配置。
+# 本例假定 Nginx 在宿主机运行，后端使用 Compose 默认的本机 8787 端口。
+# proxy_pass 末尾不加 /，让 /api/v1/... 原样传给后端。
+
+location /api/ {
+    proxy_pass http://127.0.0.1:8787;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header Connection "";
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_connect_timeout 5s;
+    proxy_read_timeout 30s;
+    proxy_send_timeout 30s;
+    client_max_body_size 256k;
+    client_body_timeout 15s;
+    proxy_request_buffering on;
+}
+
+# 只有图片上传接收 10 MiB 原始文件，其他管理操作继续使用 2 MiB。
+location = /admin/api/images {
+    proxy_pass http://127.0.0.1:8787;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header Connection "";
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_connect_timeout 5s;
+    proxy_read_timeout 75s;
+    proxy_send_timeout 30s;
+    client_max_body_size 10m;
+    client_body_timeout 15s;
+    proxy_request_buffering on;
+    # 如需限制管理入口的来源，在此按实际管理网络添加 allow / deny。
+}
+
+# /admin 与 /admin/... 都需要转发；只转发 /api/ 无法打开管理页面。
+location ~ ^/admin(?:/|$) {
+    proxy_pass http://127.0.0.1:8787;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header Connection "";
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_connect_timeout 5s;
+    # 音频识别最多约 60 秒，为错误响应与网络保留余量。
+    proxy_read_timeout 75s;
+    proxy_send_timeout 30s;
+    # 中文富文本表单包含 HTML 与纯文本，后端另外按字段限制长度。
+    client_max_body_size 2m;
+    client_body_timeout 15s;
+    proxy_request_buffering on;
+    # 如需限制管理入口的来源，在此按实际管理网络添加 allow / deny。
+}

@@ -6,6 +6,7 @@ struct MoodView: View {
     @Binding var selectedMood: Int
     @State private var stress = 2
     @State private var note = ""
+    @State private var tags: Set<LifeTag> = []
     @State private var result: String?
     @State private var error: String?
     @State private var noteFrame: CGRect = .zero
@@ -42,11 +43,27 @@ struct MoodView: View {
                         .accessibilityLabel("心情日记").accessibilityIdentifier("mood-note")
                         .onChange(of: note) { _, value in if value.count > 1000 { note = String(value.prefix(1000)) } }
                 }
+                DisclosureGroup("生活标签（可选）") {
+                    VStack(spacing: 0) {
+                        ForEach(LifeTag.allCases) { tag in
+                            if tag != LifeTag.allCases.first { Divider() }
+                            Toggle(tag.name, isOn: Binding(get: { tags.contains(tag) }, set: { selected in
+                                if selected { tags.insert(tag) } else { tags.remove(tag) }
+                            }))
+                            .toggleStyle(.switch)
+                            .padding(.trailing, 8)
+                            .frame(minHeight: 52)
+                            .accessibilityIdentifier("life-tag-\(tag.rawValue)")
+                        }
+                    }.padding(.top, 8)
+                }
+                .padding(16)
+                .background(app.scene.accent.opacity(0.06), in: RoundedRectangle(cornerRadius: 20))
                 Button {
                     writing = false
                     do {
-                        try app.store.add(mood: selectedMood, stress: stress, note: note)
-                        note = ""; result = "已记下此刻"; error = nil
+                        try app.store.add(mood: selectedMood, stress: stress, note: note, tags: LifeTag.allCases.filter { tags.contains($0) })
+                        note = ""; tags = []; result = "已记下此刻"; error = nil
                         app.updateClock()
                     } catch { self.error = "记录未能保存，请重试。"; result = nil }
                 } label: {
@@ -66,6 +83,11 @@ struct MoodView: View {
                 NavigationLink { MoodHistoryView() } label: {
                     HStack { Label("心情日记", systemImage: "book.closed"); Spacer(); Text("\(app.store.entries.count) 条记录").foregroundStyle(Color.readableSecondary); Image(systemName: "chevron.right") }.font(.subheadline).padding(.vertical, 10)
                 }.accessibilityIdentifier("mood-history")
+                NavigationLink { CompanionTimelineView() } label: { Label("身体与心情时间线", systemImage: "clock") }
+                NavigationLink { WeeklyReviewView() } label: { Label("每周回顾", systemImage: "calendar") }
+                NavigationLink { KnowledgeView(content: app.content) } label: { Label("安心小知识", systemImage: "book") }
+                NavigationLink { MoodPostcardView() } label: { Label("心情明信片", systemImage: "envelope") }
+                NavigationLink { CompanionMilestonesView(practices: app.companion.practices, moods: app.store.records) } label: { Label("团子陪伴", systemImage: "sparkles") }
                 Text("只保存在你的设备上，并通过配对设备同步。你可以随时删除记录。 ").font(.caption).foregroundStyle(Color.readableSecondary)
             }.padding(.horizontal, 22).padding(.bottom, 28)
         }.contentShape(Rectangle())

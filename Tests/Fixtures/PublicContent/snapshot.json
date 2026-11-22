@@ -1,0 +1,854 @@
+{
+  "testOnly": true,
+  "notice": "仅供本地功能测试。文章审核及发布时间是测试占位；音轨来自用户提供的三份歌单并经真实文件检查，不代表已核实正式发布授权。不得作为正式上线内容自动发布。",
+  "schemaVersion": 1,
+  "revision": 1,
+  "generatedAt": "2026-11-22T02:00:00Z",
+  "articles": [
+    {
+      "id": "d0a8476a-3551-4cef-88d8-58c73d37f001",
+      "title": "[测试] 从安心首页开始",
+      "summary": "仅供功能测试：检查首页入口、文章详情和阅读后的放松按钮。",
+      "category": "使用指南",
+      "body": "【仅供功能测试】本文是界面测试文案，没有经过医学专业审核，也不提供健康建议。\n\n先看看入口\n打开今日页，找到“陪我缓一缓”和安心小知识入口。选择阅读文章不要求先填写心情，也不要求先授予健康读取权限。本段用于检查短标题、分段文字和正文首屏的显示。\n\n按自己的节奏使用\n文章底部可以提供放松入口。是否进入由阅读者主动选择；仅打开文章不应自动开始声音或练习。开始练习后仍可以暂停或退出。本段只是说明产品交互，不表示练习具有任何治疗效果。\n\n可以检查的内容\n返回列表，再次打开本篇，查看“已读”标记是否出现；将文章加入收藏后，切换到“只看收藏”，应能找到同一篇文章。没有操作时，不应自动收藏。\n\n测试结束后\n可以移除测试收藏，关闭测试环境。这篇文章和其中的时间、来源、审核字段都只是测试数据，不能作为正式上线内容。",
+      "coverURL": null,
+      "references": [
+        {
+          "title": "测试占位来源，不是医学资料",
+          "url": "https://example.invalid/qingkong-test/start"
+        }
+      ],
+      "review": {
+        "reviewer": "测试占位 · 未专业审核",
+        "credentials": "仅供界面与数据流程测试，不代表真实审核人或资质",
+        "reviewedAt": "2026-11-22T01:00:00Z"
+      },
+      "updatedAt": "2026-11-22T01:00:00Z",
+      "publishedAt": "2026-11-22T01:00:00Z",
+      "revision": 1,
+      "sortOrder": 1,
+      "testOnly": true
+    },
+    {
+      "id": "d0a8476a-3551-4cef-88d8-58c73d37f002",
+      "title": "[测试] 收藏一篇想再看的文章",
+      "summary": "仅供功能测试：用同一篇文章检查收藏、取消收藏与列表筛选。",
+      "category": "阅读与收藏",
+      "body": "【仅供功能测试】本文不含医学结论，所有审核和来源信息均为测试占位。\n\n找到收藏按钮\n打开这篇文章，选择“收藏”，返回列表后查看书签标记。进入“只看收藏”时，本篇应继续显示；关闭筛选后，其他文章也应重新出现。收藏是主动选择，不应因为停留较久或反复打开而自动发生。\n\n再次查看\n关闭页面并重新打开，检查收藏状态是否保留。已读与收藏是两个不同状态：打开文章可以标为已读，加入收藏则需要主动操作。取消收藏不应把已读状态一起清除。\n\n搜索关键字\n可尝试搜索“书签”“再次查看”或标题中的“收藏”。搜索应覆盖标题、摘要和正文，不应因为查询为空而隐藏全部文章。随后输入一个本测试包没有的词，查看没有结果的提示，再清空输入。\n\n结束检查\n取消收藏后返回收藏列表，本篇应从该筛选结果移除，但在完整列表中仍可阅读。这里描述的是预期交互，不是已在真机上完成的验证结果。",
+      "coverURL": null,
+      "references": [
+        {
+          "title": "测试占位来源，不是医学资料",
+          "url": "https://example.invalid/qingkong-test/bookmarks"
+        }
+      ],
+      "review": {
+        "reviewer": "测试占位 · 未专业审核",
+        "credentials": "仅供界面与数据流程测试，不代表真实审核人或资质",
+        "reviewedAt": "2026-11-22T01:00:00Z"
+      },
+      "updatedAt": "2026-11-22T01:00:00Z",
+      "publishedAt": "2026-11-22T01:00:00Z",
+      "revision": 1,
+      "sortOrder": 2,
+      "testOnly": true
+    },
+    {
+      "id": "d0a8476a-3551-4cef-88d8-58c73d37f003",
+      "title": "[测试] 断网后再读一次",
+      "summary": "仅供功能测试：检查已读文章缓存、离线提示与上次成功检查时间。",
+      "category": "阅读与收藏",
+      "body": "【仅供功能测试】本文是离线阅读测试文案，不构成健康建议。\n\n先在有内容时阅读\n打开本篇并返回列表，确认已读标记。已读或主动收藏的文章可以保留离线副本；只是在列表中看见一篇文章，不代表正文已经保存。测试时可另外选择一篇从未打开也未收藏的文章作为对照。\n\n再检查离线状态\n断网后重新进入知识库，查看状态说明和上次成功检查时间。已经缓存的正文应仍能打开；应用应说明尚未检查最新修订或撤回，而不是把旧时间写成刚刚刷新成功。\n\n恢复连接之后\n主动刷新并等待成功后，已更新的正文应显示新版本；已经撤回的文章应从本机可读内容中移除。断网期间无法得知服务器刚发生的变化，因此离线副本不能被称为已确认最新。\n\n测试边界\n这篇文案不能证明真实蜂窝网络、代理或系统后台行为已经通过。自动检查与设备检查的结果应分别记录。请勿把本篇测试数据发布到正式服务。",
+      "coverURL": null,
+      "references": [
+        {
+          "title": "测试占位来源，不是医学资料",
+          "url": "https://example.invalid/qingkong-test/offline"
+        }
+      ],
+      "review": {
+        "reviewer": "测试占位 · 未专业审核",
+        "credentials": "仅供界面与数据流程测试，不代表真实审核人或资质",
+        "reviewedAt": "2026-11-22T01:00:00Z"
+      },
+      "updatedAt": "2026-11-22T01:00:00Z",
+      "publishedAt": "2026-11-22T01:00:00Z",
+      "revision": 1,
+      "sortOrder": 3,
+      "testOnly": true
+    },
+    {
+      "id": "d0a8476a-3551-4cef-88d8-58c73d37f004",
+      "title": "[测试] 查看更新时间与修订",
+      "summary": "仅供功能测试：这篇文章用于模拟正文更新和之后的撤回。",
+      "category": "阅读与收藏",
+      "body": "【仅供功能测试】本篇为初始版本，后续测试会替换这一段文字。\n\n分清几个时间\n详情会展示文章更新时间、版本和测试占位审核信息。列表上次成功检查时间表示本机何时取得内容，与文章本身何时编辑不是同一个概念。二者不必相同，也不能互相替代。\n\n观察修订\n在测试环境中保持文章标识不变、提高版本并修改正文。成功刷新后，应看到新正文；收藏仍对应同一篇文章，不应生成两份相同标题的条目。没有成功取得新数据时，不应假装完成更新。\n\n观察撤回\n下一次测试移除本篇并提供撤回记录。成功刷新后，列表、收藏和重新打开的离线副本都不应继续提供正文；已打开的详情应显示不可用提示。\n\n说明\n这里的修订和撤回都是功能场景，不是正式医学内容的编辑记录。本测试包没有进行专业审核或真实发布。",
+      "coverURL": null,
+      "references": [
+        {
+          "title": "测试占位来源，不是医学资料",
+          "url": "https://example.invalid/qingkong-test/revisions"
+        }
+      ],
+      "review": {
+        "reviewer": "测试占位 · 未专业审核",
+        "credentials": "仅供界面与数据流程测试，不代表真实审核人或资质",
+        "reviewedAt": "2026-11-22T01:00:00Z"
+      },
+      "updatedAt": "2026-11-22T01:00:00Z",
+      "publishedAt": "2026-11-22T01:00:00Z",
+      "revision": 1,
+      "sortOrder": 4,
+      "testOnly": true
+    },
+    {
+      "id": "d0a8476a-3551-4cef-88d8-58c73d37f005",
+      "title": "[测试] 了解记录与隐私",
+      "summary": "仅供功能测试：检查纯文本说明、相关内容和页面底部提示。",
+      "category": "使用指南",
+      "body": "【仅供功能测试】本文描述产品边界，不是正式法律或医学审核意见。\n\n分别理解数据\n公共知识文章与音轨目录来自公共内容服务；心情、日记、练习和健康记录属于个人使用数据。阅读公共文章不要求创建读者账户。测试时应查看实际请求与存储，不能仅凭这段文案认定隐私边界已经得到验证。\n\n主动分享\n心情明信片由用户主动选择短句、查看图片预览，再决定是否进入系统分享流程。默认图片不应加入日记、健康数值或压力评分。打开预览本身不表示已经发给任何人。\n\n删除与重算\n删除本机记录后，依赖这些记录的回顾应重新计算。没有数据时使用中性提示，不用演示数字补齐。测试内容也不应混进真实健康历史。\n\n可继续查看\n同分类的相关文章应保持有限数量，页面不提供无限滚动的信息流。本篇只用于检查这些文字和相关入口的展示，真实权限、网络和系统分享仍需设备验证。",
+      "coverURL": null,
+      "references": [
+        {
+          "title": "测试占位来源，不是医学资料",
+          "url": "https://example.invalid/qingkong-test/privacy"
+        }
+      ],
+      "review": {
+        "reviewer": "测试占位 · 未专业审核",
+        "credentials": "仅供界面与数据流程测试，不代表真实审核人或资质",
+        "reviewedAt": "2026-11-22T01:00:00Z"
+      },
+      "updatedAt": "2026-11-22T01:00:00Z",
+      "publishedAt": "2026-11-22T01:00:00Z",
+      "revision": 1,
+      "sortOrder": 5,
+      "testOnly": true
+    },
+    {
+      "id": "d0a8476a-3551-4cef-88d8-58c73d37f006",
+      "title": "[测试] 长文、标点与可访问性：把一段较长的标题完整读完",
+      "summary": "仅供功能测试：长标题、多段正文、中文引号、英文、数字与特殊字符。",
+      "category": "排版检查",
+      "body": "【仅供功能测试】这是一篇较长的排版样本，不提供健康解释或诊疗建议。测试占位来源不可访问，审核字段不是专业审核。\n\n第一段：让文字有空间\n这一段故意比列表摘要长，用来检查正文换行、行距和左右边距。阅读者可以把系统文字调大，再回到页面查看标题是否完整、按钮是否仍可点按、正文是否可以连续滚动。没有在真机确认之前，不能把这些预期描述成已经通过的结果。\n\n第二段：不同长度的内容\n短句。\n这是稍长的一句，用来观察紧邻的短句与长句在正文中的节奏。\n这一段更长一些：标题可以跨行，摘要可以被列表适度截断，但文章详情中的正文不应因为固定高度而消失。返回列表之后，页面仍应保留清楚的标题、分类和更新时间，不要求阅读者从封面推断内容。\n\n第三段：标点和字符\n中文标点样本包括：“引号”、‘单引号’、括号（说明）、书名号《测试说明》、省略号……以及破折号——。英文样本是 Read, Save & Reopen；数字样本是 1、3、5 与 15／30／60。另有 emoji：☁️、🌿。这些字符只是排版材料，不代表功能按钮、剂量、评分或健康指标。\n\n第四段：纯文本边界\n下面一行应作为普通文字出现，不应执行或被当成网页标签：\n<script>TEST_ONLY_DO_NOT_EXECUTE</script> & <b>这是正文字符</b>\n远端文章的正文按纯文本展示，因此这行用于观察尖括号与连接符的显示。不要为了让它看起来更像网页而启用远端 HTML 执行。\n\n第五段：较长段落的滚动\n阅读到这里时，可以向下滚动到参考来源和测试占位审核信息，再滚动回开头。系统辅助功能应能按正常阅读顺序访问文本与按钮。无封面时页面依然应保持可读，不应出现上一篇的图片。横竖方向、不同文字大小和不同设备上的实际效果仍需要人工确认，本测试文件只提供一致的内容样本。\n\n第六段：测试结束\n收藏这篇文章后可以在离线场景再次读取，再取消收藏检查状态变化。仅取消收藏不等于删除已经读过的离线正文；成功收到撤回信息后才应移除不再可读的内容。完成测试后关闭隔离测试环境，不把本篇或其占位字段作为正式内容发布。",
+      "coverURL": null,
+      "references": [
+        {
+          "title": "测试占位来源，不是医学资料",
+          "url": "https://example.invalid/qingkong-test/layout"
+        }
+      ],
+      "review": {
+        "reviewer": "测试占位 · 未专业审核",
+        "credentials": "仅供界面与数据流程测试，不代表真实审核人或资质",
+        "reviewedAt": "2026-11-22T01:00:00Z"
+      },
+      "updatedAt": "2026-11-22T01:00:00Z",
+      "publishedAt": "2026-11-22T01:00:00Z",
+      "revision": 1,
+      "sortOrder": 6,
+      "testOnly": true
+    }
+  ],
+  "albums": [
+    {
+      "id": "674db7ba-d9bf-5737-bdc3-690b78902514",
+      "title": "晴天随行",
+      "summary": "用户提供的第 1 份测试歌单，共 10 首，保留原曲名与顺序。",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390759381471232.png",
+      "trackIDs": [
+        "f71c2fce-d350-5adb-9f79-259f726e88d3",
+        "07311625-ba8a-5e0a-b3f6-88dcd786458a",
+        "8d667c4a-f4e4-5f7e-b709-47c5e741c8d7",
+        "d58f03b5-db1a-59be-b5ab-364c85dfca46",
+        "c15ac76c-3867-5b9f-be19-7725bbf64d55",
+        "56ca8325-6d81-5f0d-a34f-c1b7633ef7b9",
+        "027b0537-846c-5bd4-8722-fc9b844c6d5a",
+        "676c039e-86b1-5c39-b3f1-25f5710998e9",
+        "c29adf65-1a43-598c-acb9-980ef1b050ef",
+        "cb800c88-16b3-57a8-a1c1-a6b049eb80a8"
+      ],
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 1
+    },
+    {
+      "id": "e58677ee-4fb0-5392-8176-22556f6d4359",
+      "title": "星光慢行",
+      "summary": "用户提供的第 2 份测试歌单，共 10 首，保留原曲名与顺序。",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390723163656192.png",
+      "trackIDs": [
+        "0014f201-5fb3-559a-aa59-5a61c4e7cbe9",
+        "f388bf04-c182-592e-9767-9a5df31d7fe6",
+        "bf6688fa-7fdb-5d1c-a272-fd23533b1c67",
+        "77601877-3547-59e8-9acc-72ee96ef74ae",
+        "f8b48cbc-8fda-5978-904b-92eb0c8dc4ec",
+        "748f7c45-2b8b-50dc-b17d-7f5d821262ae",
+        "2cb754cc-3a2f-55c1-a3c1-d50fafdc07f3",
+        "291737df-a7f4-555b-bd02-96258c331552",
+        "f99ceb81-6d1f-5fa9-95ee-8e2c88e2e0be",
+        "0630f64b-8b63-5ff5-a263-c0c355e59176"
+      ],
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 2
+    },
+    {
+      "id": "75651932-1c8f-5bc7-b761-56e6c893bb09",
+      "title": "微风来信",
+      "summary": "用户提供的第 3 份测试歌单，共 10 首，保留原曲名与顺序。",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390646915403776.png",
+      "trackIDs": [
+        "f6f965dc-9314-52cb-bbcc-e040a970a107",
+        "fb3ec3ab-09ad-5da3-972d-243a35c396e7",
+        "34f6754a-4485-584e-a312-a7efc7333193",
+        "b37fdde0-2ffe-5686-acc6-1a04ed81244a",
+        "03614a5c-469e-5efe-ab01-ff40905b0750",
+        "99eba320-f147-5b95-abe3-f34fbd694f72",
+        "537084f3-d885-5452-b078-01ccb71f5c8f",
+        "77392e24-d3db-5e5e-a9e9-6f2fa6e2d8b2",
+        "925f685d-b362-5130-a41a-2f53da61e853",
+        "6c163f17-10b6-56aa-8e80-d8cb4c67fab0"
+      ],
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 3
+    }
+  ],
+  "tracks": [
+    {
+      "id": "f71c2fce-d350-5adb-9f79-259f726e88d3",
+      "albumID": "674db7ba-d9bf-5737-bdc3-690b78902514",
+      "title": "ロビンソン - Spitz",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390756785197056.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390759381471232.png",
+      "durationSeconds": 260.1795918367347,
+      "fileVersion": "test-57c5cb322c65466f",
+      "byteSize": 10585210,
+      "sha256": "57c5cb322c65466f5a6350e51d8b460e2c0e3885cb43d3a4e4d4a5ff13c7615f",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 1
+    },
+    {
+      "id": "07311625-ba8a-5e0a-b3f6-88dcd786458a",
+      "albumID": "674db7ba-d9bf-5737-bdc3-690b78902514",
+      "title": "You Belong With Me - Taylor Swift",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390753438142464.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390755707260928.png",
+      "durationSeconds": 232.15020408163267,
+      "fileVersion": "test-c68849741277ba9f",
+      "byteSize": 9382057,
+      "sha256": "c68849741277ba9f851d0bfe6ec6fc269fdbd4fe53f5ca145963a157dc39f953",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 2
+    },
+    {
+      "id": "8d667c4a-f4e4-5f7e-b709-47c5e741c8d7",
+      "albumID": "674db7ba-d9bf-5737-bdc3-690b78902514",
+      "title": "What Do You Mean - Justin Bieber",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390750476963840.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390752406343680.png",
+      "durationSeconds": 207.59510204081633,
+      "fileVersion": "test-2228ddb3915ac7df",
+      "byteSize": 8384475,
+      "sha256": "2228ddb3915ac7df895ce148162c0bf4713223359caaff05a0dccca741c539f2",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 3
+    },
+    {
+      "id": "d58f03b5-db1a-59be-b5ab-364c85dfca46",
+      "albumID": "674db7ba-d9bf-5737-bdc3-690b78902514",
+      "title": "This Love (Explicit) - Camila Cabello",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390746987302912.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390749537439744.png",
+      "durationSeconds": 220.1077551020408,
+      "fileVersion": "test-19e57ad250087f20",
+      "byteSize": 8940018,
+      "sha256": "19e57ad250087f208b47f715a4d708699ebf5bfcb1a502078a912794900865ab",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 4
+    },
+    {
+      "id": "c15ac76c-3867-5b9f-be19-7725bbf64d55",
+      "albumID": "674db7ba-d9bf-5737-bdc3-690b78902514",
+      "title": "This Is Me - Keala Settle、The Greatest Showman Ensemble",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390743388590080.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390746005835776.png",
+      "durationSeconds": 234.73632653061225,
+      "fileVersion": "test-724a6f95f66c444b",
+      "byteSize": 9491057,
+      "sha256": "724a6f95f66c444b95e2107cf89356a25e91da97c72cb53816da5aa1117792f6",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 5
+    },
+    {
+      "id": "56ca8325-6d81-5f0d-a34f-c1b7633ef7b9",
+      "albumID": "674db7ba-d9bf-5737-bdc3-690b78902514",
+      "title": "The Greatest - Sia、Kendrick Lamar",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390739936677888.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390742402928640.png",
+      "durationSeconds": 210.2595918367347,
+      "fileVersion": "test-fa8b793c56930e08",
+      "byteSize": 8510355,
+      "sha256": "fa8b793c56930e08af0d76cb532505152869d67a5893422b334ae73792805d13",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 6
+    },
+    {
+      "id": "027b0537-846c-5bd4-8722-fc9b844c6d5a",
+      "albumID": "674db7ba-d9bf-5737-bdc3-690b78902514",
+      "title": "The Climb - Miley Cyrus",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390735813677056.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390739039096832.png",
+      "durationSeconds": 237.03510204081633,
+      "fileVersion": "test-666162c86856344b",
+      "byteSize": 9579316,
+      "sha256": "666162c86856344be5cedd858947b84fc80dbf583e3870c9aa66af89fb1ffb99",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 7
+    },
+    {
+      "id": "676c039e-86b1-5c39-b3f1-25f5710998e9",
+      "albumID": "674db7ba-d9bf-5737-bdc3-690b78902514",
+      "title": "That Should Be Me - Justin Bieber",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390731376103424.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390734815432704.png",
+      "durationSeconds": 232.77714285714285,
+      "fileVersion": "test-e072b4e9e1135937",
+      "byteSize": 9398067,
+      "sha256": "e072b4e9e11359379b3d175864ef5f1aa1da09a9f41407dd2d1a37a194454561",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 8
+    },
+    {
+      "id": "c29adf65-1a43-598c-acb9-980ef1b050ef",
+      "albumID": "674db7ba-d9bf-5737-bdc3-690b78902514",
+      "title": "TALK TO ME NICE (Explicit) - Shy & DRS",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390727722864640.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390730423996416.png",
+      "durationSeconds": 162.69061224489795,
+      "fileVersion": "test-8aca8cf76b71ba67",
+      "byteSize": 6597352,
+      "sha256": "8aca8cf76b71ba6782634264a7475150ce7524f30e404eca473a615fa4e6c224",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 9
+    },
+    {
+      "id": "cb800c88-16b3-57a8-a1c1-a6b049eb80a8",
+      "albumID": "674db7ba-d9bf-5737-bdc3-690b78902514",
+      "title": "Sunshine - OneRepublic",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390723989934080.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390726875615232.png",
+      "durationSeconds": 163.8922448979592,
+      "fileVersion": "test-186ca3fd131735c5",
+      "byteSize": 6733187,
+      "sha256": "186ca3fd131735c56fd575aa48eee9e5231229279082a57e4286c10e6becdf2f",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 10
+    },
+    {
+      "id": "0014f201-5fb3-559a-aa59-5a61c4e7cbe9",
+      "albumID": "e58677ee-4fb0-5392-8176-22556f6d4359",
+      "title": "Sparks Fly - Taylor Swift",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390718147268608.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390723163656192.png",
+      "durationSeconds": 260.9632653061224,
+      "fileVersion": "test-cd966d4bd303ab65",
+      "byteSize": 10584640,
+      "sha256": "cd966d4bd303ab659bf13c523bc8cda8deb9740ff323805ac42c06cb65548ee2",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 1
+    },
+    {
+      "id": "f388bf04-c182-592e-9767-9a5df31d7fe6",
+      "albumID": "e58677ee-4fb0-5392-8176-22556f6d4359",
+      "title": "Sorry - Justin Bieber",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390713420288000.mp3",
+      "coverURL": null,
+      "durationSeconds": 200.82938775510203,
+      "fileVersion": "test-697513f8770d738b",
+      "byteSize": 8156855,
+      "sha256": "697513f8770d738b6d644e6434542bc24625bcb24f5607756f0776789a830120",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 2
+    },
+    {
+      "id": "bf6688fa-7fdb-5d1c-a272-fd23533b1c67",
+      "albumID": "e58677ee-4fb0-5392-8176-22556f6d4359",
+      "title": "Red Wine Supernova (Explicit) - Chappell Roan",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390708282265600.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390712476569600.png",
+      "durationSeconds": 192.75755102040816,
+      "fileVersion": "test-8087f29ab19fc26d",
+      "byteSize": 7866607,
+      "sha256": "8087f29ab19fc26d3c69f152ce19c966a8366931962073a36cbd8ac96d6025ba",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 3
+    },
+    {
+      "id": "77601877-3547-59e8-9acc-72ee96ef74ae",
+      "albumID": "e58677ee-4fb0-5392-8176-22556f6d4359",
+      "title": "Photograph - Ed Sheeran",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390700967399424.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390707401461760.png",
+      "durationSeconds": 259.03020408163263,
+      "fileVersion": "test-54793cf4c003485a",
+      "byteSize": 10427002,
+      "sha256": "54793cf4c003485acdab9cb984663dde8a68386594320b75ed0fb7a39278124f",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 4
+    },
+    {
+      "id": "f8b48cbc-8fda-5978-904b-92eb0c8dc4ec",
+      "albumID": "e58677ee-4fb0-5392-8176-22556f6d4359",
+      "title": "Only The Young (Featured in Miss Americana) - Taylor Swift",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390695569330176.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390699923017728.png",
+      "durationSeconds": 157.54448979591837,
+      "fileVersion": "test-786a568341308a4a",
+      "byteSize": 6367017,
+      "sha256": "786a568341308a4a5b1938b9b8ef8ca168e73330e6026673981a95cc057c6c58",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 5
+    },
+    {
+      "id": "748f7c45-2b8b-50dc-b17d-7f5d821262ae",
+      "albumID": "e58677ee-4fb0-5392-8176-22556f6d4359",
+      "title": "One Time - Justin Bieber",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390687776313344.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390694764023808.png",
+      "durationSeconds": 215.90204081632652,
+      "fileVersion": "test-d4b7e9abd9523080",
+      "byteSize": 8735093,
+      "sha256": "d4b7e9abd9523080cf50899e48904f2dd6677db414d39a5eee443984b5e357ea",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 6
+    },
+    {
+      "id": "2cb754cc-3a2f-55c1-a3c1-d50fafdc07f3",
+      "albumID": "e58677ee-4fb0-5392-8176-22556f6d4359",
+      "title": "On the Low (Explicit) - Justin Park",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390678741782528.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390686845177856.png",
+      "durationSeconds": 181.4204081632653,
+      "fileVersion": "test-b407e17f655e9fa5",
+      "byteSize": 7388298,
+      "sha256": "b407e17f655e9fa58c1bf1f17636ce5a22971766ec8d44f629aa944a3dafc28c",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 7
+    },
+    {
+      "id": "291737df-a7f4-555b-bd02-96258c331552",
+      "albumID": "e58677ee-4fb0-5392-8176-22556f6d4359",
+      "title": "Never Let Go - LNGSHOT",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390660299427840.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390677760315392.png",
+      "durationSeconds": 193.67183673469387,
+      "fileVersion": "test-58aa35ffd2c18858",
+      "byteSize": 7939391,
+      "sha256": "58aa35ffd2c18858c2a5579a140d2759b2144d610c52b8684bc452d0be13d403",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 8
+    },
+    {
+      "id": "f99ceb81-6d1f-5fa9-95ee-8e2c88e2e0be",
+      "albumID": "e58677ee-4fb0-5392-8176-22556f6d4359",
+      "title": "My Kink Is Karma - Chappell Roan",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390649683644416.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390659368292352.png",
+      "durationSeconds": 222.61551020408163,
+      "fileVersion": "test-b99b337152ead257",
+      "byteSize": 9069123,
+      "sha256": "b99b337152ead257cbac5405b600825014cfb19bbdeb6e05e065ff42428e35a9",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 9
+    },
+    {
+      "id": "0630f64b-8b63-5ff5-a263-c0c355e59176",
+      "albumID": "e58677ee-4fb0-5392-8176-22556f6d4359",
+      "title": "Messy (From F1® The Movie) - ROSÉ",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390647762653184.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390648735731712.png",
+      "durationSeconds": 179.09551020408162,
+      "fileVersion": "test-a2986c77898514c5",
+      "byteSize": 7263148,
+      "sha256": "a2986c77898514c54fa9ef52d5597a81bbeea6377bfcd7d855067929e23060d1",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 10
+    },
+    {
+      "id": "f6f965dc-9314-52cb-bbcc-e040a970a107",
+      "albumID": "75651932-1c8f-5bc7-b761-56e6c893bb09",
+      "title": "Lose My Mind (feat. Doja Cat) - Don Toliver、Doja Cat",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390641903210496.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390646915403776.png",
+      "durationSeconds": 209.08408163265307,
+      "fileVersion": "test-eb14319f0f3a7c29",
+      "byteSize": 8448437,
+      "sha256": "eb14319f0f3a7c295800ede318dce02ac81190835e226bcbf24f8914f5215aa8",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 1
+    },
+    {
+      "id": "fb3ec3ab-09ad-5da3-972d-243a35c396e7",
+      "albumID": "75651932-1c8f-5bc7-b761-56e6c893bb09",
+      "title": "Look At Me Now - Charlie Puth",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390637142675456.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390639084638208.png",
+      "durationSeconds": 197.61632653061224,
+      "fileVersion": "test-9429324736312c77",
+      "byteSize": 7964203,
+      "sha256": "9429324736312c771ce7dc99ffd2279045f0eabafba6316466ff1dea374bbff9",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 2
+    },
+    {
+      "id": "34f6754a-4485-584e-a312-a7efc7333193",
+      "albumID": "75651932-1c8f-5bc7-b761-56e6c893bb09",
+      "title": "Just the Way You Are - Bruno Mars",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390633975975936.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390636152819712.png",
+      "durationSeconds": 220.70857142857142,
+      "fileVersion": "test-c9ead6ca5b283db7",
+      "byteSize": 8903447,
+      "sha256": "c9ead6ca5b283db70c8dcc27a9612552c2e21d198872061a3ec66c9f28220b02",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 3
+    },
+    {
+      "id": "b37fdde0-2ffe-5686-acc6-1a04ed81244a",
+      "albumID": "75651932-1c8f-5bc7-b761-56e6c893bb09",
+      "title": "I'll Fight - Daughtry",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390631169986560.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390632986120192.png",
+      "durationSeconds": 180.76734693877552,
+      "fileVersion": "test-8e1688d446b18048",
+      "byteSize": 7351976,
+      "sha256": "8e1688d446b18048262a251bb69218a149acea1415c951f7c4f61cf9ad0390bc",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 4
+    },
+    {
+      "id": "03614a5c-469e-5efe-ab01-ff40905b0750",
+      "albumID": "75651932-1c8f-5bc7-b761-56e6c893bb09",
+      "title": "Good Life - G-Eazy、Kehlani",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390628024258560.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390630264016896.png",
+      "durationSeconds": 225.5673469387755,
+      "fileVersion": "test-b7c7670e9a1c5809",
+      "byteSize": 9191204,
+      "sha256": "b7c7670e9a1c58090f23a8afe7410d2e471fe544ad41921757df977dfb549871",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 5
+    },
+    {
+      "id": "99eba320-f147-5b95-abe3-f34fbd694f72",
+      "albumID": "75651932-1c8f-5bc7-b761-56e6c893bb09",
+      "title": "Go Again (feat. ELYSA) - King CAAN、ELYSA",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390624681398272.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390627034402816.png",
+      "durationSeconds": 179.2,
+      "fileVersion": "test-4ad0d0be5597d54c",
+      "byteSize": 7232894,
+      "sha256": "4ad0d0be5597d54c17969a8274be4bc54b64ddbf64a0a1ab2fb4cf8394b6e6f6",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 6
+    },
+    {
+      "id": "537084f3-d885-5452-b078-01ccb71f5c8f",
+      "albumID": "75651932-1c8f-5bc7-b761-56e6c893bb09",
+      "title": "Famous - Ivy Adara、Jon Hume、Lindsey Raymond Jackson、Jean Sebastian",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390622299033600.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390623804788736.png",
+      "durationSeconds": 223.6342857142857,
+      "fileVersion": "test-bfa7977478eaa1c0",
+      "byteSize": 9060111,
+      "sha256": "bfa7977478eaa1c007774d294e4cf37a4aef7134b3f98c4d86c248e9d0b0f8f0",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 7
+    },
+    {
+      "id": "77392e24-d3db-5e5e-a9e9-6f2fa6e2d8b2",
+      "albumID": "75651932-1c8f-5bc7-b761-56e6c893bb09",
+      "title": "eternal sunshine - Ariana Grande",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390618452856832.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390621346926592.png",
+      "durationSeconds": 210.2334693877551,
+      "fileVersion": "test-b86041bfd06ee0be",
+      "byteSize": 8493423,
+      "sha256": "b86041bfd06ee0be1189dce5a27b0a2151f401e5a7b1029dd5e92505e6f769e1",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 8
+    },
+    {
+      "id": "925f685d-b362-5130-a41a-2f53da61e853",
+      "albumID": "75651932-1c8f-5bc7-b761-56e6c893bb09",
+      "title": "Die For You - The Weeknd",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390614220804096.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390617454612480.png",
+      "durationSeconds": 259.134693877551,
+      "fileVersion": "test-b0fb5b062e9c2e0c",
+      "byteSize": 10517914,
+      "sha256": "b0fb5b062e9c2e0ca00c22e20b2f1b4bc2420e6e443143286f83b6b63690cbcf",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 9
+    },
+    {
+      "id": "6c163f17-10b6-56aa-8e80-d8cb4c67fab0",
+      "albumID": "75651932-1c8f-5bc7-b761-56e6c893bb09",
+      "title": "Dancing with my phone - Hunfish",
+      "audioURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390611221876736.mp3",
+      "coverURL": "https://mingqi-dmb.oss-cn-beijing.aliyuncs.com/dmb/resource/20261020/2112390613180616704.png",
+      "durationSeconds": 203.4938775510204,
+      "fileVersion": "test-dc88f37cc6893157",
+      "byteSize": 8173524,
+      "sha256": "dc88f37cc6893157e5f0749bc031b0b6d4a66c424854dc92b60999a2c738bd5b",
+      "copyright": {
+        "owner": "未提供（测试占位）",
+        "source": "用户提供的测试歌单；仅限开发联调，正式授权资料待补充",
+        "license": "测试输入，不表示已确认公开分发或上架授权；expiresAt 为空仅供测试流程使用",
+        "expiresAt": null
+      },
+      "updatedAt": "2026-11-22T02:00:00Z",
+      "publishedAt": "2026-11-22T02:00:00Z",
+      "revision": 1,
+      "sortOrder": 10
+    }
+  ],
+  "tombstones": []
+}

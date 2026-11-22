@@ -3,5 +3,8 @@ import WidgetKit
 
 @main
 struct QingkongPhoneWidgets: WidgetBundle {
-    var body: some Widget { DumplingWidget() }
+    var body: some Widget {
+        DumplingWidget()
+        DumplingMusicWidget()
+    }
 }

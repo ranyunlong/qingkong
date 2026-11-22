@@ -158,6 +158,7 @@ struct RelaxationAdviceView: View {
                 }.padding(.vertical, 10)
             }
             Section("试一件轻松的小事") {
+                NavigationLink { RelaxationView() } label: { Label("陪我缓一缓", systemImage: "leaf") }
                 Label("放下手边的事，休息一两分钟。", systemImage: "cup.and.saucer")
                 Label("放松肩膀，用舒服的节奏自然呼吸。", systemImage: "wind")
                 Label("如果方便，起身走走，看看远处。", systemImage: "figure.walk")

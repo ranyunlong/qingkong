@@ -24,6 +24,7 @@ final class RelaxationReminderService: NSObject, UNUserNotificationCenterDelegat
     private(set) var lastWatchReport: WatchReminderReport?
     private(set) var lastWatchSignalAt: Date?
     @ObservationIgnored var configurationDidChange: ((ReminderRelayConfiguration) -> Void)?
+    @ObservationIgnored var didSubmit: ((String, Date, Date, String) -> Void)?
     @ObservationIgnored private var watchInbox: [ReminderSignal] = []
     var monitoringText: String { relayConfiguration.watchOwnerID == nil ? "iPhone 检测，等待手表接手" : "Apple Watch 检测；连接时交给 iPhone 通知，断连时在手表通知" }
     var destination: ReminderDestination?
@@ -176,7 +177,7 @@ final class RelaxationReminderService: NSObject, UNUserNotificationCenterDelegat
         await refreshAuthorization()
         guard authorized else { testStatus = "请先在系统设置中允许通知。"; return }
         let content = UNMutableNotificationContent()
-        content.title = "晴空通知测试"
+        content.title = "小晴空通知测试"
         content.body = "通知功能已连接。这是一条送达测试，不代表检测到健康数据异常。"
         content.sound = .default
         content.categoryIdentifier = Self.testCategory
@@ -345,6 +346,7 @@ final class RelaxationReminderService: NSObject, UNUserNotificationCenterDelegat
                 if let kind { vitalRules[kind]?.delivery.recordDelivery(sampleDate: signal.sampleDate, now: now) }
                 else { state.recordDelivery(sampleDate: signal.sampleDate, now: now) }
                 lastSubmittedAt = .now
+                didSubmit?(identifier, lastSubmittedAt!, signal.sampleDate, content.title)
                 checkResults[signal.kind.rawValue] = "本次提醒已交给系统" + (relayConfiguration.watchOwnerID == nil ? "" : "（手表检测）")
                 persist()
                 error = nil

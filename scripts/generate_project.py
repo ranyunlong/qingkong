@@ -11,8 +11,8 @@ ROOT = Path(__file__).resolve().parent.parent
 ECG_INTERACTION = '--ecg-interaction' in sys.argv
 PHONE_ONLY = '--phone-only' in sys.argv or ECG_INTERACTION
 PROJECT_NAME = 'QingkongECGPreview' if ECG_INTERACTION else 'QingkongPhonePreview' if PHONE_ONLY else 'Qingkong'
-UPDATE_EXISTING = '--update-existing' in sys.argv
 project_file = ROOT / f'{PROJECT_NAME}.xcodeproj/project.pbxproj'
+UPDATE_EXISTING = project_file.exists() and '--recreate-project' not in sys.argv
 existing_text = project_file.read_text() if UPDATE_EXISTING and project_file.exists() else None
 existing = json.loads(subprocess.check_output(['plutil', '-convert', 'json', '-o', '-', str(project_file)])) if existing_text else None
 version_settings = next((o['buildSettings'] for o in (existing or {}).get('objects', {}).values()
@@ -85,9 +85,11 @@ for name,folder,sdk,platforms,family,bundle,product_type,assets in specs:
     elif folder=='Widgets':
         sources=['Sources/Shared/SnapshotStorage.swift','Sources/Shared/Appearance.swift']+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/Widgets').glob('*.swift'))]+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/WidgetShared').glob('*.swift'))]
     elif folder=='iOSWidgets':
-        sources=['Sources/Shared/SnapshotStorage.swift']+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/iOSWidgets').glob('*.swift'))]+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/WidgetShared').glob('*.swift'))]
+        sources=['Sources/Shared/SnapshotStorage.swift','Sources/Shared/WidgetAudioStorage.swift']+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/iOSWidgets').glob('*.swift'))]+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/WidgetShared').glob('*.swift'))]
     else:
         sources=common+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/f'Sources/{folder}').glob('*.swift'))]
+        if folder == 'iOS':
+            sources += ['Sources/Watch/DumplingArtwork.swift','Sources/WidgetShared/MusicPlaybackIntent.swift']
     if ECG_INTERACTION and folder == 'iOS':
         sources = [s for s in sources if s != 'Sources/iOS/QingkongApp.swift'] + ['Tests/InteractionFixtures/ECGFixtureApp.swift']
     if ECG_INTERACTION and folder == 'Tests':
@@ -101,12 +103,14 @@ for name,folder,sdk,platforms,family,bundle,product_type,assets in specs:
         dependencies=[dep]
         frameworks=[add(name+'.core','PBXBuildFile',productRef=dep)]
     framework_phase=add(name+'.frameworks','PBXFrameworksBuildPhase',buildActionMask=2147483647,files=frameworks,runOnlyForDeploymentPostprocessing=0)
-    settings=dict(PRODUCT_NAME='$(TARGET_NAME)',PRODUCT_BUNDLE_IDENTIFIER=bundle,SDKROOT=sdk,SUPPORTED_PLATFORMS=platforms,TARGETED_DEVICE_FAMILY=family,SWIFT_VERSION='5.0',SWIFT_STRICT_CONCURRENCY='targeted',IPHONEOS_DEPLOYMENT_TARGET='18.0',WATCHOS_DEPLOYMENT_TARGET='11.0',CODE_SIGN_STYLE='Automatic',MARKETING_VERSION='0.1.0',CURRENT_PROJECT_VERSION='4',LD_RUNPATH_SEARCH_PATHS=['$(inherited)','@executable_path/Frameworks'],ENABLE_USER_SCRIPT_SANDBOXING='YES',GENERATE_INFOPLIST_FILE='NO',SWIFT_EMIT_LOC_STRINGS='YES',LOCALIZATION_PREFERS_STRING_CATALOGS='YES',CLANG_ENABLE_MODULES='YES',SWIFT_SERIALIZE_DEBUGGING_OPTIONS='NO')
+    settings=dict(PRODUCT_NAME='$(TARGET_NAME)',PRODUCT_BUNDLE_IDENTIFIER=bundle,SDKROOT=sdk,SUPPORTED_PLATFORMS=platforms,TARGETED_DEVICE_FAMILY=family,SWIFT_VERSION='5.0',SWIFT_STRICT_CONCURRENCY='targeted',IPHONEOS_DEPLOYMENT_TARGET='18.0',WATCHOS_DEPLOYMENT_TARGET='11.0',CODE_SIGN_STYLE='Automatic',MARKETING_VERSION='0.1.0',CURRENT_PROJECT_VERSION='4' if is_test else '13',LD_RUNPATH_SEARCH_PATHS=['$(inherited)','@executable_path/Frameworks'],ENABLE_USER_SCRIPT_SANDBOXING='YES',GENERATE_INFOPLIST_FILE='NO',SWIFT_EMIT_LOC_STRINGS='YES',LOCALIZATION_PREFERS_STRING_CATALOGS='YES',CLANG_ENABLE_MODULES='YES',SWIFT_SERIALIZE_DEBUGGING_OPTIONS='NO')
     if not is_test:
         settings.update(INFOPLIST_FILE=f'Config/{folder}-Info.plist',CODE_SIGN_ENTITLEMENTS=f'Config/{folder}.entitlements')
+        settings['INFOPLIST_KEY_CFBundleDisplayName']='小晴空'
+    if folder == 'iOS': settings['INFOPLIST_KEY_LSApplicationCategoryType']='public.app-category.utilities'
     settings['DEVELOPMENT_TEAM']='9S743LF4C7'
     for setting in ('CURRENT_PROJECT_VERSION', 'MARKETING_VERSION'):
-        if setting in version_settings: settings[setting] = version_settings[setting]
+        if not is_test and setting in version_settings: settings[setting] = version_settings[setting]
     if folder in ('iOS','Watch'):
         settings['ASSETCATALOG_COMPILER_APPICON_NAME']='AppIcon'
     if folder=='Watch': settings.update(SKIP_INSTALL='YES',WK_APPLICATION='YES')

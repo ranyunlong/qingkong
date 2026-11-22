@@ -1,0 +1,47 @@
+name: qingkong-content
+
+services:
+  content:
+    image: "${QINGKONG_CONTENT_IMAGE:-qingkong-content:local}"
+    build:
+      context: ./ContentService
+    restart: unless-stopped
+    init: true
+    environment:
+      QINGKONG_ADMIN_USERNAME: "${QINGKONG_ADMIN_USERNAME:-}"
+      QINGKONG_ADMIN_PASSWORD_HASH: "${QINGKONG_ADMIN_PASSWORD_HASH:-}"
+      QINGKONG_SESSION_SECRET: "${QINGKONG_SESSION_SECRET:-}"
+      QINGKONG_SECURE_COOKIES: "1"
+      QINGKONG_CONTENT_DB: /data/content.sqlite3
+    ports:
+      - "127.0.0.1:${QINGKONG_CONTENT_PORT:-8787}:8787"
+    volumes:
+      - content-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=450m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 768m
+    stop_grace_period: 20s
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import json, urllib.request; data = json.load(urllib.request.urlopen('http://127.0.0.1:8787/api/v1/snapshot', timeout=3)); assert data['schemaVersion'] == 1"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: local
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+volumes:
+  content-data:

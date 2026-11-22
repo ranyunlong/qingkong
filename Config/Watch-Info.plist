@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>zh_CN</string>
 	<key>CFBundleDisplayName</key>
-	<string>晴空</string>
+	<string>小晴空</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -32,9 +32,9 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>晴空通过健康访问展示心率、血氧、HRV 与心电图趋势；当前版本仅申请读取权限，不会向 Apple 健康写入或修改数据。</string>
+	<string>小晴空通过健康访问展示心率、血氧、HRV 与心电图趋势；当前版本仅申请读取权限，不会向 Apple 健康写入或修改数据。</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>晴空仅在你允许后读取心率、血氧、HRV 和心电图，帮助你了解个人趋势。数据不会上传至服务器。</string>
+	<string>小晴空仅在你允许后读取心率、血氧、HRV 和心电图，帮助你了解个人趋势。数据不会上传至服务器。</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>

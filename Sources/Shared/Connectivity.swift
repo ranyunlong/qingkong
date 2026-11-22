@@ -30,6 +30,8 @@ final class Connectivity: NSObject, WCSessionDelegate {
     @ObservationIgnored private var immediateRecords: [SyncReceipt] = []
     @ObservationIgnored private var remoteStateUpdatedAt: Date?
     @ObservationIgnored var preferencesReceived: (() -> Void)?
+    @ObservationIgnored var publicContentAddressReceived: ((String) -> Void)?
+    @ObservationIgnored private var publicContentAddress: String?
     @ObservationIgnored var reminderConfigurationReceived: ((ReminderRelayConfiguration) -> Void)?
     @ObservationIgnored var reminderReadyReceived: ((WatchReminderReady) -> Void)?
     @ObservationIgnored var reminderSignalReceived: ((ReminderSignal) -> Void)?
@@ -92,7 +94,7 @@ final class Connectivity: NSObject, WCSessionDelegate {
         #if os(iOS)
         guard session.isPaired && session.isWatchAppInstalled else { syncMessage = "配对并安装 Watch 应用后同步"; return }
         #else
-        guard session.isCompanionAppInstalled else { syncMessage = "iPhone 安装晴空后可同步"; return }
+        guard session.isCompanionAppInstalled else { syncMessage = "iPhone 安装小晴空后可同步"; return }
         #endif
         do {
             let queued = session.outstandingUserInfoTransfers.compactMap { transfer -> SyncPayload? in
@@ -113,6 +115,7 @@ final class Connectivity: NSObject, WCSessionDelegate {
             var context: [String: Any] = ["preferences": try JSONEncoder().encode(store.preferences)]
             #if os(iOS)
             if let reminderConfigurationData { context["reminderConfiguration"] = reminderConfigurationData }
+            if let publicContentAddress { context["publicContentAddress"] = publicContentAddress }
             #else
             if let watchReminderReportData { context["watchReminderReport"] = watchReminderReportData }
             if let watchReadyData { context["reminderReady"] = watchReadyData }
@@ -120,7 +123,7 @@ final class Connectivity: NSObject, WCSessionDelegate {
             #endif
             try session.updateApplicationContext(context)
             if session.isReachable {
-                let reminderContext = context.filter { $0.key != "preferences" }
+                let reminderContext = context.filter { $0.key != "preferences" && $0.key != "publicContentAddress" }
                 if !reminderContext.isEmpty { session.sendMessage(reminderContext, replyHandler: nil, errorHandler: { _ in }) }
             }
         } catch { self.error = "同步暂未完成，记录已保存在本机，将在下次连接时重试。" }
@@ -129,6 +132,18 @@ final class Connectivity: NSObject, WCSessionDelegate {
     func publishReminderConfiguration(_ configuration: ReminderRelayConfiguration) {
         reminderConfigurationData = try? JSONEncoder().encode(configuration)
         flush()
+    }
+
+    func publishContentServiceAddress(_ address: String) {
+        publicContentAddress = address
+        flush()
+    }
+
+    private func receiveContentServiceAddress(_ payload: [String: Any]) {
+        #if os(watchOS)
+        guard let address = payload["publicContentAddress"] as? String, address.utf8.count <= 4096 else { return }
+        publicContentAddressReceived?(address)
+        #endif
     }
 
     func publishWatchReminderReport(_ report: WatchReminderReport) {
@@ -326,6 +341,7 @@ final class Connectivity: NSObject, WCSessionDelegate {
             guard let self else { return }
             self.reachable = connected
             if let preferences = context["preferences"] as? Data { self.receivePreferences(preferences) }
+            self.receiveContentServiceAddress(context)
             self.receiveReminderPayload(context)
             if let error { self.error = "设备同步暂不可用：\(error.localizedDescription)" }
             else { self.flush(); self.sendAudioState(self.player.state) }
@@ -345,6 +361,7 @@ final class Connectivity: NSObject, WCSessionDelegate {
     nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         Task { @MainActor [weak self] in
             if let data = applicationContext["preferences"] as? Data { self?.receivePreferences(data) }
+            self?.receiveContentServiceAddress(applicationContext)
             self?.receiveReminderPayload(applicationContext)
         }
     }

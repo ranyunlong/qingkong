@@ -2,7 +2,7 @@ import SwiftUI
 
 @main
 struct QingkongApp: App {
-    @State private var services: AppServices? = try? AppServices()
+    @State private var services: AppServices? = try? PhoneAppRuntime.services()
     var body: some Scene {
         WindowGroup {
             Group {
@@ -12,6 +12,6 @@ struct QingkongApp: App {
         }
     }
     private func initialize() {
-        services = try? AppServices()
+        services = try? PhoneAppRuntime.services()
     }
 }

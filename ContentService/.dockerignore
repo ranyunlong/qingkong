@@ -1,0 +1,11 @@
+*
+!Dockerfile
+!__init__.py
+!server.py
+!configure.py
+!richtext.py
+!images.py
+!admin_style.css
+!admin_editor.js
+!media_inspection.py
+!requirements.txt

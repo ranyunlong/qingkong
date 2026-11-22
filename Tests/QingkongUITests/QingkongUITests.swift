@@ -4,6 +4,14 @@ final class QingkongUITests: XCTestCase {
     @MainActor
     func testHomeHRVChartAllowsPageScrolling() {
         let app = launch(demo: true)
+        app.buttons["open-settings"].tap()
+        let calmHome = app.switches["calm-home"]
+        for _ in 0..<4 {
+            if calmHome.isHittable { break }
+            app.swipeUp()
+        }
+        if calmHome.value as? String == "1" { calmHome.tap() }
+        app.buttons["完成"].tap()
         let chart = app.descendants(matching: .any)["today-hrv-chart"].firstMatch
         for _ in 0..<4 {
             if chart.isHittable { break }

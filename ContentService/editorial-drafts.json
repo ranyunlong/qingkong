@@ -1,0 +1,866 @@
+{
+  "schemaVersion": 1,
+  "documentType": "editorial_review_package",
+  "preparedOn": "2026-11-21",
+  "language": "zh-CN",
+  "status": "draft_unreviewed",
+  "review": null,
+  "notice": "18篇编辑待审稿，基于已浏览核验的机构公开资料重新撰写；未经过专业审核，不可直接发布。引用不代表机构认可本应用或本文。机构原文主要面向美国／英国／全球读者，须由审核者确认中文读者适用性与本地求助路径。",
+  "characterCountRule": "body去除空白后的Unicode字符数；另列汉字数。正文为纯文本，不含HTML或Markdown。",
+  "articles": [
+    {
+      "editorialID": "afc9eca2-7db0-5882-8252-543b7c0317f6",
+      "topicNumber": 1,
+      "title": "焦虑来临时，先认识自己的感受",
+      "category": "理解焦虑",
+      "summary": "给一般成年人认识焦虑体验的入门支持；不用于判断是否患病。",
+      "body": "适用范围：一般成年人的日常焦虑体验；不能据此判断焦虑障碍，也不用于解释尚未查明的身体不适。\n为什么可能出现\n面对压力或不确定的事，人可能担忧、坐立不安，也可能留意到心跳或呼吸的变化。焦虑的表现因人而异，同一种身体感受也可能有其他原因。感到焦虑并不等于患病；是否需要诊断，应结合持续情况、生活影响和专业评估，而非一次手表读数。\n现在可以做什么\n先给感受一个朴素的描述，例如“我现在很紧张，想有人陪一下”。在安全的位置坐稳，选择安静休息、轻松走动或联系信任的人。愿意的话，简短记下开始时间、当时发生的事和对生活的影响；不必立刻找到唯一原因，也不必反复检查数字来证明自己安全。\n何时需要专业帮助\n如果担忧反复出现、难以应对，或已影响睡眠、工作、学习和人际相处，可以向合适的医疗或心理专业人员求助，不必等到非常严重。出现持续胸痛、明显呼吸困难、晕厥或伤害自己的念头时，应及时联系当地紧急支持，不能先假定只是焦虑。",
+      "coverURL": null,
+      "sortOrder": 1,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Anxiety Disorders",
+          "url": "https://www.nimh.nih.gov/health/topics/anxiety-disorders",
+          "publisher": "NIMH",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Anxiety, fear and panic",
+          "url": "https://www.nhs.uk/mental-health/feelings-symptoms-behaviours/feelings-and-symptoms/anxiety-fear-panic/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "About Heart Attack Symptoms, Risk, and Recovery",
+          "publisher": "CDC",
+          "url": "https://www.cdc.gov/heart-disease/about/heart-attack.html",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令"
+      ],
+      "bodyCharacterCount": 396,
+      "bodyHanCharacterCount": 356,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "e8e9c1e5-d53b-5aae-adc6-a6cfef9c4ffa",
+      "topicNumber": 2,
+      "title": "为什么不急着给自己贴标签",
+      "category": "理解焦虑",
+      "summary": "帮助一般成年人区分一次体验与需要专业评估的长期困扰。",
+      "body": "适用范围：一般成年人在经历担忧、紧张后阅读；不提供自测评分或诊断结论。\n为什么可能出现\n压力情境中的担忧可以是一种人的反应，持续的焦虑困扰也可能发生在没有眼前威胁的时候。仅凭“今天很紧张”或网上一段症状描述，无法确定属于哪种情况。正式评估还会了解持续时间、频率、功能影响和其他健康因素；没有标签，也不意味着感受不值得被认真对待。\n现在可以做什么\n把“我是不是有问题”换成更具体的问题：最近哪些事变难了？是否总在回避？睡眠和日常安排受了多少影响？写下两三条想与专业人员讨论的事实即可。可以先尝试可承受的小步安排，保持与支持者联系；不必用连续搜索症状、与他人比较或一次健康数据来确认身份。\n何时需要专业帮助\n当担忧难以控制、持续困扰，或开始妨碍生活时，可以直接预约评估，不需要先证明自己符合某个疾病名称。若症状迅速加重、无法维持基本照顾，或有自伤、自杀想法，应尽快取得专业或紧急支持。本文的“不急着贴标签”不等于延迟就医或否定已有诊断。",
+      "coverURL": null,
+      "sortOrder": 2,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Anxiety Disorders",
+          "url": "https://www.nimh.nih.gov/health/topics/anxiety-disorders",
+          "publisher": "NIMH",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Generalized Anxiety Disorder: What You Need to Know",
+          "url": "https://www.nimh.nih.gov/health/publications/generalized-anxiety-disorder-gad",
+          "publisher": "NIMH",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "I’m So Stressed Out! Fact Sheet",
+          "url": "https://www.nimh.nih.gov/health/publications/so-stressed-out-fact-sheet",
+          "publisher": "NIMH",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令"
+      ],
+      "bodyCharacterCount": 410,
+      "bodyHanCharacterCount": 371,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "c41a2320-0da7-5929-a1ae-4bb04326cb68",
+      "topicNumber": 3,
+      "title": "身体不适时，怎样描述给专业人员",
+      "category": "身体感受",
+      "summary": "一般成年人就诊沟通准备；不是在家排除严重疾病的方法。",
+      "body": "适用范围：一般成年人为咨询或就诊整理信息；急症时应先求助，不要为了完成记录而等待。\n为什么可能出现\n心悸、紧绷或其他不适可能与情境、生活习惯、药物或身体状况有关，感受相似不代表原因相同。专业人员通常需要了解症状本身及发生背景，而不仅是“我觉得不正常”。记录能帮助沟通，但不能靠记录或手表数据独立判断原因。\n现在可以做什么\n用自己的话记下：哪里不舒服、何时开始、每次多久、出现几次、当时在做什么，以及有没有其他伴随感受。说明对走路、睡眠或工作产生的实际影响；带上正在使用的药物、补充剂及重要既往情况。若有设备记录，注明来源与时间，并区分当时的主观感受和屏幕数字；没有记录也可以就医。向对方询问下一步、哪些变化需要提前复诊，并确认自己理解了说明。\n何时需要专业帮助\n新出现、持续、反复或逐渐加重的不适，应咨询合适的医疗人员。胸部持续压迫或疼痛、明显气促、晕厥等情况需立即联系当地急救服务。即使同时焦虑，或设备读数看起来平稳，也不能据此排除需要处理的问题。",
+      "coverURL": null,
+      "sortOrder": 3,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Heart palpitations",
+          "url": "https://www.nhs.uk/symptoms/heart-palpitations/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Heart Rate",
+          "url": "https://my.clevelandclinic.org/health/diagnostics/heart-rate",
+          "publisher": "Cleveland Clinic",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Getting help for your mental health",
+          "url": "https://www.nhs.uk/mental-health/social-care-and-your-rights/how-to-access-mental-health-services/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Chest Pain",
+          "publisher": "MedlinePlus / U.S. National Library of Medicine",
+          "url": "https://medlineplus.gov/chestpain.html",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Tips for Talking With a Health Care Provider About Your Mental Health",
+          "publisher": "NIMH",
+          "url": "https://www.nimh.nih.gov/health/publications/tips-for-talking-with-your-health-care-provider",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令"
+      ],
+      "bodyCharacterCount": 419,
+      "bodyHanCharacterCount": 376,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "82b0ad44-e3d7-5107-a079-a1f9a6a92cbb",
+      "topicNumber": 4,
+      "title": "心跳变化：记录观察而不自行诊断",
+      "category": "身体感受",
+      "summary": "面向注意到心跳变化的一般成年人；不用于判读心律或决定是否安全。",
+      "body": "适用范围：一般成年人了解心跳感受与记录的边界；已有心脏疾病者应遵循个人医疗计划。\n为什么可能出现\n有时人会感到心跳明显、加快、扑动或漏跳。活动、睡眠不足、情绪、咖啡因及某些药物都可能与心悸有关，也可能存在需要评估的心律或其他健康问题。感觉强烈程度与屏幕上的心率数值不是同一件事，单次读数不能解释症状原因。\n现在可以做什么\n停在安全的位置，简短记录何时出现、持续多久、是否反复、当时活动及伴随症状。把近期药物、咖啡因或作息变化如实告诉医疗人员，不自行停药或用额外药物压低心率。若选择查看设备，记录来源与采样时间；读不到数据时保留空缺，也不要为了得到安心的数字连续测量。\n何时需要专业帮助\n心悸反复、次数增加、持续较久，或已有心脏病／相关家族史时，应联系医疗人员评估。心悸持续不缓解，或伴胸痛、气促、头晕欲晕或已经晕厥时，应立即联系当地急救服务；不要等手表发出提示。症状已停止也应告知曾出现的危险伴随表现，由专业人员判断后续安排。",
+      "coverURL": null,
+      "sortOrder": 4,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Heart palpitations",
+          "url": "https://www.nhs.uk/symptoms/heart-palpitations/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Heart Rate",
+          "url": "https://my.clevelandclinic.org/health/diagnostics/heart-rate",
+          "publisher": "Cleveland Clinic",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Pulse Oximeters",
+          "url": "https://www.fda.gov/medical-devices/products-and-medical-procedures/pulse-oximeters",
+          "publisher": "FDA",
+          "retrievedOn": "2026-11-21",
+          "applicabilityNote": "原文讨论脉搏血氧仪；这里只支持不应只看仪器读数、还应看症状的原则，不把血氧仪精度说明或阈值外推为腕表HRV标准。"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令"
+      ],
+      "bodyCharacterCount": 407,
+      "bodyHanCharacterCount": 368,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "a5b5e246-eabc-50e0-9f67-0b0b55b3c8a8",
+      "topicNumber": 5,
+      "title": "准备戒烟：先整理需要的支持",
+      "category": "生活变化",
+      "summary": "给准备停止吸烟的成年人；具体药物与特殊人群方案由医疗人员确定。",
+      "body": "适用范围：准备戒烟的成年吸烟者；未成年人、孕期或哺乳期人群，以及有重要健康问题者，应先取得适合自己的专业建议。\n为什么可能出现\n停止使用尼古丁后，有些人会经历吸烟渴望、烦躁、坐立不安、注意力或睡眠变化。这些体验的程度与过程因人而异，不能把戒烟期间出现的一切身体不适都归为“正常恢复”。新的、明显的或持续加重的症状仍需要单独评估。\n现在可以做什么\n先写下想戒烟的理由、容易想吸烟的场景和可联系的支持者，选择可执行的开始方式。与医疗人员或当地正规戒烟服务讨论行为支持及适合的戒烟药物；联合使用行为支持和药物可提高戒烟成功机会，但不能照搬别人的用量。为渴望出现时准备简单替代活动，例如短暂走动、换个环境或联系支持者。一次又吸烟不代表只能放弃，可以重新梳理触发情境和支持计划。\n何时需要专业帮助\n戒烟过程难以坚持、情绪或睡眠明显受影响，或对药物有疑问时，应主动咨询。若情绪严重低落、出现自伤想法，或发生胸痛、明显气促等急症表现，应及时取得相应的专业或紧急帮助，不能仅凭“正在戒烟”推迟处理。",
+      "coverURL": null,
+      "sortOrder": 5,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "How to Quit Smoking",
+          "url": "https://www.cdc.gov/tobacco/about/how-to-quit.html",
+          "publisher": "CDC",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "7 Common Withdrawal Symptoms",
+          "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/7-common-withdrawal-symptoms/index.html",
+          "publisher": "CDC",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "About Heart Attack Symptoms, Risk, and Recovery",
+          "publisher": "CDC",
+          "url": "https://www.cdc.gov/heart-disease/about/heart-attack.html",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令"
+      ],
+      "bodyCharacterCount": 435,
+      "bodyHanCharacterCount": 395,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "dc59dd3e-bdf8-5684-b471-9f38deda12b6",
+      "topicNumber": 6,
+      "title": "减少咖啡因前，记录自己的日常习惯",
+      "category": "生活变化",
+      "summary": "一般成年人调整咖啡因习惯的准备；不是治疗心悸、焦虑或失眠的处方。",
+      "body": "适用范围：考虑调整咖啡因摄入的成年人；孕期、备孕、哺乳期或正在服药者，宜向医疗人员询问个人适用范围。\n为什么可能出现\n咖啡因来自咖啡、茶、部分饮料和其他产品，人对它的敏感程度及处理速度并不相同。摄入过多时可能出现睡眠受影响、紧张或心悸；但这些表现也可能有其他原因，不能仅凭喝过咖啡就认定问题已经解释清楚。突然减少后，有些人也会感到头痛或不舒服。\n现在可以做什么\n先记录几天常喝的产品、份量与时间，查看标签，别把一杯当作固定剂量。愿意减少时可以逐步调整，例如减少份量或更换一部分低咖啡因饮品，而不是要求一次完全停止。留意较晚摄入与睡眠安排是否冲突，但不要用几天的同时变化证明因果。记录以帮助自己和专业人员沟通为目的，不设人人必须达到的统一上限或保证有效的目标。\n何时需要专业帮助\n症状持续、加重或妨碍生活，或者需要同时调整药物时，应咨询医疗人员，不要自行停药。发生持续胸痛、严重呼吸困难、晕厥等情况，应立即联系当地急救服务；降低咖啡因不能替代对这些表现的评估。",
+      "coverURL": null,
+      "sortOrder": 6,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Spilling the Beans: How Much Caffeine is Too Much?",
+          "url": "https://www.fda.gov/consumers/consumer-updates/spilling-beans-how-much-caffeine-too-much",
+          "publisher": "FDA",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Sleep Deprivation and Deficiency: Healthy Sleep Habits",
+          "url": "https://www.nhlbi.nih.gov/health/sleep-deprivation/healthy-sleep-habits",
+          "publisher": "NIH NHLBI",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "About Heart Attack Symptoms, Risk, and Recovery",
+          "publisher": "CDC",
+          "url": "https://www.cdc.gov/heart-disease/about/heart-attack.html",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令"
+      ],
+      "bodyCharacterCount": 423,
+      "bodyHanCharacterCount": 386,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "516a7829-21d2-5818-942e-318f7fe29d89",
+      "topicNumber": 7,
+      "title": "睡不着的一晚，怎样温和对待自己",
+      "category": "睡眠",
+      "summary": "适用于一般成年人偶尔难以入睡的一晚；不是慢性失眠治疗方案。",
+      "body": "适用范围：一般成年人偶尔难入睡或夜间醒来时的支持；不替代已有睡眠疾病的诊疗安排。\n为什么可能出现\n压力、作息变化、环境、咖啡因及其他因素都可能与睡眠困难有关。同一晚也可能没有清楚原因。越想马上睡着，有时越容易反复关注时间和身体感受；一晚的体验不足以判断长期睡眠问题，也不能从手表的睡眠数字直接解释原因。\n现在可以做什么\n给自己一个低要求的选择：困倦时再上床，睡前安排安静活动，尽量延续日常起床时间。躺着清醒并越来越烦躁时，可以离开床，在安全舒适处做些安静的事，等困意回来再试。不必强迫完成呼吸次数或必须听完一段声音，也不靠酒精、擅自加药或不断看时钟催睡。第二天如明显困倦，应避免驾车或操作危险设备。\n何时需要专业帮助\n调整习惯仍无改善、睡眠问题反复或持续，或白天受影响以至难以应对时，应联系医疗人员；不需要为了凑够某个时长才求助。若伴随明显呼吸问题、情绪严重变化或安全风险，应更早取得评估。若已有医生给出的方案，以个人方案为准。",
+      "coverURL": null,
+      "sortOrder": 7,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Insomnia",
+          "url": "https://www.nhs.uk/conditions/insomnia/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "How to fall asleep faster and sleep better",
+          "url": "https://www.nhs.uk/every-mind-matters/mental-wellbeing-tips/how-to-fall-asleep-faster-and-sleep-better/",
+          "publisher": "NHS Every Mind Matters",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Sleep Deprivation and Deficiency: Healthy Sleep Habits",
+          "url": "https://www.nhlbi.nih.gov/health/sleep-deprivation/healthy-sleep-habits",
+          "publisher": "NIH NHLBI",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令",
+        "核实建议适用性；不将一般睡眠习惯建议替代慢性失眠的规范诊疗"
+      ],
+      "bodyCharacterCount": 408,
+      "bodyHanCharacterCount": 373,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "9824ee87-1492-5091-8fa3-28d2b955ea6d",
+      "topicNumber": 8,
+      "title": "整理一个适合自己的睡前环境",
+      "category": "睡眠",
+      "summary": "帮助一般成年人检查可调整的环境；不承诺环境改变能够治疗睡眠疾病。",
+      "body": "适用范围：一般成年人整理睡前环境与习惯；轮班工作、照护责任或疾病可能限制可调整的范围，应以实际处境为准。\n为什么可能出现\n噪声、光线、房间温度和作息不规律可能影响入睡；压力、疾病或药物也可能参与其中。睡眠困难并不说明自己做错了什么，环境改善也不一定解决所有问题。别人喜欢的灯光、气味或背景音，不一定适合你。\n现在可以做什么\n从一件可承受的小事开始，例如降低不必要的光线、让房间安静些，或把温度调到自己舒适的程度。睡前给活动留一段缓冲，减少让自己持续清醒的强光屏幕；尽可能保持相对固定的作息。若使用背景音，保持低音量，留意是否更难放松，不要盖住重要提示。无需购买设备、香氛或助眠产品来完成一张“合格卧室”清单，也不以手表评分判断环境是否成功。\n何时需要专业帮助\n若睡眠困扰持续、反复影响白天生活，或怀疑与药物及身体状况有关，应找医疗人员讨论。明显困倦时避免危险活动；若已有诊断或治疗安排，不应以换环境代替治疗。可把最困扰的一两项情况带去咨询，而不必先把所有习惯调整完。",
+      "coverURL": null,
+      "sortOrder": 8,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "How to fall asleep faster and sleep better",
+          "url": "https://www.nhs.uk/every-mind-matters/mental-wellbeing-tips/how-to-fall-asleep-faster-and-sleep-better/",
+          "publisher": "NHS Every Mind Matters",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Sleep Deprivation and Deficiency: Healthy Sleep Habits",
+          "url": "https://www.nhlbi.nih.gov/health/sleep-deprivation/healthy-sleep-habits",
+          "publisher": "NIH NHLBI",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Insomnia",
+          "url": "https://www.nhs.uk/conditions/insomnia/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Deafness and hearing loss: Safe listening",
+          "url": "https://www.who.int/news-room/questions-and-answers/item/deafness-and-hearing-loss-safe-listening",
+          "publisher": "WHO",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令",
+        "核实建议适用性；不将一般睡眠习惯建议替代慢性失眠的规范诊疗"
+      ],
+      "bodyCharacterCount": 427,
+      "bodyHanCharacterCount": 387,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "195e28a7-d719-5ce8-a67c-56406aecfb79",
+      "topicNumber": 9,
+      "title": "看健康趋势前，先看来源与采样时间",
+      "category": "健康数据",
+      "summary": "适用于查看个人健康记录的一般成年人；数据阅读不等于医疗判断。",
+      "body": "适用范围：一般成年人阅读已有健康记录；不据此诊断疾病、调整药物或判断当下是否安全。\n为什么可能出现\n脉搏会随活动、休息、情绪及部分药物等因素改变。一次采样只说明某个时刻的记录，不能自然代表全天，更不能把两个不同背景下的数字直接当作身体好坏的比较。不同来源、测量方法或采样条件也会限制比较的意义。\n现在可以做什么\n先看指标名称、单位、来源与时间，再想起当时是在休息、活动还是感觉不适。比较时尽量了解条件是否相近，留意是单次值还是一段时间的汇总；对于缺失或来源不清的记录，保留不确定性。可以为想咨询的变化留下简短说明，但不需要通过反复测量找到一个“正确数字”。把当时的身体感受和功能影响与设备记录一起告诉医疗人员。\n何时需要专业帮助\n若有新出现、持续或加重的不适，或变化令你担忧，应寻求专业评估，不能只等趋势图自行恢复。持续胸痛、明显气促、晕厥等急症表现应立即取得紧急帮助；看似平稳的消费设备读数不能用来否定这些症状，某些测量还存在精度和适用范围的限制。",
+      "coverURL": null,
+      "sortOrder": 9,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Heart Rate",
+          "url": "https://my.clevelandclinic.org/health/diagnostics/heart-rate",
+          "publisher": "Cleveland Clinic",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Pulse Oximeters",
+          "url": "https://www.fda.gov/medical-devices/products-and-medical-procedures/pulse-oximeters",
+          "publisher": "FDA",
+          "retrievedOn": "2026-11-21",
+          "applicabilityNote": "原文讨论脉搏血氧仪；这里只支持不应只看仪器读数、还应看症状的原则，不把血氧仪精度说明或阈值外推为腕表HRV标准。"
+        },
+        {
+          "title": "About Heart Attack Symptoms, Risk, and Recovery",
+          "publisher": "CDC",
+          "url": "https://www.cdc.gov/heart-disease/about/heart-attack.html",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令",
+        "分开审核应用自身数据处理说明与医学表述；官方健康来源不为本应用计算或设备准确性背书"
+      ],
+      "bodyCharacterCount": 419,
+      "bodyHanCharacterCount": 383,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "803ad4a2-fe7a-5f23-8d7a-5817dbf81676",
+      "topicNumber": 10,
+      "title": "HRV 数据的边界与适用条件",
+      "category": "健康数据",
+      "summary": "给查看腕表HRV记录的一般成年人；不提供诊断阈值或焦虑判断。",
+      "body": "适用范围：一般成年人了解 HRV 的含义与边界；已有心脏疾病、植入设备或正在治疗者，应请医疗人员解释个人适用性。\n为什么可能出现\nHRV 描述相邻心跳之间时间间隔的变化，并不是心率数值本身。它与自主神经调节等因素有关，也会受到个体差异、睡眠、活动及测量背景影响。不同人、设备、算法或采样时长的结果未必适合直接相比；不能只凭高低给健康打分，较低也不能直接证明焦虑或患病。\n现在可以做什么\n先确认数据来源、指标名称与采样时间。小晴空只展示已有的 SDNN 记录，不从普通心率反推 HRV；本应用的短期个人基线只是辅助阅读历史记录的比较方式，不是医学阈值。资料不足时等待真实数据积累，不补零、不猜测，也不要求每次放松后数字必须改善。若想讨论变化，可提供记录背景及身体感受。\n何时需要专业帮助\n不能用腕表 HRV 排除疾病、判断情绪原因或自行调整药物。新症状、持续不适或明显功能影响需要合适的专业评估；出现持续胸痛、气促或晕厥时应及时取得紧急帮助。单次低值本身也不构成这里能判断的急症结论。",
+      "coverURL": null,
+      "sortOrder": 10,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Heart Rate Variability (HRV)",
+          "url": "https://my.clevelandclinic.org/health/symptoms/21773-heart-rate-variability-hrv",
+          "publisher": "Cleveland Clinic",
+          "retrievedOn": "2026-11-21",
+          "applicabilityNote": "原文涉及临床HRV与24小时记录，不将其中临床数值阈值移植为短时腕表SDNN或本应用基线的诊断标准；原文医学审核不等于本稿已审核。"
+        },
+        {
+          "title": "Heart Rate",
+          "url": "https://my.clevelandclinic.org/health/diagnostics/heart-rate",
+          "publisher": "Cleveland Clinic",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Chest Pain",
+          "publisher": "MedlinePlus / U.S. National Library of Medicine",
+          "url": "https://medlineplus.gov/chestpain.html",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令",
+        "分开审核应用自身数据处理说明与医学表述；官方健康来源不为本应用计算或设备准确性背书"
+      ],
+      "bodyCharacterCount": 427,
+      "bodyHanCharacterCount": 376,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "2f40e9ee-77d4-57fa-9b90-b0a4f2323a50",
+      "topicNumber": 11,
+      "title": "缺少记录时，不补零也不猜测",
+      "category": "健康数据",
+      "summary": "说明数据空缺的阅读原则；没有记录不代表没有症状或健康风险。",
+      "body": "适用范围：一般成年人查看不完整的健康记录；本文解释信息边界，不用来判定是否患病或授权状态。\n为什么可能出现\n设备没有留下记录与实际测得零是两种不同的信息。只有已有、来源明确的结果才能作为相应时刻的记录；页面空白本身无法告诉我们当时身体发生了什么，也不能用它推断用户是否拒绝了权限。消费设备的结果还受测量方法和使用条件限制。\n现在可以做什么\n先看页面是否注明来源、采样时间或缺失状态，再按设备及应用的说明检查可用记录；不必为了填满图表连续测量。小晴空会保留缺失，不放入假数据，也不把没有样本的一天自动算作零。讨论趋势时说明哪些日期有资料、哪些没有；若求助时缺少设备数据，直接讲清自己的感受、发生时间及生活影响即可，不能因为没有图表而放弃咨询。\n何时需要专业帮助\n是否需要帮助应结合真实症状和情况，而非图表是否完整。新出现或反复的不适可以联系医疗人员；持续胸痛、明显呼吸困难或晕厥需立即取得紧急支持。不要等待设备恢复记录，也不要把某一次正常外观的读数当作排除问题的依据。",
+      "coverURL": null,
+      "sortOrder": 11,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Pulse Oximeters",
+          "url": "https://www.fda.gov/medical-devices/products-and-medical-procedures/pulse-oximeters",
+          "publisher": "FDA",
+          "retrievedOn": "2026-11-21",
+          "applicabilityNote": "原文讨论脉搏血氧仪；这里只支持不应只看仪器读数、还应看症状的原则，不把血氧仪精度说明或阈值外推为腕表HRV标准。"
+        },
+        {
+          "title": "Heart Rate",
+          "url": "https://my.clevelandclinic.org/health/diagnostics/heart-rate",
+          "publisher": "Cleveland Clinic",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Chest Pain",
+          "publisher": "MedlinePlus / U.S. National Library of Medicine",
+          "url": "https://medlineplus.gov/chestpain.html",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令",
+        "分开审核应用自身数据处理说明与医学表述；官方健康来源不为本应用计算或设备准确性背书"
+      ],
+      "bodyCharacterCount": 427,
+      "bodyHanCharacterCount": 397,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "1f432b54-dc7b-53e2-b66a-a5d1de3f69d4",
+      "topicNumber": 12,
+      "title": "第一次求助前，可以准备哪些问题",
+      "category": "寻求支持",
+      "summary": "面向一般成年人首次咨询；具体入口依所在地区医疗与心理服务安排。",
+      "body": "适用范围：准备向医疗或心理专业人员咨询的一般成年人；儿童、青少年及特殊人群需选择相应服务。\n为什么可能出现\n第一次谈论身心困扰时，不知道怎样开口或担心说不清楚很常见。你不必先确定诊断，也不用证明自己已经足够严重。专业人员可以帮助了解症状及对生活的影响，并讨论适合的下一步；服务形式和转介方式会因地区而不同。\n现在可以做什么\n带上最想解决的一两个问题，简短记录困扰何时开始、频率、变化及对睡眠、工作或基本生活的影响。说明既往情况、正在使用的药物和已有支持。可以问：“可能还需要了解什么？”“有哪些选择，收益与限制是什么？”“如果加重，我应联系谁？”需要时提前询问沟通辅助或陪同安排。若没有健康设备数据，照样可以咨询；忘了某个细节，也可以之后补充。\n何时需要专业帮助\n持续困扰、生活受影响或自己难以应对时，可以预约，不必等自助办法全部失败。若存在自伤、自杀想法、无法维持安全或已经发生危险，应立即联系当地紧急服务或危机支持，并尽可能让可信任的人陪同。本文不提供诊断，也不能替代及时评估。",
+      "coverURL": null,
+      "sortOrder": 12,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Getting help for your mental health",
+          "url": "https://www.nhs.uk/mental-health/social-care-and-your-rights/how-to-access-mental-health-services/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Caring for Your Mental Health",
+          "url": "https://www.nimh.nih.gov/health/topics/caring-for-your-mental-health",
+          "publisher": "NIMH",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "My Mental Health: Do I Need Help?",
+          "url": "https://www.nimh.nih.gov/health/publications/my-mental-health-do-i-need-help",
+          "publisher": "NIMH",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Tips for Talking With a Health Care Provider About Your Mental Health",
+          "publisher": "NIMH",
+          "url": "https://www.nimh.nih.gov/health/publications/tips-for-talking-with-your-health-care-provider",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令"
+      ],
+      "bodyCharacterCount": 435,
+      "bodyHanCharacterCount": 389,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "922879e0-5cb1-5a02-a73d-e5b3ab3eb41b",
+      "topicNumber": 13,
+      "title": "怎样向信任的人表达需要陪伴",
+      "category": "寻求支持",
+      "summary": "帮助一般成年人表达支持需求；亲友陪伴不能替代需要的医疗照护。",
+      "body": "适用范围：希望与可信任的人谈论近况的一般成年人；若某段关系不安全，应改找其他支持者或合适服务。\n为什么可能出现\n难开口可能与担心被误解、增加别人负担，或自己尚未理清感受有关。对方也可能不知道如何回应。一次谈话不一定解决问题，但可以让支持需求更清楚；有没有立刻获得理想回应，都不能决定你的感受是否重要。\n现在可以做什么\n挑一个较安静、彼此有时间的时刻，先问对方能否听一会儿。可以说：“我最近有点难熬，想请你陪我坐十分钟，先不用帮我找原因。”也可以用文字、一起散步或预约另一个时间开始。具体说明希望得到的帮助，例如听你说完、陪同预约或之后再联系，并尊重彼此能承担的范围。若第一次没有谈成，可以换人或换方式，不必把这理解为自己不值得被帮助。\n何时需要专业帮助\n亲友不负责诊断，也不应成为唯一的安全安排。困扰持续、加重或影响基本生活时，可联系专业人员。如果有自伤、自杀想法或当下不安全，应及时使用当地紧急／危机服务，并告诉可信任的人需要立即支持；不要只等待下一次聊天。",
+      "coverURL": null,
+      "sortOrder": 13,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "How to talk about your mental health",
+          "url": "https://www.nhs.uk/every-mind-matters/mental-wellbeing-tips/how-to-talk-about-your-mental-health/",
+          "publisher": "NHS Every Mind Matters",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Caring for Your Mental Health",
+          "url": "https://www.nimh.nih.gov/health/topics/caring-for-your-mental-health",
+          "publisher": "NIMH",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "My Mental Health: Do I Need Help?",
+          "url": "https://www.nimh.nih.gov/health/publications/my-mental-health-do-i-need-help",
+          "publisher": "NIMH",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令"
+      ],
+      "bodyCharacterCount": 424,
+      "bodyHanCharacterCount": 383,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "04c8ac87-3186-50a8-a0be-b2c0f747055c",
+      "topicNumber": 14,
+      "title": "一分钟安静陪伴的使用说明",
+      "category": "日常放松",
+      "summary": "说明本应用的可选短暂陪伴；一分钟并非经验证的治疗剂量。",
+      "body": "适用范围：一般成年人在安全场所自愿使用的短暂陪伴；不用于急症处理、诊断或替代心理及医疗治疗。\n为什么可能出现\n压力下，人可能觉得紧绷、思绪很快，或一时难以安静。放松方法对部分人有帮助，但体验和研究证据因方法与人群不同而异；有些人关注呼吸或身体后反而更不舒服。本应用的一分钟入口只是降低开始门槛，不代表一分钟就能治疗焦虑或改善某个健康数值。\n现在可以做什么\n先确认自己没有在驾车、游泳或操作设备，选择舒服且稳妥的位置。愿意时让呼吸自然地进出，不必吸得很深，不憋气，也不追求固定次数。你可以看看周围、听一段低音量声音，或只是安静坐着；提示、声音和触感都可关闭，随时暂停或离开。结束后不必给表现打分，也无需用 HRV 的前后变化证明是否有效。\n何时需要专业帮助\n如果练习让你头晕、气促、恐慌或明显不适，应停下并按实际情况求助。持续或加重的困扰需要专业评估；严重胸痛、明显呼吸困难或晕厥应联系当地急救服务，不能先做完练习再决定。已有健康状况或创伤相关困扰者，可以先讨论更适合自己的方式。",
+      "coverURL": null,
+      "sortOrder": 14,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Breathing exercises for stress",
+          "url": "https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21",
+          "applicabilityNote": "原文介绍至少5分钟的呼吸练习；本稿不把它作为本应用1分钟模式疗效证据，也不声称特定时长经过临床验证。"
+        },
+        {
+          "title": "Relaxation Techniques: What You Need To Know",
+          "url": "https://www.nccih.nih.gov/health/relaxation-techniques-what-you-need-to-know",
+          "publisher": "NIH NCCIH",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Heart Attack Symptoms",
+          "publisher": "NIH NHLBI",
+          "url": "https://www.nhlbi.nih.gov/health/heart-attack/symptoms",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令"
+      ],
+      "bodyCharacterCount": 431,
+      "bodyHanCharacterCount": 390,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "96067ddd-e46e-5c3f-beaa-865713952b9a",
+      "topicNumber": 15,
+      "title": "选择适合当下的放松方式",
+      "category": "日常放松",
+      "summary": "提供一般成年人自愿选择支持方式的框架，不宣称任何一种适合所有人。",
+      "body": "适用范围：一般成年人选择可承受的日常放松活动；不将自助练习作为所有症状的通用处理办法。\n为什么可能出现\n人在不同时间可能需要不同支持：有时想安静，有时更愿意走动或有人陪伴。某种练习让别人舒服，不代表你也必须喜欢。放松技术的研究结果取决于具体方法和人群；部分人可能出现焦虑增加、侵入性想法等不适，因此不能以“坚持下去就一定有效”要求自己。\n现在可以做什么\n从当下最容易接受的一项开始，例如短暂安静休息、温和活动、自然呼吸或联系支持者。选择安全位置，避免在驾车或需要集中注意的活动中闭眼练习；呼吸不强迫、不憋气。如果一段引导令人不适，可以关掉、换成外界声音或结束，停止不是失败。把结果描述成“此刻感觉怎样”即可，不设必须平静的目标，也不靠心率或 HRV 的即时变化评判。\n何时需要专业帮助\n已有疾病、创伤经历或对某类练习反应强烈时，可以向专业人员咨询适合的方法。困扰持续或功能受影响，应寻求评估，而非不断增加练习量。出现急性胸痛、明显呼吸困难、晕厥或自伤风险，需要及时取得相应紧急帮助。",
+      "coverURL": null,
+      "sortOrder": 15,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Relaxation Techniques: What You Need To Know",
+          "url": "https://www.nccih.nih.gov/health/relaxation-techniques-what-you-need-to-know",
+          "publisher": "NIH NCCIH",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Breathing exercises for stress",
+          "url": "https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21",
+          "applicabilityNote": "原文介绍至少5分钟的呼吸练习；本稿不把它作为本应用1分钟模式疗效证据，也不声称特定时长经过临床验证。"
+        },
+        {
+          "title": "Caring for Your Mental Health",
+          "url": "https://www.nimh.nih.gov/health/topics/caring-for-your-mental-health",
+          "publisher": "NIMH",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Heart Attack Symptoms",
+          "publisher": "NIH NHLBI",
+          "url": "https://www.nhlbi.nih.gov/health/heart-attack/symptoms",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令"
+      ],
+      "bodyCharacterCount": 433,
+      "bodyHanCharacterCount": 389,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "d6f9d102-8d1e-5000-aafb-c1b4786cbad1",
+      "topicNumber": 16,
+      "title": "何时需要及时求助：待专业核实的清单",
+      "category": "身体感受",
+      "summary": "提供有限的一般安全提示，不是完整急症筛查或个体化分诊。",
+      "body": "适用范围：一般成年人的有限安全提示；不是完整的急症清单，也不能用“未列出”证明某个症状安全。正式发布前须由专业人员核实当地求助路径与措辞。\n为什么可能出现相似感受\n有些需要及时处理的问题会与焦虑时的感受重叠。单靠自己觉得紧张、年龄较轻，或手表暂时没有异常提示，都不足以判断原因。症状的变化、伴随表现和个人病史需要由专业人员综合评估。\n现在可以做什么\n若出现突然发生且持续不缓解的胸部疼痛／压迫，特别是伴明显气促、出汗、恶心或疼痛向手臂、下颌等处延伸，应立即联系当地急救服务。心悸持续不缓解，或心悸伴胸痛、气促、欲晕或晕厥，也应紧急求助。若存在自伤、自杀想法、已采取危险行为或无法确保安全，及时联系当地紧急／危机支持，并尽可能让可信任的人陪着。不要等待手表测量、网络刷新或放松练习完成。\n何时需要专业帮助\n没有上述表现仍可能需要评估。新出现、反复、持续或加重的不适，或明显影响日常生活的困扰，应联系医疗人员；不确定紧急程度时，使用当地医疗咨询渠道。急症时不要自行驾车前往，按急救人员指引行动。",
+      "coverURL": null,
+      "sortOrder": 16,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Chest pain",
+          "url": "https://www.nhs.uk/symptoms/chest-pain/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Heart palpitations",
+          "url": "https://www.nhs.uk/symptoms/heart-palpitations/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "My Mental Health: Do I Need Help?",
+          "url": "https://www.nimh.nih.gov/health/publications/my-mental-health-do-i-need-help",
+          "publisher": "NIMH",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Pulse Oximeters",
+          "url": "https://www.fda.gov/medical-devices/products-and-medical-procedures/pulse-oximeters",
+          "publisher": "FDA",
+          "retrievedOn": "2026-11-21",
+          "applicabilityNote": "原文讨论脉搏血氧仪；这里只支持不应只看仪器读数、还应看症状的原则，不把血氧仪精度说明或阈值外推为腕表HRV标准。"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令",
+        "本稿不是完整分诊规则；特别核实症状组合、紧急程度及本地适用性，不遗漏非典型表现"
+      ],
+      "bodyCharacterCount": 439,
+      "bodyHanCharacterCount": 395,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "fd85bb71-d077-5e5d-adf0-c28c5e02dcee",
+      "topicNumber": 17,
+      "title": "声音陪伴与个人偏好",
+      "category": "睡眠",
+      "summary": "面向一般成年人选择低音量声音；普通录音不等于专业音乐治疗。",
+      "body": "适用范围：一般成年人自愿选择背景声音或音乐作为陪伴；不用于治疗失眠、焦虑或耳部疾病。\n为什么可能出现\n声音的喜好与反应因人而异，喜欢的声音可能带来舒适感，也可能令人分心或唤起不愉快的记忆。音乐相关研究涉及不同干预、环境与人群，不能把研究结论直接套到本应用的某一段录音。专业音乐治疗有明确的人员和治疗安排，与自行播放音乐不同。\n现在可以做什么\n先从低而舒服的音量试一小段，选择自己愿意听的内容；不喜欢就换掉或关闭，不必追求所谓最有效频率。听耳机时还要考虑音量和持续时间，安排休息；音量较低也不意味着任何时长都没有风险。睡前播放可以设置停止时间，确认不会遮住必要的安全提示。安静同样是可以接受的个人选择，不需要整夜开声才算完成睡前流程。\n何时需要专业帮助\n声音使你更紧张或出现不适时应停止。耳鸣、听力变化、疼痛等情况可向合适的医疗或听力专业人员咨询；睡眠问题持续并影响白天生活时，也应取得评估。不能用某段声音替代已安排的诊疗，更不能因为正在播放助眠内容而推迟急症求助。",
+      "coverURL": null,
+      "sortOrder": 17,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Music and Health: What You Need To Know",
+          "url": "https://www.nccih.nih.gov/health/music-and-health-what-you-need-to-know",
+          "publisher": "NIH NCCIH",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Deafness and hearing loss: Safe listening",
+          "url": "https://www.who.int/news-room/questions-and-answers/item/deafness-and-hearing-loss-safe-listening",
+          "publisher": "WHO",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Insomnia",
+          "url": "https://www.nhs.uk/conditions/insomnia/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令",
+        "核实建议适用性；不将一般睡眠习惯建议替代慢性失眠的规范诊疗"
+      ],
+      "bodyCharacterCount": 426,
+      "bodyHanCharacterCount": 395,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    },
+    {
+      "editorialID": "7fa14d46-b80e-53c6-baac-a3c9fd055294",
+      "topicNumber": 18,
+      "title": "记录感受与解释原因之间的区别",
+      "category": "理解焦虑",
+      "summary": "帮助一般成年人组织观察，不根据时间线、日记或设备读数推断病因。",
+      "body": "适用范围：一般成年人回顾自己的感受与记录；不是研究、诊断或治疗决策工具。\n为什么可能出现理解上的混淆\n“下午喝了咖啡，晚上很紧张”是在描述先后发生的事；“紧张一定由咖啡造成”则是原因判断。时间接近不等于因果；睡眠、活动、情境、药物等因素可能同时改变。即使观察到多次共同变化，也可能存在其他解释，单个人的一段记录更不能排除身体原因。\n现在可以做什么\n把记录分成看见的事实和暂时的猜想。例如写“当时心跳明显，持续几分钟”，而不是“手表证明我又焦虑了”。记不清的地方可以保留空缺，不为了故事完整而补上细节。回顾时优先看对生活的实际影响及想讨论的问题；若带给专业人员，说明记录来源、时间与局限。无需反复检查日记或每个指标，也不根据暂时关联自行停药、加药或限制正常生活。\n何时需要专业帮助\n困扰持续、加重或影响生活时，可请专业人员协助理解记录；没有找到规律也不妨碍求助。新的身体不适需要合适评估，胸痛、明显呼吸困难或晕厥等情况应及时取得紧急帮助。记录可以帮助沟通，不能承担判断安全或排除疾病的责任。",
+      "coverURL": null,
+      "sortOrder": 18,
+      "status": "draft",
+      "review": null,
+      "professionalReviewStatus": "not_reviewed",
+      "references": [
+        {
+          "title": "Finding and Using Health Statistics: Causation",
+          "url": "https://www.nlm.nih.gov/oet/ed/stats/02-400.html",
+          "publisher": "U.S. National Library of Medicine",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Heart Rate",
+          "url": "https://my.clevelandclinic.org/health/diagnostics/heart-rate",
+          "publisher": "Cleveland Clinic",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Anxiety, fear and panic",
+          "url": "https://www.nhs.uk/mental-health/feelings-symptoms-behaviours/feelings-and-symptoms/anxiety-fear-panic/",
+          "publisher": "NHS",
+          "retrievedOn": "2026-11-21"
+        },
+        {
+          "title": "Heart Attack Symptoms",
+          "publisher": "NIH NHLBI",
+          "url": "https://www.nhlbi.nih.gov/health/heart-attack/symptoms",
+          "retrievedOn": "2026-11-21"
+        }
+      ],
+      "preparedOn": "2026-11-21",
+      "scope": "仅供专业人员审核的编辑待审稿，不应在审核前公开。",
+      "reviewChecklist": [
+        "核对医学表述、适用人群与遗漏风险",
+        "逐条复核来源对应性、中文转述和时效",
+        "核实本地医疗与紧急求助路径；不直接照搬海外号码",
+        "确认正文不构成个体诊断、治疗承诺或用药指令"
+      ],
+      "bodyCharacterCount": 438,
+      "bodyHanCharacterCount": 393,
+      "sourceVerificationStatus": "linked_institution_pages_browsed_not_professional_review"
+    }
+  ],
+  "sourceVerificationNotes": [
+    "所有保留的references URL已于2026-11-21通过网页浏览工具打开或官方检索结果与正文核验；遇到失效旧地址已改为可访问的官方页面。",
+    "来源以健康主管机构和医疗机构自身公众材料为主；不把原始来源页面的专业审核转写成本稿审核。",
+    "没有逐篇医学专家签字、没有对特定个人进行评估；没有配置本地急救号码或服务名，需发布前本地化。",
+    "正文中应用数据规则属于项目功能说明，不是外部医学机构对本应用的认可。"
+  ]
+}

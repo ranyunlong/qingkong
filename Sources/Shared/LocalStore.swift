@@ -31,11 +31,11 @@ final class LocalStore {
     var entries: [MoodRecord] { records.filter { !$0.isDeleted }.sorted { $0.createdAt > $1.createdAt } }
     var scene: SceneTheme { preferences.scene(entries: records) }
 
-    init(testing: Bool = false, reset: Bool = false) throws {
-        defaults = testing ? UserDefaults(suiteName: "cn.geckoai.qingkong.uitests")! : .standard
+    init(testing: Bool = false, reset: Bool = false, directoryOverride: URL? = nil, defaultsOverride: UserDefaults? = nil) throws {
+        defaults = defaultsOverride ?? (testing ? UserDefaults(suiteName: "cn.geckoai.qingkong.uitests")! : .standard)
         if testing && reset { defaults.removePersistentDomain(forName: "cn.geckoai.qingkong.uitests") }
         preferences = defaults.data(forKey: "qingkong.preferences.v1").flatMap { try? JSONDecoder().decode(Preferences.self, from: $0) } ?? Preferences()
-        let folder = URL.applicationSupportDirectory.appending(path: "Qingkong", directoryHint: .isDirectory)
+        let folder = directoryOverride ?? URL.applicationSupportDirectory.appending(path: "Qingkong", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let config = ModelConfiguration(url: folder.appending(path: testing ? "uitests.store" : "journal.store"), cloudKitDatabase: .none)
         container = try ModelContainer(for: StoredMood.self, configurations: config)
@@ -46,16 +46,18 @@ final class LocalStore {
             try context.save()
         }
         try reload()
+        CompanionActionMemory.remember(moods: records, defaults: defaults)
     }
 
-    func add(mood: Int, stress: Int, note: String) throws {
-        try save(MoodRecord(mood: mood, stress: stress, note: note))
+    func add(mood: Int, stress: Int, note: String, tags: [LifeTag] = []) throws {
+        try save(MoodRecord(mood: mood, stress: stress, note: note, tags: tags))
     }
 
     func delete(_ record: MoodRecord) throws {
         var tombstone = record
         tombstone.isDeleted = true
         tombstone.note = ""
+        tombstone.tags = []
         tombstone.updatedAt = max(.now, record.updatedAt.addingTimeInterval(0.001))
         try save(tombstone)
     }
@@ -74,6 +76,7 @@ final class LocalStore {
         }
         do { try context.save() } catch { context.rollback(); throw error }
         try reload()
+        CompanionActionMemory.remember(moods: records, defaults: defaults)
         didChangeRecords?()
         if !fromPeer { didChange?() }
     }

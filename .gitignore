@@ -11,3 +11,7 @@ QingkongPhonePreview.xcodeproj/
 QingkongECGPreview.xcodeproj/
 __pycache__/
 *.pyc
+.env
+.env.*
+!.env.example
+backups/

@@ -14,16 +14,24 @@ struct WatchMusicView: View {
     @State private var showingVolume = false
     @State private var volumeActivity = UUID()
     @State private var pageVisible = false
+    @State private var operationContext = UUID()
     @GestureState private var touchingVolume = false
     private var state: AudioState { remote ? (app.link.remoteState ?? lastRemoteState ?? app.player.state) : app.player.state }
     private var busy: Bool { operating || switching || app.link.remoteBusy || app.player.activating }
     private var canAdjustVolume: Bool { pageVisible && scenePhase == .active && !busy && playbackError == nil }
 
     var body: some View {
-        VStack(spacing: 12) {
-            Spacer(minLength: 0)
-            Image(state.track.image).resizable().scaledToFill().frame(width: 100, height: 90).clipped().clipShape(RoundedRectangle(cornerRadius: 18)).accessibilityHidden(true)
-            Text(state.track.name).font(.headline).lineLimit(1).accessibilityIdentifier("watch-current-track")
+        GeometryReader { geometry in
+          VStack(spacing: 6) {
+            AudioArtworkView(state: state)
+                .frame(width: 100, height: max(50, min(90, geometry.size.height - 88)))
+                .clipShape(RoundedRectangle(cornerRadius: 18))
+            VStack(spacing: 2) {
+                Text(state.displayTitle).font(.headline).lineLimit(1).accessibilityIdentifier("watch-current-track")
+                Text(remote ? "iPhone 正在加载…" : "正在加载…").font(.caption2)
+                    .opacity(state.buffering == true ? 1 : 0)
+                    .accessibilityHidden(state.buffering != true)
+            }.frame(height: 32)
             ZStack {
                 // Keep the native control mounted and focused, including while covered.
                 // Handing focus over after the first crown event loses that volume step.
@@ -46,13 +54,34 @@ struct WatchMusicView: View {
                 }
             }
             .frame(height: 44)
-            Spacer(minLength: 0)
+          }.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .padding(.horizontal, 6)
         .digitalCrownAccessory(.hidden)
         .accessibilityHint("旋转数码表冠调节音量")
         .accessibilityAction(named: "调节音量", revealVolume)
         .navigationTitle("")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    List {
+                        NavigationLink("手表曲库与下载") { WatchAudioLibraryView() }
+                        Button("自动选择播放设备") {
+                            Task {
+                                operationContext = UUID()
+                                await app.player.useAutomaticPlaybackSelection()
+                                remote = false
+                            }
+                        }
+                        Text(app.player.localPlaybackSelected ? "当前保持手表本机播放。" : "返回音乐页后自动检查可用播放设备。")
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }.navigationTitle("播放设置")
+                } label: { Image(systemName: "ellipsis").foregroundStyle(.black) }
+                    .tint(.white)
+                    .accessibilityLabel("播放设备与手表下载")
+                    .accessibilityIdentifier("watch-music-settings")
+            }
+        }
         .alert("播放未完成", isPresented: Binding(get: { playbackError != nil }, set: { if !$0 { playbackError = nil } })) {
             Button("知道了", role: .cancel) { playbackError = nil }
         } message: {
@@ -77,8 +106,14 @@ struct WatchMusicView: View {
             .onChange(of: app.link.remoteVolumeRevision) { _, _ in
                 if remote { volumeChanged() }
             }
-            .onAppear { pageVisible = true }
-            .onDisappear { pageVisible = false; showingVolume = false }
+            .onAppear {
+                pageVisible = true
+                if !app.player.localPlaybackSelected, !app.player.state.playing, let phone = app.link.remoteState {
+                    lastRemoteState = phone
+                    remote = true
+                }
+            }
+            .onDisappear { pageVisible = false; showingVolume = false; operationContext = UUID() }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active, !busy { Task { try? await chooseLocation() } }
             }
@@ -86,7 +121,11 @@ struct WatchMusicView: View {
                 guard let value else { return }
                 lastRemoteState = value
                 // A phone status update changes the display, never starts Watch playback.
-                if !app.player.state.playing && !app.player.activating && !switching { remote = true }
+                if !app.player.localPlaybackSelected && !app.player.state.playing && !app.player.activating && !switching { remote = true }
+            }
+            .onChange(of: app.player.localPlaybackSelected) { _, value in
+                operationContext = UUID()
+                if value { remote = false }
             }
             .onChange(of: app.link.reachable) { _, connected in
                 if connected, scenePhase == .active, !busy { Task { try? await chooseLocation() } }
@@ -96,7 +135,7 @@ struct WatchMusicView: View {
     private func controls(_ state: AudioState) -> some View {
         HStack(spacing: 10) {
             playbackButton("上一首", symbol: "backward.end.fill", action: .previous)
-            playbackButton(state.playing ? "暂停" : "播放", symbol: state.playing ? "pause.fill" : "play.fill", action: .playPause)
+            playbackButton(state.playing || state.buffering == true ? "暂停" : "播放", symbol: state.playing || state.buffering == true ? "pause.fill" : "play.fill", action: .playPause)
             playbackButton("下一首", symbol: "forward.end.fill", action: .next)
         }.buttonStyle(.plain).disabled(busy)
     }
@@ -121,16 +160,24 @@ struct WatchMusicView: View {
 
     private func perform(_ action: AudioCommand.Action) {
         Task {
-            guard !busy else { return }
+            guard pageVisible, !busy else { return }
+            let context = operationContext
             operating = true
             defer { operating = false }
-            let operation: AudioCommand.Action = action == .playPause && state.playing ? .pause : action
+            let operation: AudioCommand.Action = action == .playPause && (state.playing || state.buffering == true) ? .pause : action
+            // A remote pause/skip must receive a phone receipt. Changing the local
+            // player cannot stand in for an operation that failed on the phone.
+            if remote && operation != .playPause {
+                if !(await app.link.command(operation)) { playbackError = app.link.error ?? "iPhone 未确认操作，请稍后重试。" }
+                return
+            }
             do {
                 try await chooseLocation(waitForPhone: true)
                 try Task.checkCancellation()
             } catch { return }
+            guard pageVisible, context == operationContext else { return }
             // A newly confirmed phone may already be playing; a Play tap must not pause it.
-            if operation == .playPause, state.playing { return }
+            if operation == .playPause, state.playing || state.buffering == true { return }
             if remote {
                 if !(await app.link.command(operation)) { playbackError = app.link.error ?? "iPhone 未确认操作，请稍后重试。" }
             }
@@ -143,6 +190,9 @@ struct WatchMusicView: View {
 
     private func chooseLocation(waitForPhone: Bool = false) async throws {
         guard !switching && !app.link.remoteBusy else { return }
+        // A user explicitly selected a verified Watch download. Keep its local
+        // pause/resume and queue controls until another source is selected.
+        if app.player.localPlaybackSelected { remote = false; return }
         // Keep an active local session stable through brief connection changes.
         guard !app.player.state.playing && !app.player.activating else { remote = false; return }
         switching = true
@@ -156,12 +206,25 @@ struct WatchMusicView: View {
             return
         }
         try Task.checkCancellation()
+        // The user may have selected local audio while the phone receipt was pending.
+        guard !app.player.localPlaybackSelected, !app.player.state.playing, !app.player.activating else {
+            remote = false
+            return
+        }
         if confirmed, let confirmedState = app.link.remoteState {
             remote = true
             lastRemoteState = confirmedState
             return
         }
+        // A failed background status probe must not turn subsequent remote
+        // pause/skip commands into local operations. Only an explicit Play tap
+        // may select the Watch after the phone confirmation times out.
+        guard waitForPhone else { return }
         if remote, let lastRemoteState {
+            if lastRemoteState.onlineTrackID != nil {
+                playbackError = "iPhone 未确认播放。可在手表曲库选择已下载音轨或内置声音。"
+                throw CancellationError()
+            }
             await app.player.prepareForPlayback(lastRemoteState)
         }
         remote = false

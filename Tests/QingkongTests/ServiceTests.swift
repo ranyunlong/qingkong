@@ -6,6 +6,194 @@ import QingkongCore
 @testable import Qingkong
 
 final class ServiceTests: XCTestCase {
+    func testMusicWidgetSnapshotRoundTripAndMeaningfulChanges() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        var state = AudioState()
+        state.onlineTrackID = "song-a"
+        state.onlineTitle = "测试歌曲"
+        state.playing = true
+        let snapshot = WidgetAudioSnapshot(state: state)
+        XCTAssertTrue(try WidgetAudioStorage.save(snapshot, to: url))
+        XCTAssertEqual(WidgetAudioStorage.load(from: url), snapshot)
+        XCTAssertFalse(try WidgetAudioStorage.save(WidgetAudioSnapshot(state: state, now: snapshot.generatedAt.addingTimeInterval(60)), to: url))
+        state.playing = false
+        XCTAssertTrue(try WidgetAudioStorage.save(WidgetAudioSnapshot(state: state), to: url))
+        XCTAssertEqual(WidgetAudioStorage.load(from: url)?.playing, false)
+        XCTAssertEqual(WidgetAudioStorage.load(from: url)?.onlineTrackID, "song-a")
+        try Data("broken".utf8).write(to: url)
+        XCTAssertNil(WidgetAudioStorage.load(from: url))
+    }
+
+    @MainActor
+    func testMusicWidgetControlsUseCurrentPlayerAndExplicitPlayPause() async throws {
+        let player = AudioPlayer()
+        defer { player.pause() }
+        await player.select(.ocean)
+        func unexpectedRestore() async throws { XCTFail("已有选择时不能另建播放来源") }
+        try await WidgetPlaybackController.perform(.play, on: player, restoreSelection: unexpectedRestore)
+        XCTAssertTrue(player.state.playing, player.error ?? "应使用现有播放器播放")
+        XCTAssertEqual(player.state.track, .ocean)
+        try await WidgetPlaybackController.perform(.play, on: player, restoreSelection: unexpectedRestore)
+        XCTAssertTrue(player.state.playing, "组件过时的播放动作不能反向暂停")
+        try await WidgetPlaybackController.perform(.next, on: player, restoreSelection: unexpectedRestore)
+        XCTAssertEqual(player.state.track, .night)
+        XCTAssertTrue(player.state.playing)
+        try await WidgetPlaybackController.perform(.pause, on: player, restoreSelection: unexpectedRestore)
+        try await WidgetPlaybackController.perform(.pause, on: player, restoreSelection: unexpectedRestore)
+        XCTAssertFalse(player.state.playing, "重复暂停不能开始播放")
+        try await WidgetPlaybackController.perform(.previous, on: player, restoreSelection: unexpectedRestore)
+        XCTAssertEqual(player.state.track, .ocean)
+        XCTAssertFalse(player.state.playing, "暂停时切歌不自动开始")
+        player.reportPlaybackError("上次播放失败")
+        try await WidgetPlaybackController.perform(.pause, on: player, restoreSelection: unexpectedRestore)
+        XCTAssertFalse(player.state.playing, "之前的播放错误不能让暂停动作报错")
+    }
+
+    @MainActor
+    func testMusicWidgetRestoresSelectionAndDoesNotFallbackAfterRestoreError() async throws {
+        let player = AudioPlayer()
+        defer { player.pause() }
+        var restores = 0
+        try await WidgetPlaybackController.perform(.pause, on: player) { restores += 1 }
+        XCTAssertEqual(restores, 0, "冷启动暂停不恢复歌曲或开始声音")
+        do {
+            try await WidgetPlaybackController.perform(.play, on: player) {
+                restores += 1
+                throw WidgetPlaybackError.unavailable("歌曲已撤回")
+            }
+            XCTFail("恢复失败应向系统返回错误")
+        } catch { XCTAssertEqual(error.localizedDescription, "歌曲已撤回") }
+        XCTAssertFalse(player.state.playing)
+        XCTAssertFalse(player.hasSelection)
+        try await WidgetPlaybackController.perform(.play, on: player) {
+            restores += 1
+            await player.select(.night)
+        }
+        XCTAssertEqual(restores, 2)
+        XCTAssertEqual(player.state.track, .night)
+        XCTAssertTrue(player.state.playing)
+    }
+
+    @MainActor
+    func testTrackChangesPublishCompleteMetadataWithoutBundledFallback() async throws {
+        func track(_ id: String) throws -> PublicAudioTrack {
+            let object: [String: Any] = ["id": id, "albumID": "album", "title": "Title " + id,
+                "audioURL": "https://example.invalid/audio.wav", "durationSeconds": 30,
+                "fileVersion": "1", "byteSize": 100, "sha256": String(repeating: "0", count: 64),
+                "copyright": ["owner": "Test", "source": "Fixture", "license": "Test only"],
+                "updatedAt": "2026-11-21T00:00:00Z", "publishedAt": "2026-11-21T00:00:00Z", "revision": 1, "sortOrder": 0]
+            return try PublicContentSnapshot.decoder().decode(PublicAudioTrack.self, from: JSONSerialization.data(withJSONObject: object))
+        }
+        let player = AudioPlayer()
+        defer { player.pause() }
+        let first = try track("first"), second = try track("second")
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "rain", withExtension: "wav"))
+        await player.selectOnline(first, queue: [first, second], url: url, allowCellular: false, autoplay: false)
+        for _ in 0..<100 {
+            if player.canSeek { break }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        XCTAssertTrue(player.canSeek, "AVPlayer 准备完成后应能定位")
+        await player.seek(to: 8)
+        XCTAssertEqual(player.playbackPosition, 8, accuracy: 0.1)
+        XCTAssertFalse(player.state.playing, "线上播放器定位时也应保留暂停状态")
+        var updates: [AudioState] = []
+        player.didChangeState = { updates.append($0) }
+        await player.selectOnline(second, queue: [first, second], url: url, allowCellular: false, autoplay: false)
+        XCTAssertFalse(updates.isEmpty)
+        for value in updates {
+            XCTAssertTrue(value.onlineTrackID == first.id || value.onlineTrackID == second.id, "切歌中不能发布内置封面状态")
+            XCTAssertEqual(value.onlineTitle, value.onlineTrackID == first.id ? first.title : second.title, "歌名与歌曲必须一起更新")
+        }
+        updates.removeAll()
+        await player.select(.ocean)
+        for value in updates where value.onlineTrackID == nil {
+            XCTAssertEqual(value.track, .ocean, "切到内置曲目不能先闪上一首内置封面")
+            XCTAssertNil(value.onlineTitle)
+            XCTAssertNil(value.onlineArtworkURL)
+        }
+    }
+
+    @MainActor
+    func testPlaybackModesPersistAndShuffleSelectsAnotherTrack() async throws {
+        let suite = "qingkong.playback-mode-test." + UUID().uuidString
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let player = AudioPlayer(defaultsOverride: defaults)
+        defer { player.pause(); defaults.removePersistentDomain(forName: suite) }
+        XCTAssertEqual(player.playbackMode, .sequence)
+        player.playbackMode = .shuffle
+        XCTAssertEqual(player.playbackMode, .shuffle)
+        await player.select(.rain)
+        await player.skip(1)
+        XCTAssertNotEqual(player.state.track, .rain)
+        XCTAssertFalse(player.state.playing)
+        player.playbackMode = .single
+        XCTAssertEqual(player.playbackMode, .single)
+        let reopened = AudioPlayer(defaultsOverride: defaults)
+        defer { reopened.pause() }
+        XCTAssertEqual(reopened.playbackMode, .single)
+        reopened.playbackMode = .sequence
+        XCTAssertEqual(reopened.playbackMode, .sequence)
+    }
+
+    @MainActor
+    func testBundledPlaybackModesAdvanceAtTheRealEndOfAudio() async throws {
+        let suite = "qingkong.loop-test." + UUID().uuidString
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let player = AudioPlayer(defaultsOverride: defaults)
+        defer { player.pause(); defaults.removePersistentDomain(forName: suite) }
+        for mode in AudioPlaybackMode.allCases {
+            player.playbackMode = mode
+            await player.select(.night, autoplay: true)
+            XCTAssertTrue(player.state.playing, player.error ?? "本地声音应开始播放")
+            await player.seek(to: player.playbackDuration - 0.1)
+            for _ in 0..<100 {
+                let expectedTrack = switch mode {
+                case .single: player.state.track == .night
+                case .sequence: player.state.track == .rain
+                case .shuffle: player.state.track != .night
+                }
+                if expectedTrack && player.state.playing && player.playbackPosition < 2 { break }
+                try await Task.sleep(for: .milliseconds(20))
+            }
+            XCTAssertTrue(player.state.playing)
+            XCTAssertLessThan(player.playbackPosition, 2, "\(mode.title)应从头继续播放")
+            switch mode {
+            case .single: XCTAssertEqual(player.state.track, .night)
+            case .sequence: XCTAssertEqual(player.state.track, .rain, "最后一首之后应循环到第一首")
+            case .shuffle: XCTAssertNotEqual(player.state.track, .night)
+            }
+            player.pause()
+        }
+    }
+
+    @MainActor
+    func testLocalPlaybackSeekKeepsPauseAndRejectsInvalidPositions() async throws {
+        let suite = "qingkong.seek-test." + UUID().uuidString
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let player = AudioPlayer(defaultsOverride: defaults)
+        defer { player.pause(); defaults.removePersistentDomain(forName: suite) }
+        await player.select(.rain, autoplay: true)
+        XCTAssertTrue(player.state.playing, player.error ?? "本地音频应能播放")
+        player.pause()
+        XCTAssertTrue(player.canSeek)
+        XCTAssertGreaterThan(player.playbackDuration, 8)
+
+        await player.seek(to: 8)
+        XCTAssertEqual(player.playbackPosition, 8, accuracy: 0.1)
+        XCTAssertFalse(player.state.playing, "拖动暂停中的音频不应开始播放")
+        await player.seek(to: .nan)
+        await player.seek(to: .infinity)
+        XCTAssertEqual(player.playbackPosition, 8, accuracy: 0.1)
+        await player.seek(to: -4)
+        XCTAssertEqual(player.playbackPosition, 0, accuracy: 0.1)
+
+        await player.select(.ocean)
+        XCTAssertEqual(player.playbackPosition, 0)
+        XCTAssertTrue(player.canSeek, "暂停切歌后仍能定位，但不能沿用上一首的位置")
+    }
+
     @MainActor
     func testWatchMoodAttemptsToWakeBackgroundPhoneAndKeepsDurableCopy() throws {
         let store = try LocalStore(testing: true, reset: true)
