@@ -47,6 +47,9 @@ final class AudioPlayer: NSObject, AVAudioPlayerDelegate {
     @ObservationIgnored private var downloadedLicenseTask: Task<Void, Never>?
     #endif
     #if os(iOS)
+    // Audio-session changes can block on the system audio service. Keep them
+    // off the main actor and ordered across rapid play/pause requests.
+    private static let audioSessionQueue = DispatchQueue(label: "cn.geckoai.qingkong.audio-session", qos: .userInitiated)
     private(set) var onlineTrack: PublicAudioTrack?
     @ObservationIgnored var onlineURLProvider: ((PublicAudioTrack, Bool) throws -> URL)?
     @ObservationIgnored var didStartOnline: ((PublicAudioTrack) -> Void)?
@@ -112,8 +115,8 @@ final class AudioPlayer: NSObject, AVAudioPlayerDelegate {
             #if os(watchOS)
             guard downloadedTrack?.copyright.expiresAt.map({ $0 > .now }) ?? true else { throw PlaybackError.cannotPlay }
             #endif
-            let session = AVAudioSession.sharedInstance()
             #if os(watchOS)
+            let session = AVAudioSession.sharedInstance()
             try session.setCategory(.playback, mode: .default, policy: .longFormAudio, options: [])
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                 session.activate(options: []) { active, error in
@@ -123,8 +126,16 @@ final class AudioPlayer: NSObject, AVAudioPlayerDelegate {
                 }
             }
             #else
-            try session.setCategory(.playback, mode: .default, options: [])
-            try session.setActive(true)
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                Self.audioSessionQueue.async {
+                    do {
+                        let session = AVAudioSession.sharedInstance()
+                        try session.setCategory(.playback, mode: .default, options: [])
+                        try session.setActive(true)
+                        continuation.resume()
+                    } catch { continuation.resume(throwing: error) }
+                }
+            }
             #endif
             guard activationID == attempt else { return }
             #if os(iOS)
@@ -142,6 +153,7 @@ final class AudioPlayer: NSObject, AVAudioPlayerDelegate {
             state.playing = true
             updateNowPlaying()
         } catch {
+            guard activationID == attempt else { return }
             wantsPlayback = false
             state.playing = false
             self.error = "播放未开始，请检查音频输出设备后重试。"
@@ -155,8 +167,12 @@ final class AudioPlayer: NSObject, AVAudioPlayerDelegate {
         buffering = false
         #if os(iOS)
         onlinePlayer?.pause(); onlineTimeout?.cancel()
-        #endif
+        Self.audioSessionQueue.async {
+            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        }
+        #else
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        #endif
         updateNowPlaying()
     }
 

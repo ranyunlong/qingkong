@@ -6,6 +6,49 @@ import QingkongCore
 @testable import Qingkong
 
 final class ServiceTests: XCTestCase {
+    @MainActor
+    func testPlaybackActivationLetsPendingUIWorkRun() async throws {
+        let player = AudioPlayer()
+        defer { player.pause() }
+        await player.select(.ocean)
+        var processedUIUpdate = false
+        let uiUpdate = Task { @MainActor in processedUIUpdate = true }
+        let clock = ContinuousClock()
+        let started = clock.now
+        await player.play()
+        print("Audio session activation elapsed: \(started.duration(to: clock.now))")
+        XCTAssertTrue(processedUIUpdate, "音频会话激活不能阻塞已排队的界面更新")
+        XCTAssertTrue(player.state.playing, player.error ?? "本地音频应正常播放")
+        let pauseStarted = clock.now
+        player.pause()
+        print("Audio pause elapsed: \(pauseStarted.duration(to: clock.now))")
+        XCTAssertFalse(player.state.playing)
+        await uiUpdate.value
+    }
+
+    @MainActor
+    func testPauseDuringAudioActivationDoesNotRestartPlayback() async throws {
+        let player = AudioPlayer()
+        defer { player.pause() }
+        await player.select(.ocean)
+        let pause = Task { @MainActor in player.pause() }
+        await player.play()
+        XCTAssertFalse(player.state.playing, "激活期间的暂停必须阻止旧请求重新播放")
+        XCTAssertFalse(player.activating)
+        XCTAssertNil(player.error)
+        await pause.value
+        await player.play()
+        XCTAssertTrue(player.state.playing, player.error ?? "取消后仍能再次播放")
+        for _ in 0..<3 {
+            player.pause()
+            await player.play()
+            XCTAssertTrue(player.state.playing, player.error ?? "快速切换后应保留最新播放请求")
+        }
+        player.pause()
+        XCTAssertFalse(player.state.playing)
+        XCTAssertFalse(player.buffering)
+    }
+
     func testMusicWidgetSnapshotRoundTripAndMeaningfulChanges() throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
         defer { try? FileManager.default.removeItem(at: url) }
