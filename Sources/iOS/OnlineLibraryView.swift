@@ -198,10 +198,9 @@ struct AlbumPlaylistView: View {
             GeometryReader { geometry in
                 Group {
                     if let url = album.coverURL, PublicContentURL.isHTTPS(url) {
-                        AsyncImage(url: url) { phase in
-                            if let image = phase.image { image.resizable().scaledToFill() }
-                            else { artworkPlaceholder }
-                        }.id(url)
+                        CachedPublicCoverImage(content: content, url: url,
+                            identity: "album|\(album.id)|\(album.revision)|\(album.updatedAt.timeIntervalSince1970)",
+                            maximumPixelSize: 960) { artworkPlaceholder }
                     } else { artworkPlaceholder }
                 }.frame(width: geometry.size.width, height: geometry.size.height).clipped()
             }.accessibilityHidden(true)
@@ -222,6 +221,12 @@ struct AlbumPlaylistView: View {
 
     private func trackRow(_ track: PublicAudioTrack, number: Int) -> some View {
         let selected = app.player.onlineTrack?.id == track.id
+        let downloadProgress: Double?
+        switch downloads.state(for: track) {
+        case .downloading(let progress): downloadProgress = progress
+        case .verifying: downloadProgress = 1
+        default: downloadProgress = nil
+        }
         return VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 4) {
                 Button { requestPlay(track) } label: {
@@ -233,7 +238,7 @@ struct AlbumPlaylistView: View {
                         }.font(.subheadline).frame(width: 24)
                         VStack(alignment: .leading, spacing: 5) {
                             Text(track.title).font(.subheadline.weight(.medium)).foregroundStyle(selected ? app.scene.accent : Color.primary)
-                            Text("\(Int(track.durationSeconds) / 60):\(String(format: "%02d", Int(track.durationSeconds) % 60)) · \(downloads.state(for: track).label)")
+                            Text("\(Int(track.durationSeconds) / 60):\(String(format: "%02d", Int(track.durationSeconds) % 60))")
                                 .font(.caption).foregroundStyle(Color.readableSecondary)
                         }
                         Spacer(minLength: 0)
@@ -257,7 +262,11 @@ struct AlbumPlaylistView: View {
                     Image(systemName: "ellipsis").frame(minWidth: 44, minHeight: 44)
                 }.buttonStyle(.borderless).accessibilityLabel("\(track.title)的下载选项")
             }
-            if case .downloading(let progress) = downloads.state(for: track) { ProgressView(value: progress) }
+            ProgressView(value: downloadProgress ?? 0)
+                .progressViewStyle(.linear).frame(height: 4)
+                .opacity(downloadProgress == nil ? 0 : 1)
+                .accessibilityHidden(downloadProgress == nil)
+                .accessibilityLabel("\(track.title)下载进度")
         }.padding(.vertical, 6)
     }
 
@@ -314,5 +323,34 @@ private struct AudioDownloadSettings: View {
                 }
             }
         }.navigationTitle("下载与空间")
+    }
+}
+
+
+struct CachedPublicCoverImage<Placeholder: View>: View {
+    let content: ContentLibrary
+    let url: URL
+    let identity: String
+    let maximumPixelSize: Int
+    @ViewBuilder var placeholder: Placeholder
+    @State private var loaded: CGImage?
+    @State private var loadedKey: String?
+
+    private var key: String { content.serviceAddress + "|" + identity + "|" + url.absoluteString }
+
+    var body: some View {
+        Group {
+            if let image = (loadedKey == key ? loaded : nil) ?? content.coverImages.cachedImage(for: url, identity: key, maximumPixelSize: maximumPixelSize) {
+                Image(decorative: image, scale: 1).resizable().scaledToFill()
+            } else { placeholder }
+        }
+        .task(id: key) {
+            let requested = key
+            do {
+                let image = try await content.coverImages.image(for: url, identity: requested, maximumPixelSize: maximumPixelSize)
+                guard !Task.isCancelled, requested == key else { return }
+                loadedKey = requested; loaded = image
+            } catch { }
+        }
     }
 }

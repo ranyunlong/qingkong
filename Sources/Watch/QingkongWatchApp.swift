@@ -77,6 +77,13 @@ struct WatchRootView: View {
                     }
                 }
         }.task { await app.start() }
+            .task(id: scenePhase) {
+                guard scenePhase == .active else { return }
+                while !Task.isCancelled {
+                    app.link.flush()
+                    do { try await Task.sleep(for: .seconds(5 * 60)) } catch { return }
+                }
+            }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { Task { await app.activate() } }
                 else { app.downloads.interruptForegroundDownloads() }

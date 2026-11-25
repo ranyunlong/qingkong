@@ -13,25 +13,38 @@
 		08A7879530457B2659682CEC /* Resources/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85CFDE5EAC46CBA295861E3B /* Resources/Assets.xcassets */; };
 		0A6776AC18DFC92686BCB50C /* Sources/iOS/CompanionTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DDA0DF4C80F3745754C73E0 /* Sources/iOS/CompanionTimelineView.swift */; };
 		0C09B4B204C539D3D5C68479 /* Sources/Shared/Appearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8937306A1755C1188CBAF41 /* Sources/Shared/Appearance.swift */; };
+		0D10A9CB5967E5C0FF975D61 /* Sources/DesktopShared/LocalPeerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98BB052D739F0D61446BE51F /* Sources/DesktopShared/LocalPeerConnection.swift */; };
+		0D1D63C56D38D26C885DB1E3 /* Sources/Mac/App/QingkongMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE9071AB3F1BE3C66F6E505 /* Sources/Mac/App/QingkongMacApp.swift */; };
 		0D382C20306D1A073340E6E4 /* Sources/Shared/CompanionCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C134237A0836A4ACECD83DAC /* Sources/Shared/CompanionCollectionView.swift */; };
+		104D80C940732D8F576DCF22 /* Sources/Shared/WatchBatteryStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9040C718FCAB0B3DFE9F47A /* Sources/Shared/WatchBatteryStorage.swift */; };
 		12A0D5246A4881CB5626DF41 /* Resources/Wallpapers/sky.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDC71F1B5C639B19080E0EA /* Resources/Wallpapers/sky.png */; };
 		137D55272B09030C58E6E346 /* Sources/Shared/Connectivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF4F7560DF571D2CFDF1953D /* Sources/Shared/Connectivity.swift */; };
+		1640587BA7BED20D5D086514 /* Sources/DesktopShared/DesktopAccountTrust.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0847DC7B35A57E15CE8A554D /* Sources/DesktopShared/DesktopAccountTrust.swift */; };
 		1B47C0096028F7DA36709283 /* Resources/Audio/night.wav in Resources */ = {isa = PBXBuildFile; fileRef = 40324E7AECA2E621B24CC24F /* Resources/Audio/night.wav */; };
+		1BB4076C568756FDF7EAB505 /* Sources/Mac/Views/MacKnowledgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F6441B25E8B4173D63A79 /* Sources/Mac/Views/MacKnowledgeView.swift */; };
+		1CFCB583541E33832536B012 /* Sources/Mac/Services/MacDeviceConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57C3504360C6B9FBF69C9FB8 /* Sources/Mac/Services/MacDeviceConnection.swift */; };
 		1E5A5C8BCCD7799661325AE6 /* Sources/Shared/ArticleImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F065162FB136F7E535A6EAF1 /* Sources/Shared/ArticleImageCache.swift */; };
+		1E93F1F842F3E1FE78464319 /* Sources/Mac/Views/MacArtworkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0718CACC0E98CBA1B249399F /* Sources/Mac/Views/MacArtworkView.swift */; };
 		20CEE27A5F1E15BDFE2424E3 /* Sources/Shared/RelaxationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417E6D3C0CE03A65966042F2 /* Sources/Shared/RelaxationView.swift */; };
 		21ACEB08CCC9489753B03DDF /* Resources/PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A3ACDC3700526B2AC00D8392 /* Resources/PrivacyInfo.xcprivacy */; };
+		23CE823CA5AD930AB3F4EDCC /* QingkongCore in Frameworks */ = {isa = PBXBuildFile; productRef = D8323FA08489A20E83F33E08 /* QingkongCore */; };
 		273CC9CA57D1D1319DC210BC /* Resources/Wallpapers/night.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 41723D9A2DFBF7E646584D4E /* Resources/Wallpapers/night.jpg */; };
 		2766C5EB70092F4D077B99AD /* Sources/Watch/DumplingArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0288B2A5F135491E54409CCC /* Sources/Watch/DumplingArtwork.swift */; };
+		27ECD6BD848621FC357F3F17 /* Sources/Mac/Views/MacMusicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B8639673BD9EC54F15D439 /* Sources/Mac/Views/MacMusicView.swift */; };
 		28A76080E92F7364EE9E3388 /* Sources/iOS/QingkongApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1155E83E32F6A1CA75146008 /* Sources/iOS/QingkongApp.swift */; };
 		28EA834D00B5352FCAA6EC25 /* Sources/Shared/LocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147BB3DCD58648C8C6D5E16B /* Sources/Shared/LocalStore.swift */; };
 		2DDAEAE2583CE67904E88DD5 /* QingkongWidgets.appex in Embed QingkongWidgets */ = {isa = PBXBuildFile; fileRef = 28FD165828ED1653AF8742AE /* QingkongWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2E76A79C48601B10E0AF5A7C /* Sources/Mac/Services/MacAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60143EAEB1F96326C14ECE13 /* Sources/Mac/Services/MacAudioPlayer.swift */; };
 		2ED3DF7A0D4EEAED76F9CA54 /* Sources/Shared/AudioArtworkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF3905D6D7E9DD11EDA5CFF /* Sources/Shared/AudioArtworkView.swift */; };
 		332D8E6BDA6EF44D466AD86C /* Sources/Shared/AppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F852D69D0E79188BD4B4F5B /* Sources/Shared/AppServices.swift */; };
+		3422FD82F6AF9B443C21918F /* Sources/Mac/Views/MacDownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D76C48850F9EBB7B06EC96 /* Sources/Mac/Views/MacDownloadsView.swift */; };
 		368CC1ADD350B2D93E348A09 /* Sources/Watch/WatchDumplingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75C9833D5E06602C3332E43F /* Sources/Watch/WatchDumplingView.swift */; };
 		3747E16D8A1F0F5C28E2E0F7 /* Resources/Audio/ocean.wav in Resources */ = {isa = PBXBuildFile; fileRef = D92C9EBCC54209664718E8DB /* Resources/Audio/ocean.wav */; };
 		3C9B8D4026FD1A507A891CA3 /* Resources/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85CFDE5EAC46CBA295861E3B /* Resources/Assets.xcassets */; };
+		3D5050482DF6A3C55B870954 /* Sources/DesktopShared/PhoneMacPeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73152E32493E8AEBEC46817B /* Sources/DesktopShared/PhoneMacPeer.swift */; };
 		3D72E5FF6BA7F81FD336C468 /* Sources/Shared/ArticleImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F065162FB136F7E535A6EAF1 /* Sources/Shared/ArticleImageCache.swift */; };
 		3EA8E0F136653A5D65A65573 /* Resources/Audio/rain.wav in Resources */ = {isa = PBXBuildFile; fileRef = 9B394F6AE1630B9268385C88 /* Resources/Audio/rain.wav */; };
+		3FD3B03A9461BD75F37F8F7D /* Sources/Mac/Services/MacAlbumArtworkCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216A132337E8EDD4C867CB06 /* Sources/Mac/Services/MacAlbumArtworkCache.swift */; };
 		439F2DEB75DAA9CB674A8944 /* Resources/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85CFDE5EAC46CBA295861E3B /* Resources/Assets.xcassets */; };
 		46CA878B351A83E542CB3C96 /* Sources/iOS/RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA7A1FB2B98C3AE72E85F35 /* Sources/iOS/RootView.swift */; };
 		489CF95A5998BB19C1F9F7C2 /* Resources/Wallpapers/forest.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 5FDDC5FE5094BB075C329664 /* Resources/Wallpapers/forest.jpg */; };
@@ -39,22 +52,29 @@
 		4B546CFCE3C94117DA54B0F7 /* Sources/Shared/Appearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8937306A1755C1188CBAF41 /* Sources/Shared/Appearance.swift */; };
 		4BF72B474F3B9D73290EB14D /* Sources/Shared/CompanionHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA2838FB57B42770BADCB1F /* Sources/Shared/CompanionHistoryView.swift */; };
 		4F6E5CE45AEB2718D4756460 /* Sources/Shared/SnapshotStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 536634741B1CCBD5DF5774F7 /* Sources/Shared/SnapshotStorage.swift */; };
+		4F6F3AACE5FB6DF12AF10D0D /* Sources/DesktopShared/PhoneMacPeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73152E32493E8AEBEC46817B /* Sources/DesktopShared/PhoneMacPeer.swift */; };
+		500F49438A74FDE5B528A4E3 /* Sources/iOS/DesktopPairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8447D1D5785ADED8B5329727 /* Sources/iOS/DesktopPairingView.swift */; };
 		509CDCA445ED3E8138BF06A8 /* Sources/Shared/WidgetAudioStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEDAE1C9DAB0094A930C01FA /* Sources/Shared/WidgetAudioStorage.swift */; };
 		527008ABE51E1AC91DB33E1D /* QingkongCore in Frameworks */ = {isa = PBXBuildFile; productRef = 549BF92972A939DB79974CA7 /* QingkongCore */; };
 		53A1889E5A307A7598B7A999 /* Sources/iOS/SleepOverviewSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A89FF84E6E870BF6831773C /* Sources/iOS/SleepOverviewSection.swift */; };
 		54B898543FA6E80B9BDD938E /* Resources/Wallpapers/ocean.jpg in Resources */ = {isa = PBXBuildFile; fileRef = B1E7E6AC1C5C8D19D3032D4D /* Resources/Wallpapers/ocean.jpg */; };
 		55EE84617376DB202B0DE8AE /* Sources/WidgetShared/MusicPlaybackIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D59BE94921AA4CA6B4828F1 /* Sources/WidgetShared/MusicPlaybackIntent.swift */; };
+		55F5283183668C6B90454F76 /* Sources/Shared/ArticleImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F065162FB136F7E535A6EAF1 /* Sources/Shared/ArticleImageCache.swift */; };
 		566B8BB99A17A17A7ABC5121 /* Tests/QingkongUITests/FeatureCompletionUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793607EB8E24ED895B3ED83F /* Tests/QingkongUITests/FeatureCompletionUITests.swift */; };
 		572CB26FC175AE24BEF22682 /* Sources/WidgetShared/MusicPlaybackIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D59BE94921AA4CA6B4828F1 /* Sources/WidgetShared/MusicPlaybackIntent.swift */; };
 		582B1C3AE8C91045C8FDC5AC /* Resources/PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A3ACDC3700526B2AC00D8392 /* Resources/PrivacyInfo.xcprivacy */; };
+		59513D5127AA2ECE36B7FE7E /* Sources/iOS/HomeScreenQuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA55E06BF66E8762CB61CEC /* Sources/iOS/HomeScreenQuickActions.swift */; };
 		5AB8A2A7DAC4F32297993AA2 /* Sources/iOSWidgets/WidgetPlaybackExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 012FC52F9D55C614EB507AFC /* Sources/iOSWidgets/WidgetPlaybackExecution.swift */; };
 		5ADCFF77550F72360222A0CD /* Resources/Wallpapers/sky.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDC71F1B5C639B19080E0EA /* Resources/Wallpapers/sky.png */; };
+		5DEFE5B4D306B11B0DC820DE /* Sources/Mac/Views/MacContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 229ECCEE00D857362E91DD93 /* Sources/Mac/Views/MacContentView.swift */; };
 		5FBB6BF53EE8134A6B335895 /* Tests/QingkongUITests/QingkongUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2FBDA5C70BAD717B986199 /* Tests/QingkongUITests/QingkongUITests.swift */; };
 		605896BEF0CC9E351332594E /* Sources/Shared/SnapshotStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 536634741B1CCBD5DF5774F7 /* Sources/Shared/SnapshotStorage.swift */; };
 		60A27E2821FFCAAC4BD80B2F /* Resources/Audio/ocean.wav in Resources */ = {isa = PBXBuildFile; fileRef = D92C9EBCC54209664718E8DB /* Resources/Audio/ocean.wav */; };
 		610435CBDDBDA91ABA4DC920 /* Sources/Shared/LocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147BB3DCD58648C8C6D5E16B /* Sources/Shared/LocalStore.swift */; };
 		6214A561407C8E26074908D9 /* Sources/Watch/WatchMusicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DF21C57DCF40BDFC32B0A83 /* Sources/Watch/WatchMusicView.swift */; };
 		6254D9268B60D3588DD9172F /* Sources/Shared/SnapshotStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 536634741B1CCBD5DF5774F7 /* Sources/Shared/SnapshotStorage.swift */; };
+		64ADED00CB1133AD9DFEF1B1 /* Sources/iOS/PhoneDesktopSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95E1AA181DFF8962C80E5121 /* Sources/iOS/PhoneDesktopSync.swift */; };
+		652B793CD7905C918B581A32 /* Sources/iOSWidgets/WatchBatteryWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9678870E7833771C3AD95C76 /* Sources/iOSWidgets/WatchBatteryWidget.swift */; };
 		6634532A45E6880A77298766 /* Tests/QingkongTests/ServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 932B233469613B9738433053 /* Tests/QingkongTests/ServiceTests.swift */; };
 		66D77C627C4B0E4BC4E50533 /* Resources/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85CFDE5EAC46CBA295861E3B /* Resources/Assets.xcassets */; };
 		6A7025A157C3B0171529F329 /* Resources/iOS/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4E76142A3B102387DCC151E1 /* Resources/iOS/Assets.xcassets */; };
@@ -64,36 +84,53 @@
 		6D78FEDEC0F241ED9162FF11 /* Sources/Shared/WidgetAudioStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEDAE1C9DAB0094A930C01FA /* Sources/Shared/WidgetAudioStorage.swift */; };
 		6DFB6457828444862E520BBC /* Sources/Shared/AppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F852D69D0E79188BD4B4F5B /* Sources/Shared/AppServices.swift */; };
 		7415D9236494F6FAE1BD279B /* Sources/iOS/PersonalizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF631FD36D568C8A83F45F00 /* Sources/iOS/PersonalizationView.swift */; };
+		74F151B4E80A568C38F10E3D /* Sources/Mac/Views/MacQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0135EC9D053E863512FA058 /* Sources/Mac/Views/MacQueueView.swift */; };
 		7691E4DE1E20F5F8854A2751 /* Sources/Shared/BreathingDumplingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FA7647F469B62F5ADFEC89 /* Sources/Shared/BreathingDumplingView.swift */; };
 		7878D961807230CFFDECCCBF /* Sources/Shared/SnapshotStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 536634741B1CCBD5DF5774F7 /* Sources/Shared/SnapshotStorage.swift */; };
 		7AF4B22F09E0F231B460CDFF /* Sources/iOS/MoodPostcardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F419B5BD554B4B3C0F33E1C /* Sources/iOS/MoodPostcardView.swift */; };
 		7BA44E0C2D1BDC45169F0227 /* Sources/Shared/AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9309414D3F52A8BBD521D8C7 /* Sources/Shared/AudioPlayer.swift */; };
+		8372DE70B58E35E2F5AC22B2 /* Sources/Mac/Stores/MacReportCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F97692E539EEB7204FE7690 /* Sources/Mac/Stores/MacReportCache.swift */; };
 		85446B425A8572DE9B510297 /* Sources/iOS/MoodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE212FA4FBAE740EE0832BF /* Sources/iOS/MoodView.swift */; };
+		8633241913A223CB66615153 /* Sources/Mac/Views/MacMenuBarPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0147AC3AB355231C4FB70A0E /* Sources/Mac/Views/MacMenuBarPlayer.swift */; };
+		86DE7B615BA2848DF62874B9 /* Resources/PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A3ACDC3700526B2AC00D8392 /* Resources/PrivacyInfo.xcprivacy */; };
 		888D46749708C0C9836C75A4 /* Sources/WidgetShared/MusicPlaybackIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D59BE94921AA4CA6B4828F1 /* Sources/WidgetShared/MusicPlaybackIntent.swift */; };
+		89C3991D6FC622B4ABD2F72F /* Resources/Mac/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 76F4979A6856B61685DB7615 /* Resources/Mac/Assets.xcassets */; };
 		8B53F766C92967AE5F771043 /* Sources/Watch/DumplingArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0288B2A5F135491E54409CCC /* Sources/Watch/DumplingArtwork.swift */; };
+		8C45E2684A98F8A2BA5E3BF8 /* Resources/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85CFDE5EAC46CBA295861E3B /* Resources/Assets.xcassets */; };
 		92356FAE84DBFF860215B2C3 /* Sources/Shared/CompanionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A67F15D31AFC8589EDC8737 /* Sources/Shared/CompanionStore.swift */; };
 		92AA8E60A95FEB79A0E22A66 /* Sources/iOS/RelaxationReminderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A71D72CBFDC3821048AFA78D /* Sources/iOS/RelaxationReminderView.swift */; };
+		956E1B5DE089F6198006C0AE /* Sources/Mac/Views/MacReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AFAD6FAA97CD8FE24E2F80C /* Sources/Mac/Views/MacReportsView.swift */; };
+		99DC92F076CA7279B2295850 /* Sources/Mac/Views/MacArticleRichText.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0032A68FA463C667E3CBCC /* Sources/Mac/Views/MacArticleRichText.swift */; };
+		9A00EE99C1D2CD0E17BF2802 /* Sources/Shared/WatchBatteryStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9040C718FCAB0B3DFE9F47A /* Sources/Shared/WatchBatteryStorage.swift */; };
+		9AA6E1F00D17C3E45AC4DB78 /* Sources/Mac/Services/MacLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1211FA218D19C2F02A55AF6B /* Sources/Mac/Services/MacLibrary.swift */; };
 		9BFBE37CBCEF12B4E6BF336C /* QingkongPhoneWidgets.appex in Embed QingkongPhoneWidgets */ = {isa = PBXBuildFile; fileRef = 5404060FB7A068D68B89ADB5 /* QingkongPhoneWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9CFF3E9873166E40858A289B /* QingkongCore in Frameworks */ = {isa = PBXBuildFile; productRef = D3F60B7FB16F488686C9302F /* QingkongCore */; };
 		9D0FB6A43F423AAFFE0814E1 /* Sources/Watch/WatchAudioLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0E31469BE25BB59D92043DF /* Sources/Watch/WatchAudioLibraryView.swift */; };
 		A13DC57137B16C33247C979E /* Resources/Watch/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 65A4BF6B7685C66D3E10148D /* Resources/Watch/Assets.xcassets */; };
+		A32A0ADEFFD977C15D0ACD5C /* Sources/Shared/ContentLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D686842633A234990A097CBF /* Sources/Shared/ContentLibrary.swift */; };
 		AC1453E48D56BF327B5032B5 /* Sources/Shared/Appearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8937306A1755C1188CBAF41 /* Sources/Shared/Appearance.swift */; };
 		AC3994A557EC9C6B29A9A0F6 /* Sources/iOS/TrendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51FD96A7177F7AAE8D9E3A51 /* Sources/iOS/TrendsView.swift */; };
 		AE4A0F320E4B507321793207 /* Sources/iOSWidgets/DumplingMusicWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A31280B7D5AD454F593B43 /* Sources/iOSWidgets/DumplingMusicWidget.swift */; };
 		AEB703071043E11CF4A12E95 /* Sources/iOS/RelaxationReminderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F56AA2D89289CBD709E8228 /* Sources/iOS/RelaxationReminderService.swift */; };
+		AF57E4ACAC217C18130E9BD1 /* Sources/Mac/Views/MacPairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8137CD99F23C4D5188E02132 /* Sources/Mac/Views/MacPairingView.swift */; };
 		AF8778F997B37377FC574B72 /* Resources/Wallpapers/forest.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 5FDDC5FE5094BB075C329664 /* Resources/Wallpapers/forest.jpg */; };
 		B0044BA69F57279DD6026DF0 /* Sources/Watch/DumplingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 593587D7422E1586E2F491AD /* Sources/Watch/DumplingView.swift */; };
+		B0F4E5E7DBECFF1329DC8F4D /* Sources/Mac/Views/MacAlbumDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57C6D77890A725E49C494886 /* Sources/Mac/Views/MacAlbumDetailView.swift */; };
 		B11D2EFA64411FEEA6F4BB2C /* Sources/Shared/AudioDownloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F07EF66974F816EE82D4400 /* Sources/Shared/AudioDownloads.swift */; };
+		B43E9DD6D283F8DFF7041EBE /* Resources/Audio/night.wav in Resources */ = {isa = PBXBuildFile; fileRef = 40324E7AECA2E621B24CC24F /* Resources/Audio/night.wav */; };
 		B8001E267390F66EE5C8E664 /* Sources/Shared/AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9309414D3F52A8BBD521D8C7 /* Sources/Shared/AudioPlayer.swift */; };
 		BB35A811A657B3599E7DBF1E /* QingkongCore in Frameworks */ = {isa = PBXBuildFile; productRef = F42820EC9DF6A5995F17CC5F /* QingkongCore */; };
 		BB49D76359C99C012A03888C /* Sources/Widgets/QingkongWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = F54235BCDCC2EB29256A12B3 /* Sources/Widgets/QingkongWidgets.swift */; };
 		C0744191BA3623DB1D054907 /* Sources/Shared/CompanionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A67F15D31AFC8589EDC8737 /* Sources/Shared/CompanionStore.swift */; };
 		C0ABB4FA9424941174D3B0DC /* Sources/Shared/Connectivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF4F7560DF571D2CFDF1953D /* Sources/Shared/Connectivity.swift */; };
 		C2AD54D0A15E56E448CA16F0 /* Sources/iOS/WidgetPlaybackRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC12DBD24ECC63C0B957AB2 /* Sources/iOS/WidgetPlaybackRuntime.swift */; };
+		C99E35AF52CD3DF9C6FD42F7 /* Sources/Shared/AudioDownloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F07EF66974F816EE82D4400 /* Sources/Shared/AudioDownloads.swift */; };
+		CA5FCEFFE014B6E0FC665C14 /* Sources/DesktopShared/DesktopAccountTrust.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0847DC7B35A57E15CE8A554D /* Sources/DesktopShared/DesktopAccountTrust.swift */; };
 		CA778E21C7A0AD758ADE765D /* Resources/Wallpapers/night.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 41723D9A2DFBF7E646584D4E /* Resources/Wallpapers/night.jpg */; };
 		CD567213A937AA209E528C79 /* Sources/Shared/ContentLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D686842633A234990A097CBF /* Sources/Shared/ContentLibrary.swift */; };
 		D06920BCE5C641FCA94561F1 /* Sources/WidgetShared/DumplingWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 042714A3D9351E3A717CDEE1 /* Sources/WidgetShared/DumplingWidget.swift */; };
 		D0ADC7DC5B36D65EEEC92F0B /* Sources/Watch/QingkongWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ACEB1EA2C20D7E909E2F9F /* Sources/Watch/QingkongWatchApp.swift */; };
+		D2232D15C1D11E0032348610 /* Sources/Mac/Views/MacPlayerBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AEBC1FFDD32EB399F5C7889 /* Sources/Mac/Views/MacPlayerBar.swift */; };
 		D386D6F98CEB8B29BA6DB5D5 /* Sources/iOS/SleepHealthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4516DEF7C5D3BF36FD8813F5 /* Sources/iOS/SleepHealthService.swift */; };
 		D3CC2D6AFE6CEC81D2A98FBF /* Sources/Shared/HealthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B76C642994A5E7EB7D64C3ED /* Sources/Shared/HealthService.swift */; };
 		D4D3FDC09DFF4A9ECD7F78E6 /* QingkongWatch.app in Embed QingkongWatch */ = {isa = PBXBuildFile; fileRef = 99690BA2A92C36B3859F917C /* QingkongWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -105,16 +142,26 @@
 		E5A0A5D9482937EEF5961058 /* Resources/Wallpapers/ocean.jpg in Resources */ = {isa = PBXBuildFile; fileRef = B1E7E6AC1C5C8D19D3032D4D /* Resources/Wallpapers/ocean.jpg */; };
 		E60FCF5EA851B06FB073AF0D /* Sources/iOS/BedtimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3423E4E3BCAEA06ED4D7EC5 /* Sources/iOS/BedtimeView.swift */; };
 		E73F6D5BF050C559EC0184C1 /* Sources/Shared/WidgetAudioStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEDAE1C9DAB0094A930C01FA /* Sources/Shared/WidgetAudioStorage.swift */; };
+		E7C0110EE4C819444565B52F /* Sources/Mac/Services/MacSystemPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE5AF010B943182087030D37 /* Sources/Mac/Services/MacSystemPlayback.swift */; };
 		E91A4D25AFB9A1F52583ACAC /* QingkongCore in Frameworks */ = {isa = PBXBuildFile; productRef = 48D9239D948AC15F47040BB9 /* QingkongCore */; };
 		EA3DA1792FC5DCE752E73ED5 /* Sources/iOS/OnlineLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526695A15DE3FD5FE2D3E124 /* Sources/iOS/OnlineLibraryView.swift */; };
 		EC10F93C89E0E7A144791FF7 /* Sources/WidgetShared/DumplingWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 042714A3D9351E3A717CDEE1 /* Sources/WidgetShared/DumplingWidget.swift */; };
 		EE25DC6EB9E94C59186E78DD /* Sources/Watch/WatchHealthReminderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153899AED7D4F023CD81B640 /* Sources/Watch/WatchHealthReminderService.swift */; };
+		F0734EA03F915E6F5DB81063 /* Resources/Audio/rain.wav in Resources */ = {isa = PBXBuildFile; fileRef = 9B394F6AE1630B9268385C88 /* Resources/Audio/rain.wav */; };
 		F3D4E22D74E2CAAA09CE315C /* Sources/Shared/HealthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B76C642994A5E7EB7D64C3ED /* Sources/Shared/HealthService.swift */; };
+		F48467E7BA90BEB649E55318 /* Sources/Mac/Views/MacDistributionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1FE4939A4608531F5F67219 /* Sources/Mac/Views/MacDistributionCard.swift */; };
+		F56A1703FCF69024664B2F81 /* Sources/DesktopShared/LocalPeerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98BB052D739F0D61446BE51F /* Sources/DesktopShared/LocalPeerConnection.swift */; };
 		F75025A3845E667F82D7E88B /* Resources/PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A3ACDC3700526B2AC00D8392 /* Resources/PrivacyInfo.xcprivacy */; };
 		F76124AB5099DE49A804D9AE /* Sources/Shared/ContentLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D686842633A234990A097CBF /* Sources/Shared/ContentLibrary.swift */; };
+		F9F2BE480186C80AA677508E /* Sources/Shared/WatchBatteryStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9040C718FCAB0B3DFE9F47A /* Sources/Shared/WatchBatteryStorage.swift */; };
 		FAAC11A6BF91BB88B90B5B36 /* Resources/Audio/night.wav in Resources */ = {isa = PBXBuildFile; fileRef = 40324E7AECA2E621B24CC24F /* Resources/Audio/night.wav */; };
 		FAE1D9FC0495FBB0167B492D /* Resources/PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A3ACDC3700526B2AC00D8392 /* Resources/PrivacyInfo.xcprivacy */; };
 		FCA4FA541C219D6C85D45F11 /* Sources/iOS/TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0D4A0A6D70A05D7D82710F /* Sources/iOS/TodayView.swift */; };
+		FF369B1D17CD612A9BE7495A /* Resources/Audio/ocean.wav in Resources */ = {isa = PBXBuildFile; fileRef = D92C9EBCC54209664718E8DB /* Resources/Audio/ocean.wav */; };
+		3F859F356F3D7269484211B4 = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = 80CBC8EC7EBE17BB1F94EFA9;
+		};
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -193,12 +240,19 @@
 
 /* Begin PBXFileReference section */
 		012FC52F9D55C614EB507AFC /* Sources/iOSWidgets/WidgetPlaybackExecution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOSWidgets/WidgetPlaybackExecution.swift; sourceTree = SOURCE_ROOT; };
+		0147AC3AB355231C4FB70A0E /* Sources/Mac/Views/MacMenuBarPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacMenuBarPlayer.swift; sourceTree = SOURCE_ROOT; };
 		0288B2A5F135491E54409CCC /* Sources/Watch/DumplingArtwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Watch/DumplingArtwork.swift; sourceTree = SOURCE_ROOT; };
 		042714A3D9351E3A717CDEE1 /* Sources/WidgetShared/DumplingWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/WidgetShared/DumplingWidget.swift; sourceTree = SOURCE_ROOT; };
+		0718CACC0E98CBA1B249399F /* Sources/Mac/Views/MacArtworkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacArtworkView.swift; sourceTree = SOURCE_ROOT; };
+		0847DC7B35A57E15CE8A554D /* Sources/DesktopShared/DesktopAccountTrust.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/DesktopShared/DesktopAccountTrust.swift; sourceTree = SOURCE_ROOT; };
 		1155E83E32F6A1CA75146008 /* Sources/iOS/QingkongApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/QingkongApp.swift; sourceTree = SOURCE_ROOT; };
+		1211FA218D19C2F02A55AF6B /* Sources/Mac/Services/MacLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Services/MacLibrary.swift; sourceTree = SOURCE_ROOT; };
 		13F84853674F6B817CAD363C /* Config/Watch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Config/Watch.entitlements; sourceTree = SOURCE_ROOT; };
 		147BB3DCD58648C8C6D5E16B /* Sources/Shared/LocalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/LocalStore.swift; sourceTree = SOURCE_ROOT; };
 		153899AED7D4F023CD81B640 /* Sources/Watch/WatchHealthReminderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Watch/WatchHealthReminderService.swift; sourceTree = SOURCE_ROOT; };
+		1AEBC1FFDD32EB399F5C7889 /* Sources/Mac/Views/MacPlayerBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacPlayerBar.swift; sourceTree = SOURCE_ROOT; };
+		216A132337E8EDD4C867CB06 /* Sources/Mac/Services/MacAlbumArtworkCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Services/MacAlbumArtworkCache.swift; sourceTree = SOURCE_ROOT; };
+		229ECCEE00D857362E91DD93 /* Sources/Mac/Views/MacContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacContentView.swift; sourceTree = SOURCE_ROOT; };
 		28FD165828ED1653AF8742AE /* QingkongWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QingkongWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D70EB73501FC2C59560D52B /* Sources/iOS/SleepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/SleepView.swift; sourceTree = SOURCE_ROOT; };
 		2F07EF66974F816EE82D4400 /* Sources/Shared/AudioDownloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/AudioDownloads.swift; sourceTree = SOURCE_ROOT; };
@@ -214,32 +268,47 @@
 		417E6D3C0CE03A65966042F2 /* Sources/Shared/RelaxationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/RelaxationView.swift; sourceTree = SOURCE_ROOT; };
 		41FA7647F469B62F5ADFEC89 /* Sources/Shared/BreathingDumplingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/BreathingDumplingView.swift; sourceTree = SOURCE_ROOT; };
 		4516DEF7C5D3BF36FD8813F5 /* Sources/iOS/SleepHealthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/SleepHealthService.swift; sourceTree = SOURCE_ROOT; };
+		45EF6E05CC6748E71F64D51B /* Config/Mac-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Config/Mac-Info.plist"; sourceTree = SOURCE_ROOT; };
 		4A828106898C08F2585B20C8 /* QingkongTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QingkongTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4E76142A3B102387DCC151E1 /* Resources/iOS/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/iOS/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		4EA7A1FB2B98C3AE72E85F35 /* Sources/iOS/RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/RootView.swift; sourceTree = SOURCE_ROOT; };
+		4F97692E539EEB7204FE7690 /* Sources/Mac/Stores/MacReportCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Stores/MacReportCache.swift; sourceTree = SOURCE_ROOT; };
 		4FE212FA4FBAE740EE0832BF /* Sources/iOS/MoodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/MoodView.swift; sourceTree = SOURCE_ROOT; };
 		51FD96A7177F7AAE8D9E3A51 /* Sources/iOS/TrendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/TrendsView.swift; sourceTree = SOURCE_ROOT; };
 		526695A15DE3FD5FE2D3E124 /* Sources/iOS/OnlineLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/OnlineLibraryView.swift; sourceTree = SOURCE_ROOT; };
 		536634741B1CCBD5DF5774F7 /* Sources/Shared/SnapshotStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/SnapshotStorage.swift; sourceTree = SOURCE_ROOT; };
 		5404060FB7A068D68B89ADB5 /* QingkongPhoneWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QingkongPhoneWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		57C3504360C6B9FBF69C9FB8 /* Sources/Mac/Services/MacDeviceConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Services/MacDeviceConnection.swift; sourceTree = SOURCE_ROOT; };
+		57C6D77890A725E49C494886 /* Sources/Mac/Views/MacAlbumDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacAlbumDetailView.swift; sourceTree = SOURCE_ROOT; };
 		593587D7422E1586E2F491AD /* Sources/Watch/DumplingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Watch/DumplingView.swift; sourceTree = SOURCE_ROOT; };
 		5FDDC5FE5094BB075C329664 /* Resources/Wallpapers/forest.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Resources/Wallpapers/forest.jpg; sourceTree = SOURCE_ROOT; };
+		60143EAEB1F96326C14ECE13 /* Sources/Mac/Services/MacAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Services/MacAudioPlayer.swift; sourceTree = SOURCE_ROOT; };
+		62B8639673BD9EC54F15D439 /* Sources/Mac/Views/MacMusicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacMusicView.swift; sourceTree = SOURCE_ROOT; };
 		65A4BF6B7685C66D3E10148D /* Resources/Watch/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/Watch/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		6A9A9E150C433BE4F3A685A3 /* Sources/iOS/KnowledgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/KnowledgeView.swift; sourceTree = SOURCE_ROOT; };
+		6AFAD6FAA97CD8FE24E2F80C /* Sources/Mac/Views/MacReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacReportsView.swift; sourceTree = SOURCE_ROOT; };
 		6D59BE94921AA4CA6B4828F1 /* Sources/WidgetShared/MusicPlaybackIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/WidgetShared/MusicPlaybackIntent.swift; sourceTree = SOURCE_ROOT; };
 		6DF21C57DCF40BDFC32B0A83 /* Sources/Watch/WatchMusicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Watch/WatchMusicView.swift; sourceTree = SOURCE_ROOT; };
+		73152E32493E8AEBEC46817B /* Sources/DesktopShared/PhoneMacPeer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/DesktopShared/PhoneMacPeer.swift; sourceTree = SOURCE_ROOT; };
 		75C9833D5E06602C3332E43F /* Sources/Watch/WatchDumplingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Watch/WatchDumplingView.swift; sourceTree = SOURCE_ROOT; };
+		76F4979A6856B61685DB7615 /* Resources/Mac/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/Mac/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		793607EB8E24ED895B3ED83F /* Tests/QingkongUITests/FeatureCompletionUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/QingkongUITests/FeatureCompletionUITests.swift; sourceTree = SOURCE_ROOT; };
 		7A89FF84E6E870BF6831773C /* Sources/iOS/SleepOverviewSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/SleepOverviewSection.swift; sourceTree = SOURCE_ROOT; };
+		7AA55E06BF66E8762CB61CEC /* Sources/iOS/HomeScreenQuickActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/HomeScreenQuickActions.swift; sourceTree = SOURCE_ROOT; };
 		7B684346D20F891C3F8312BE /* Config/iOSWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Config/iOSWidgets.entitlements; sourceTree = SOURCE_ROOT; };
+		8137CD99F23C4D5188E02132 /* Sources/Mac/Views/MacPairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacPairingView.swift; sourceTree = SOURCE_ROOT; };
+		8447D1D5785ADED8B5329727 /* Sources/iOS/DesktopPairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/DesktopPairingView.swift; sourceTree = SOURCE_ROOT; };
 		85CFDE5EAC46CBA295861E3B /* Resources/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		8AA2838FB57B42770BADCB1F /* Sources/Shared/CompanionHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/CompanionHistoryView.swift; sourceTree = SOURCE_ROOT; };
 		8C0D4A0A6D70A05D7D82710F /* Sources/iOS/TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/TodayView.swift; sourceTree = SOURCE_ROOT; };
 		8F56AA2D89289CBD709E8228 /* Sources/iOS/RelaxationReminderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/RelaxationReminderService.swift; sourceTree = SOURCE_ROOT; };
 		9309414D3F52A8BBD521D8C7 /* Sources/Shared/AudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/AudioPlayer.swift; sourceTree = SOURCE_ROOT; };
 		932B233469613B9738433053 /* Tests/QingkongTests/ServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/QingkongTests/ServiceTests.swift; sourceTree = SOURCE_ROOT; };
+		95E1AA181DFF8962C80E5121 /* Sources/iOS/PhoneDesktopSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/PhoneDesktopSync.swift; sourceTree = SOURCE_ROOT; };
+		9678870E7833771C3AD95C76 /* Sources/iOSWidgets/WatchBatteryWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOSWidgets/WatchBatteryWidget.swift; sourceTree = SOURCE_ROOT; };
 		969F205FBC0297893ADB1AF9 /* Config/iOSWidgets-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Config/iOSWidgets-Info.plist"; sourceTree = SOURCE_ROOT; };
 		96A31280B7D5AD454F593B43 /* Sources/iOSWidgets/DumplingMusicWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOSWidgets/DumplingMusicWidget.swift; sourceTree = SOURCE_ROOT; };
+		98BB052D739F0D61446BE51F /* Sources/DesktopShared/LocalPeerConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/DesktopShared/LocalPeerConnection.swift; sourceTree = SOURCE_ROOT; };
 		99690BA2A92C36B3859F917C /* QingkongWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QingkongWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A67F15D31AFC8589EDC8737 /* Sources/Shared/CompanionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/CompanionStore.swift; sourceTree = SOURCE_ROOT; };
 		9AC12DBD24ECC63C0B957AB2 /* Sources/iOS/WidgetPlaybackRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/WidgetPlaybackRuntime.swift; sourceTree = SOURCE_ROOT; };
@@ -247,27 +316,43 @@
 		9EDC71F1B5C639B19080E0EA /* Resources/Wallpapers/sky.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Resources/Wallpapers/sky.png; sourceTree = SOURCE_ROOT; };
 		A3ACDC3700526B2AC00D8392 /* Resources/PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Resources/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
 		A71D72CBFDC3821048AFA78D /* Sources/iOS/RelaxationReminderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/RelaxationReminderView.swift; sourceTree = SOURCE_ROOT; };
+		AC6F6441B25E8B4173D63A79 /* Sources/Mac/Views/MacKnowledgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacKnowledgeView.swift; sourceTree = SOURCE_ROOT; };
+		AD0032A68FA463C667E3CBCC /* Sources/Mac/Views/MacArticleRichText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacArticleRichText.swift; sourceTree = SOURCE_ROOT; };
 		AEDAE1C9DAB0094A930C01FA /* Sources/Shared/WidgetAudioStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/WidgetAudioStorage.swift; sourceTree = SOURCE_ROOT; };
 		B1E7E6AC1C5C8D19D3032D4D /* Resources/Wallpapers/ocean.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Resources/Wallpapers/ocean.jpg; sourceTree = SOURCE_ROOT; };
 		B3423E4E3BCAEA06ED4D7EC5 /* Sources/iOS/BedtimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/BedtimeView.swift; sourceTree = SOURCE_ROOT; };
 		B76C642994A5E7EB7D64C3ED /* Sources/Shared/HealthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/HealthService.swift; sourceTree = SOURCE_ROOT; };
+		B8827A5A704151487A138CAA /* 小晴空.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "小晴空.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8937306A1755C1188CBAF41 /* Sources/Shared/Appearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/Appearance.swift; sourceTree = SOURCE_ROOT; };
 		BCF3905D6D7E9DD11EDA5CFF /* Sources/Shared/AudioArtworkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/AudioArtworkView.swift; sourceTree = SOURCE_ROOT; };
 		BF4F7560DF571D2CFDF1953D /* Sources/Shared/Connectivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/Connectivity.swift; sourceTree = SOURCE_ROOT; };
+		C0135EC9D053E863512FA058 /* Sources/Mac/Views/MacQueueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacQueueView.swift; sourceTree = SOURCE_ROOT; };
 		C0E31469BE25BB59D92043DF /* Sources/Watch/WatchAudioLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Watch/WatchAudioLibraryView.swift; sourceTree = SOURCE_ROOT; };
 		C134237A0836A4ACECD83DAC /* Sources/Shared/CompanionCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/CompanionCollectionView.swift; sourceTree = SOURCE_ROOT; };
+		C1D76C48850F9EBB7B06EC96 /* Sources/Mac/Views/MacDownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacDownloadsView.swift; sourceTree = SOURCE_ROOT; };
 		C4AAFD872EF04B9305FDFF78 /* Config/iOS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Config/iOS-Info.plist"; sourceTree = SOURCE_ROOT; };
 		CC2FBDA5C70BAD717B986199 /* Tests/QingkongUITests/QingkongUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/QingkongUITests/QingkongUITests.swift; sourceTree = SOURCE_ROOT; };
 		CD11C1A11DC3CBB74B2FA589 /* Config/iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Config/iOS.entitlements; sourceTree = SOURCE_ROOT; };
 		CF631FD36D568C8A83F45F00 /* Sources/iOS/PersonalizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOS/PersonalizationView.swift; sourceTree = SOURCE_ROOT; };
+		D1FE4939A4608531F5F67219 /* Sources/Mac/Views/MacDistributionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Views/MacDistributionCard.swift; sourceTree = SOURCE_ROOT; };
 		D686842633A234990A097CBF /* Sources/Shared/ContentLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/ContentLibrary.swift; sourceTree = SOURCE_ROOT; };
+		D9040C718FCAB0B3DFE9F47A /* Sources/Shared/WatchBatteryStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/WatchBatteryStorage.swift; sourceTree = SOURCE_ROOT; };
 		D92C9EBCC54209664718E8DB /* Resources/Audio/ocean.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Resources/Audio/ocean.wav; sourceTree = SOURCE_ROOT; };
+		DE5AF010B943182087030D37 /* Sources/Mac/Services/MacSystemPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/Services/MacSystemPlayback.swift; sourceTree = SOURCE_ROOT; };
+		E2506A095C07967B92BA420C /* Config/Mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Config/Mac.entitlements; sourceTree = SOURCE_ROOT; };
 		F065162FB136F7E535A6EAF1 /* Sources/Shared/ArticleImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Shared/ArticleImageCache.swift; sourceTree = SOURCE_ROOT; };
 		F265255D58D7EFC4DC04502E /* Sources/iOSWidgets/QingkongPhoneWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/iOSWidgets/QingkongPhoneWidgets.swift; sourceTree = SOURCE_ROOT; };
 		F33E92D5376F0BCFDE44E89D /* QingkongUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QingkongUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F54235BCDCC2EB29256A12B3 /* Sources/Widgets/QingkongWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Widgets/QingkongWidgets.swift; sourceTree = SOURCE_ROOT; };
 		F5ACEB1EA2C20D7E909E2F9F /* Sources/Watch/QingkongWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Watch/QingkongWatchApp.swift; sourceTree = SOURCE_ROOT; };
 		F9523A2A1872E4F9CAE9022D /* Qingkong.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Qingkong.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDE9071AB3F1BE3C66F6E505 /* Sources/Mac/App/QingkongMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/Mac/App/QingkongMacApp.swift; sourceTree = SOURCE_ROOT; };
+		80CBC8EC7EBE17BB1F94EFA9 = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Sources/iOS/PhoneAudioRoutePicker.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -284,6 +369,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB35A811A657B3599E7DBF1E /* QingkongCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F4B74AAC391371CBF599A1A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				23CE823CA5AD930AB3F4EDCC /* QingkongCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -330,86 +423,16 @@
 				5404060FB7A068D68B89ADB5 /* QingkongPhoneWidgets.appex */,
 				F33E92D5376F0BCFDE44E89D /* QingkongUITests.xctest */,
 				4A828106898C08F2585B20C8 /* QingkongTests.xctest */,
+				B8827A5A704151487A138CAA /* 小晴空.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		958B6263A0B70C847CDA462B /* Sources and Resources */ = {
-			isa = PBXGroup;
-			children = (
-				2F852D69D0E79188BD4B4F5B /* Sources/Shared/AppServices.swift */,
-				B8937306A1755C1188CBAF41 /* Sources/Shared/Appearance.swift */,
-				9309414D3F52A8BBD521D8C7 /* Sources/Shared/AudioPlayer.swift */,
-				9A67F15D31AFC8589EDC8737 /* Sources/Shared/CompanionStore.swift */,
-				BF4F7560DF571D2CFDF1953D /* Sources/Shared/Connectivity.swift */,
-				B76C642994A5E7EB7D64C3ED /* Sources/Shared/HealthService.swift */,
-				147BB3DCD58648C8C6D5E16B /* Sources/Shared/LocalStore.swift */,
-				417E6D3C0CE03A65966042F2 /* Sources/Shared/RelaxationView.swift */,
-				536634741B1CCBD5DF5774F7 /* Sources/Shared/SnapshotStorage.swift */,
-				B3423E4E3BCAEA06ED4D7EC5 /* Sources/iOS/BedtimeView.swift */,
-				3DDA0DF4C80F3745754C73E0 /* Sources/iOS/CompanionTimelineView.swift */,
-				6A9A9E150C433BE4F3A685A3 /* Sources/iOS/KnowledgeView.swift */,
-				4FE212FA4FBAE740EE0832BF /* Sources/iOS/MoodView.swift */,
-				526695A15DE3FD5FE2D3E124 /* Sources/iOS/OnlineLibraryView.swift */,
-				CF631FD36D568C8A83F45F00 /* Sources/iOS/PersonalizationView.swift */,
-				1155E83E32F6A1CA75146008 /* Sources/iOS/QingkongApp.swift */,
-				8F56AA2D89289CBD709E8228 /* Sources/iOS/RelaxationReminderService.swift */,
-				A71D72CBFDC3821048AFA78D /* Sources/iOS/RelaxationReminderView.swift */,
-				4EA7A1FB2B98C3AE72E85F35 /* Sources/iOS/RootView.swift */,
-				4516DEF7C5D3BF36FD8813F5 /* Sources/iOS/SleepHealthService.swift */,
-				7A89FF84E6E870BF6831773C /* Sources/iOS/SleepOverviewSection.swift */,
-				2D70EB73501FC2C59560D52B /* Sources/iOS/SleepView.swift */,
-				8C0D4A0A6D70A05D7D82710F /* Sources/iOS/TodayView.swift */,
-				51FD96A7177F7AAE8D9E3A51 /* Sources/iOS/TrendsView.swift */,
-				85CFDE5EAC46CBA295861E3B /* Resources/Assets.xcassets */,
-				A3ACDC3700526B2AC00D8392 /* Resources/PrivacyInfo.xcprivacy */,
-				40324E7AECA2E621B24CC24F /* Resources/Audio/night.wav */,
-				D92C9EBCC54209664718E8DB /* Resources/Audio/ocean.wav */,
-				9B394F6AE1630B9268385C88 /* Resources/Audio/rain.wav */,
-				5FDDC5FE5094BB075C329664 /* Resources/Wallpapers/forest.jpg */,
-				41723D9A2DFBF7E646584D4E /* Resources/Wallpapers/night.jpg */,
-				B1E7E6AC1C5C8D19D3032D4D /* Resources/Wallpapers/ocean.jpg */,
-				9EDC71F1B5C639B19080E0EA /* Resources/Wallpapers/sky.png */,
-				4E76142A3B102387DCC151E1 /* Resources/iOS/Assets.xcassets */,
-				0288B2A5F135491E54409CCC /* Sources/Watch/DumplingArtwork.swift */,
-				593587D7422E1586E2F491AD /* Sources/Watch/DumplingView.swift */,
-				F5ACEB1EA2C20D7E909E2F9F /* Sources/Watch/QingkongWatchApp.swift */,
-				75C9833D5E06602C3332E43F /* Sources/Watch/WatchDumplingView.swift */,
-				153899AED7D4F023CD81B640 /* Sources/Watch/WatchHealthReminderService.swift */,
-				6DF21C57DCF40BDFC32B0A83 /* Sources/Watch/WatchMusicView.swift */,
-				65A4BF6B7685C66D3E10148D /* Resources/Watch/Assets.xcassets */,
-				F54235BCDCC2EB29256A12B3 /* Sources/Widgets/QingkongWidgets.swift */,
-				042714A3D9351E3A717CDEE1 /* Sources/WidgetShared/DumplingWidget.swift */,
-				F265255D58D7EFC4DC04502E /* Sources/iOSWidgets/QingkongPhoneWidgets.swift */,
-				CC2FBDA5C70BAD717B986199 /* Tests/QingkongUITests/QingkongUITests.swift */,
-				3868F2C9CAB59D457C5E5284 /* Tests/QingkongTests/CompanionStoreTests.swift */,
-				932B233469613B9738433053 /* Tests/QingkongTests/ServiceTests.swift */,
-				4129847587C4C70ECE75D2FA /* Config/Watch-Info.plist */,
-				13F84853674F6B817CAD363C /* Config/Watch.entitlements */,
-				3067297239BBE763622CD180 /* Config/Widgets-Info.plist */,
-				36995CB3043E15F33924F38A /* Config/Widgets.entitlements */,
-				C4AAFD872EF04B9305FDFF78 /* Config/iOS-Info.plist */,
-				CD11C1A11DC3CBB74B2FA589 /* Config/iOS.entitlements */,
-				969F205FBC0297893ADB1AF9 /* Config/iOSWidgets-Info.plist */,
-				7B684346D20F891C3F8312BE /* Config/iOSWidgets.entitlements */,
-				3F419B5BD554B4B3C0F33E1C /* Sources/iOS/MoodPostcardView.swift */,
-				8AA2838FB57B42770BADCB1F /* Sources/Shared/CompanionHistoryView.swift */,
-				2F07EF66974F816EE82D4400 /* Sources/Shared/AudioDownloads.swift */,
-				D686842633A234990A097CBF /* Sources/Shared/ContentLibrary.swift */,
-				C0E31469BE25BB59D92043DF /* Sources/Watch/WatchAudioLibraryView.swift */,
-				BCF3905D6D7E9DD11EDA5CFF /* Sources/Shared/AudioArtworkView.swift */,
-				41FA7647F469B62F5ADFEC89 /* Sources/Shared/BreathingDumplingView.swift */,
-				F065162FB136F7E535A6EAF1 /* Sources/Shared/ArticleImageCache.swift */,
-				C134237A0836A4ACECD83DAC /* Sources/Shared/CompanionCollectionView.swift */,
-				793607EB8E24ED895B3ED83F /* Tests/QingkongUITests/FeatureCompletionUITests.swift */,
-				AEDAE1C9DAB0094A930C01FA /* Sources/Shared/WidgetAudioStorage.swift */,
-				9AC12DBD24ECC63C0B957AB2 /* Sources/iOS/WidgetPlaybackRuntime.swift */,
-				6D59BE94921AA4CA6B4828F1 /* Sources/WidgetShared/MusicPlaybackIntent.swift */,
-				96A31280B7D5AD454F593B43 /* Sources/iOSWidgets/DumplingMusicWidget.swift */,
-				012FC52F9D55C614EB507AFC /* Sources/iOSWidgets/WidgetPlaybackExecution.swift */,
-			);
-			name = "Sources and Resources";
-			sourceTree = "<group>";
+		958B6263A0B70C847CDA462B = {
+			"isa" = "PBXGroup";
+			"name" = "Sources and Resources";
+			"children" = ("2F852D69D0E79188BD4B4F5B", "B8937306A1755C1188CBAF41", "9309414D3F52A8BBD521D8C7", "9A67F15D31AFC8589EDC8737", "BF4F7560DF571D2CFDF1953D", "B76C642994A5E7EB7D64C3ED", "147BB3DCD58648C8C6D5E16B", "417E6D3C0CE03A65966042F2", "536634741B1CCBD5DF5774F7", "B3423E4E3BCAEA06ED4D7EC5", "3DDA0DF4C80F3745754C73E0", "6A9A9E150C433BE4F3A685A3", "4FE212FA4FBAE740EE0832BF", "526695A15DE3FD5FE2D3E124", "CF631FD36D568C8A83F45F00", "1155E83E32F6A1CA75146008", "8F56AA2D89289CBD709E8228", "A71D72CBFDC3821048AFA78D", "4EA7A1FB2B98C3AE72E85F35", "4516DEF7C5D3BF36FD8813F5", "7A89FF84E6E870BF6831773C", "2D70EB73501FC2C59560D52B", "8C0D4A0A6D70A05D7D82710F", "51FD96A7177F7AAE8D9E3A51", "85CFDE5EAC46CBA295861E3B", "A3ACDC3700526B2AC00D8392", "40324E7AECA2E621B24CC24F", "D92C9EBCC54209664718E8DB", "9B394F6AE1630B9268385C88", "5FDDC5FE5094BB075C329664", "41723D9A2DFBF7E646584D4E", "B1E7E6AC1C5C8D19D3032D4D", "9EDC71F1B5C639B19080E0EA", "4E76142A3B102387DCC151E1", "0288B2A5F135491E54409CCC", "593587D7422E1586E2F491AD", "F5ACEB1EA2C20D7E909E2F9F", "75C9833D5E06602C3332E43F", "153899AED7D4F023CD81B640", "6DF21C57DCF40BDFC32B0A83", "65A4BF6B7685C66D3E10148D", "F54235BCDCC2EB29256A12B3", "042714A3D9351E3A717CDEE1", "F265255D58D7EFC4DC04502E", "CC2FBDA5C70BAD717B986199", "3868F2C9CAB59D457C5E5284", "932B233469613B9738433053", "4129847587C4C70ECE75D2FA", "13F84853674F6B817CAD363C", "3067297239BBE763622CD180", "36995CB3043E15F33924F38A", "C4AAFD872EF04B9305FDFF78", "CD11C1A11DC3CBB74B2FA589", "969F205FBC0297893ADB1AF9", "7B684346D20F891C3F8312BE", "3F419B5BD554B4B3C0F33E1C", "8AA2838FB57B42770BADCB1F", "2F07EF66974F816EE82D4400", "D686842633A234990A097CBF", "C0E31469BE25BB59D92043DF", "BCF3905D6D7E9DD11EDA5CFF", "41FA7647F469B62F5ADFEC89", "F065162FB136F7E535A6EAF1", "C134237A0836A4ACECD83DAC", "793607EB8E24ED895B3ED83F", "AEDAE1C9DAB0094A930C01FA", "9AC12DBD24ECC63C0B957AB2", "6D59BE94921AA4CA6B4828F1", "96A31280B7D5AD454F593B43", "012FC52F9D55C614EB507AFC", "7AA55E06BF66E8762CB61CEC", "FDE9071AB3F1BE3C66F6E505", "60143EAEB1F96326C14ECE13", "57C3504360C6B9FBF69C9FB8", "4F97692E539EEB7204FE7690", "229ECCEE00D857362E91DD93", "62B8639673BD9EC54F15D439", "8137CD99F23C4D5188E02132", "98BB052D739F0D61446BE51F", "D9040C718FCAB0B3DFE9F47A", "8447D1D5785ADED8B5329727", "95E1AA181DFF8962C80E5121", "9678870E7833771C3AD95C76", "45EF6E05CC6748E71F64D51B", "E2506A095C07967B92BA420C", "6AFAD6FAA97CD8FE24E2F80C", "76F4979A6856B61685DB7615", "0847DC7B35A57E15CE8A554D", "0718CACC0E98CBA1B249399F", "D1FE4939A4608531F5F67219", "1AEBC1FFDD32EB399F5C7889", "C0135EC9D053E863512FA058", "73152E32493E8AEBEC46817B", "57C6D77890A725E49C494886", "AD0032A68FA463C667E3CBCC", "C1D76C48850F9EBB7B06EC96", "AC6F6441B25E8B4173D63A79", "1211FA218D19C2F02A55AF6B", "216A132337E8EDD4C867CB06", "DE5AF010B943182087030D37", "0147AC3AB355231C4FB70A0E", 80CBC8EC7EBE17BB1F94EFA9);
+			"sourceTree" = "<group>";
 		};
 		E50290A24C49A459B43487C5 = {
 			isa = PBXGroup;
@@ -482,6 +505,26 @@
 			);
 			productName = QingkongWatch;
 			productReference = 99690BA2A92C36B3859F917C /* QingkongWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		9D4445022E3B51D95F152512 /* QingkongMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6D9C23E448245E88D1FBB3FE /* Build configuration list for PBXNativeTarget "QingkongMac" */;
+			buildPhases = (
+				B28E70A974B4BD3019BA8A69 /* Sources */,
+				6F4B74AAC391371CBF599A1A /* Frameworks */,
+				E2C5CAAD342F389D4D61C357 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = QingkongMac;
+			packageProductDependencies = (
+				D8323FA08489A20E83F33E08 /* QingkongCore */,
+			);
+			productName = "小晴空";
+			productReference = B8827A5A704151487A138CAA /* 小晴空.app */;
 			productType = "com.apple.product-type.application";
 		};
 		9F2D38BEDC43D49FB8446337 /* QingkongTests */ = {
@@ -581,11 +624,12 @@
 			projectRoot = "";
 			targets = (
 				A0E5FFDF5B2DAF3E6F82CEB1 /* Qingkong */,
+				9D4445022E3B51D95F152512 /* QingkongMac */,
 				96F4EE748FBB3E32B1BA5534 /* QingkongWatch */,
 				1D33BD6EB6ABAE658B1680B3 /* QingkongWidgets */,
 				B55A37B16AE1B9376EAD22C4 /* QingkongPhoneWidgets */,
-				21FEDFE4E0EF6755CA832354 /* QingkongUITests */,
 				9F2D38BEDC43D49FB8446337 /* QingkongTests */,
+				21FEDFE4E0EF6755CA832354 /* QingkongUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -628,6 +672,19 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E2C5CAAD342F389D4D61C357 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86DE7B615BA2848DF62874B9 /* Resources/PrivacyInfo.xcprivacy in Resources */,
+				8C45E2684A98F8A2BA5E3BF8 /* Resources/Assets.xcassets in Resources */,
+				B43E9DD6D283F8DFF7041EBE /* Resources/Audio/night.wav in Resources */,
+				FF369B1D17CD612A9BE7495A /* Resources/Audio/ocean.wav in Resources */,
+				F0734EA03F915E6F5DB81063 /* Resources/Audio/rain.wav in Resources */,
+				89C3991D6FC622B4ABD2F72F /* Resources/Mac/Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -680,6 +737,8 @@
 				AE4A0F320E4B507321793207 /* Sources/iOSWidgets/DumplingMusicWidget.swift in Sources */,
 				5AB8A2A7DAC4F32297993AA2 /* Sources/iOSWidgets/WidgetPlaybackExecution.swift in Sources */,
 				572CB26FC175AE24BEF22682 /* Sources/WidgetShared/MusicPlaybackIntent.swift in Sources */,
+				104D80C940732D8F576DCF22 /* Sources/Shared/WatchBatteryStorage.swift in Sources */,
+				652B793CD7905C918B581A32 /* Sources/iOSWidgets/WatchBatteryWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -720,51 +779,48 @@
 				3D72E5FF6BA7F81FD336C468 /* Sources/Shared/ArticleImageCache.swift in Sources */,
 				0D382C20306D1A073340E6E4 /* Sources/Shared/CompanionCollectionView.swift in Sources */,
 				509CDCA445ED3E8138BF06A8 /* Sources/Shared/WidgetAudioStorage.swift in Sources */,
+				F9F2BE480186C80AA677508E /* Sources/Shared/WatchBatteryStorage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E93BC37F70689FD4B786B02C /* Sources */ = {
+		B28E70A974B4BD3019BA8A69 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				332D8E6BDA6EF44D466AD86C /* Sources/Shared/AppServices.swift in Sources */,
-				AC1453E48D56BF327B5032B5 /* Sources/Shared/Appearance.swift in Sources */,
-				B8001E267390F66EE5C8E664 /* Sources/Shared/AudioPlayer.swift in Sources */,
-				C0744191BA3623DB1D054907 /* Sources/Shared/CompanionStore.swift in Sources */,
-				C0ABB4FA9424941174D3B0DC /* Sources/Shared/Connectivity.swift in Sources */,
-				D3CC2D6AFE6CEC81D2A98FBF /* Sources/Shared/HealthService.swift in Sources */,
-				28EA834D00B5352FCAA6EC25 /* Sources/Shared/LocalStore.swift in Sources */,
-				20CEE27A5F1E15BDFE2424E3 /* Sources/Shared/RelaxationView.swift in Sources */,
-				7878D961807230CFFDECCCBF /* Sources/Shared/SnapshotStorage.swift in Sources */,
-				E60FCF5EA851B06FB073AF0D /* Sources/iOS/BedtimeView.swift in Sources */,
-				0A6776AC18DFC92686BCB50C /* Sources/iOS/CompanionTimelineView.swift in Sources */,
-				E58F6F2EDC1120123D2A8D69 /* Sources/iOS/KnowledgeView.swift in Sources */,
-				85446B425A8572DE9B510297 /* Sources/iOS/MoodView.swift in Sources */,
-				EA3DA1792FC5DCE752E73ED5 /* Sources/iOS/OnlineLibraryView.swift in Sources */,
-				7415D9236494F6FAE1BD279B /* Sources/iOS/PersonalizationView.swift in Sources */,
-				28A76080E92F7364EE9E3388 /* Sources/iOS/QingkongApp.swift in Sources */,
-				AEB703071043E11CF4A12E95 /* Sources/iOS/RelaxationReminderService.swift in Sources */,
-				92AA8E60A95FEB79A0E22A66 /* Sources/iOS/RelaxationReminderView.swift in Sources */,
-				46CA878B351A83E542CB3C96 /* Sources/iOS/RootView.swift in Sources */,
-				D386D6F98CEB8B29BA6DB5D5 /* Sources/iOS/SleepHealthService.swift in Sources */,
-				53A1889E5A307A7598B7A999 /* Sources/iOS/SleepOverviewSection.swift in Sources */,
-				6D1F42A64D87D533DBF9832F /* Sources/iOS/SleepView.swift in Sources */,
-				FCA4FA541C219D6C85D45F11 /* Sources/iOS/TodayView.swift in Sources */,
-				AC3994A557EC9C6B29A9A0F6 /* Sources/iOS/TrendsView.swift in Sources */,
-				7AF4B22F09E0F231B460CDFF /* Sources/iOS/MoodPostcardView.swift in Sources */,
-				4BF72B474F3B9D73290EB14D /* Sources/Shared/CompanionHistoryView.swift in Sources */,
-				6A781B3878D4330C421E9604 /* Sources/Shared/AudioDownloads.swift in Sources */,
-				F76124AB5099DE49A804D9AE /* Sources/Shared/ContentLibrary.swift in Sources */,
-				2ED3DF7A0D4EEAED76F9CA54 /* Sources/Shared/AudioArtworkView.swift in Sources */,
-				7691E4DE1E20F5F8854A2751 /* Sources/Shared/BreathingDumplingView.swift in Sources */,
-				2766C5EB70092F4D077B99AD /* Sources/Watch/DumplingArtwork.swift in Sources */,
-				1E5A5C8BCCD7799661325AE6 /* Sources/Shared/ArticleImageCache.swift in Sources */,
-				E34099B4966AEAB9EA29E53B /* Sources/Shared/CompanionCollectionView.swift in Sources */,
-				6D78FEDEC0F241ED9162FF11 /* Sources/Shared/WidgetAudioStorage.swift in Sources */,
-				C2AD54D0A15E56E448CA16F0 /* Sources/iOS/WidgetPlaybackRuntime.swift in Sources */,
-				55EE84617376DB202B0DE8AE /* Sources/WidgetShared/MusicPlaybackIntent.swift in Sources */,
+				0D1D63C56D38D26C885DB1E3 /* Sources/Mac/App/QingkongMacApp.swift in Sources */,
+				2E76A79C48601B10E0AF5A7C /* Sources/Mac/Services/MacAudioPlayer.swift in Sources */,
+				1CFCB583541E33832536B012 /* Sources/Mac/Services/MacDeviceConnection.swift in Sources */,
+				8372DE70B58E35E2F5AC22B2 /* Sources/Mac/Stores/MacReportCache.swift in Sources */,
+				5DEFE5B4D306B11B0DC820DE /* Sources/Mac/Views/MacContentView.swift in Sources */,
+				27ECD6BD848621FC357F3F17 /* Sources/Mac/Views/MacMusicView.swift in Sources */,
+				AF57E4ACAC217C18130E9BD1 /* Sources/Mac/Views/MacPairingView.swift in Sources */,
+				0D10A9CB5967E5C0FF975D61 /* Sources/DesktopShared/LocalPeerConnection.swift in Sources */,
+				956E1B5DE089F6198006C0AE /* Sources/Mac/Views/MacReportsView.swift in Sources */,
+				1640587BA7BED20D5D086514 /* Sources/DesktopShared/DesktopAccountTrust.swift in Sources */,
+				1E93F1F842F3E1FE78464319 /* Sources/Mac/Views/MacArtworkView.swift in Sources */,
+				F48467E7BA90BEB649E55318 /* Sources/Mac/Views/MacDistributionCard.swift in Sources */,
+				D2232D15C1D11E0032348610 /* Sources/Mac/Views/MacPlayerBar.swift in Sources */,
+				74F151B4E80A568C38F10E3D /* Sources/Mac/Views/MacQueueView.swift in Sources */,
+				4F6F3AACE5FB6DF12AF10D0D /* Sources/DesktopShared/PhoneMacPeer.swift in Sources */,
+				A32A0ADEFFD977C15D0ACD5C /* Sources/Shared/ContentLibrary.swift in Sources */,
+				C99E35AF52CD3DF9C6FD42F7 /* Sources/Shared/AudioDownloads.swift in Sources */,
+				55F5283183668C6B90454F76 /* Sources/Shared/ArticleImageCache.swift in Sources */,
+				B0F4E5E7DBECFF1329DC8F4D /* Sources/Mac/Views/MacAlbumDetailView.swift in Sources */,
+				99DC92F076CA7279B2295850 /* Sources/Mac/Views/MacArticleRichText.swift in Sources */,
+				3422FD82F6AF9B443C21918F /* Sources/Mac/Views/MacDownloadsView.swift in Sources */,
+				1BB4076C568756FDF7EAB505 /* Sources/Mac/Views/MacKnowledgeView.swift in Sources */,
+				9AA6E1F00D17C3E45AC4DB78 /* Sources/Mac/Services/MacLibrary.swift in Sources */,
+				3FD3B03A9461BD75F37F8F7D /* Sources/Mac/Services/MacAlbumArtworkCache.swift in Sources */,
+				E7C0110EE4C819444565B52F /* Sources/Mac/Services/MacSystemPlayback.swift in Sources */,
+				8633241913A223CB66615153 /* Sources/Mac/Views/MacMenuBarPlayer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E93BC37F70689FD4B786B02C = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("332D8E6BDA6EF44D466AD86C", "AC1453E48D56BF327B5032B5", "B8001E267390F66EE5C8E664", "C0744191BA3623DB1D054907", "C0ABB4FA9424941174D3B0DC", "D3CC2D6AFE6CEC81D2A98FBF", "28EA834D00B5352FCAA6EC25", "20CEE27A5F1E15BDFE2424E3", "7878D961807230CFFDECCCBF", "E60FCF5EA851B06FB073AF0D", "0A6776AC18DFC92686BCB50C", "E58F6F2EDC1120123D2A8D69", "85446B425A8572DE9B510297", "EA3DA1792FC5DCE752E73ED5", "7415D9236494F6FAE1BD279B", "28A76080E92F7364EE9E3388", "AEB703071043E11CF4A12E95", "92AA8E60A95FEB79A0E22A66", "46CA878B351A83E542CB3C96", "D386D6F98CEB8B29BA6DB5D5", "53A1889E5A307A7598B7A999", "6D1F42A64D87D533DBF9832F", "FCA4FA541C219D6C85D45F11", "AC3994A557EC9C6B29A9A0F6", "7AF4B22F09E0F231B460CDFF", "4BF72B474F3B9D73290EB14D", "6A781B3878D4330C421E9604", "F76124AB5099DE49A804D9AE", "2ED3DF7A0D4EEAED76F9CA54", "7691E4DE1E20F5F8854A2751", "2766C5EB70092F4D077B99AD", "1E5A5C8BCCD7799661325AE6", "E34099B4966AEAB9EA29E53B", "6D78FEDEC0F241ED9162FF11", "C2AD54D0A15E56E448CA16F0", "55EE84617376DB202B0DE8AE", "59513D5127AA2ECE36B7FE7E", "9A00EE99C1D2CD0E17BF2802", "500F49438A74FDE5B528A4E3", "64ADED00CB1133AD9DFEF1B1", "F56A1703FCF69024664B2F81", "CA5FCEFFE014B6E0FC665C14", "3D5050482DF6A3C55B870954", 3F859F356F3D7269484211B4);
+			"runOnlyForDeploymentPostprocessing" = "0";
 		};
 		F9BA78CE3624AAE1BA6A8CBA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -816,7 +872,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Config/iOS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 9S743LF4C7;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -847,6 +903,47 @@
 			};
 			name = Debug;
 		};
+		09E5D7CEE2E5164436010E5F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Config/Mac.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 19;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 9S743LF4C7;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				EXECUTABLE_NAME = "$(TARGET_NAME)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/Mac-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "小晴空";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.geckoai.qingkong.mac;
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "小晴空";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_SERIALIZE_DEBUGGING_OPTIONS = NO;
+				SWIFT_STRICT_CONCURRENCY = targeted;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
 		3F40CA9F7EE8C2ACDD44FD40 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -854,7 +951,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Config/iOSWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 9S743LF4C7;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -946,7 +1043,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Config/Widgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 9S743LF4C7;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -983,7 +1080,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Config/iOS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 9S743LF4C7;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -1019,7 +1116,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Config/Watch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 9S743LF4C7;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -1056,7 +1153,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Config/Widgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 9S743LF4C7;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -1111,7 +1208,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Config/Watch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 9S743LF4C7;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -1142,6 +1239,45 @@
 				WK_APPLICATION = YES;
 			};
 			name = Debug;
+		};
+		CB0D13861BCA7B247FF74316 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Config/Mac.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 19;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 9S743LF4C7;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				EXECUTABLE_NAME = "$(TARGET_NAME)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/Mac-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "小晴空";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.geckoai.qingkong.mac;
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "小晴空";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_SERIALIZE_DEBUGGING_OPTIONS = NO;
+				SWIFT_STRICT_CONCURRENCY = targeted;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
 		};
 		D09EB81758DBD276064721A2 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -1219,7 +1355,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Config/iOSWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 9S743LF4C7;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -1331,6 +1467,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		6D9C23E448245E88D1FBB3FE /* Build configuration list for PBXNativeTarget "QingkongMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				09E5D7CEE2E5164436010E5F /* Debug */,
+				CB0D13861BCA7B247FF74316 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		722C19E26E48C941850B8355 /* Build configuration list for PBXNativeTarget "Qingkong" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1375,6 +1520,11 @@
 			productName = QingkongCore;
 		};
 		D3F60B7FB16F488686C9302F /* QingkongCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 582681C2EAE02B3F3D399C0C /* XCLocalSwiftPackageReference "Packages/QingkongCore" */;
+			productName = QingkongCore;
+		};
+		D8323FA08489A20E83F33E08 /* QingkongCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 582681C2EAE02B3F3D399C0C /* XCLocalSwiftPackageReference "Packages/QingkongCore" */;
 			productName = QingkongCore;

@@ -58,6 +58,14 @@ struct PersonalizationView: View {
             VitalReminderSettingsSection()
 
             Section {
+                NavigationLink { DesktopPairingView() } label: {
+                    Label("连接 Mac", systemImage: "laptopcomputer.and.iphone")
+                }.accessibilityIdentifier("desktop-pairing")
+            } header: { Text("自己的设备之间") } footer: {
+                Text("同一 Apple ID、同一 Wi-Fi 自动连接。Mac 默认独立播放；在手机选择 Mac 接力后，手机和手表可遥控。")
+            }
+
+            Section {
                 HStack(spacing: 12) {
                     Image("mood-\(MoodSummary.latest(in: app.store.records)?.value ?? 3)")
                         .resizable().scaledToFit().frame(width: 60, height: 60)
@@ -71,6 +79,8 @@ struct PersonalizationView: View {
                     .font(.footnote)
                 Text("锁定屏幕：长按锁屏 → 自定 → 锁定屏幕 → 添加小组件 → 小晴空。")
                     .font(.footnote)
+                Text("锁屏可选「手表电量」圆环，需 iPhone 与 Apple Watch 两端安装小晴空。仅用圆环显示最近同步的电量，充电时显示闪电；超过 30 分钟未更新显示空环，刷新由系统安排。")
+                    .font(.footnote)
             } header: { Text("屏幕上的小团子") } footer: {
                 Text("组件显示最近可读取的健康数据及采样时间，按系统调度刷新。点按打开应用；无记录时显示空缺。")
             }
@@ -79,6 +89,7 @@ struct PersonalizationView: View {
                 watchPreview
                 Button("在系统中添加表盘组件", systemImage: "applewatch") { faceGuide = true }
                 Label(app.link.syncMessage, systemImage: "arrow.triangle.2.circlepath").font(.footnote).foregroundStyle(Color.readableSecondary)
+                if let error = app.link.batterySyncError { Text(error).font(.footnote).foregroundStyle(Color.readableSecondary) }
                 if let error = app.link.error { Text(error).font(.footnote).foregroundStyle(Color.readableSecondary) }
             } header: { Text("手腕上的小晴空") } footer: { Text("团子页面始终显示 HRV、心率和血氧三项数值。点按系统表盘中的「心情团子」可进入手表 App 的动画页面。") }
 
@@ -132,7 +143,12 @@ struct PersonalizationView: View {
                 HStack(spacing: 0) {
                     ForEach(HealthMetric.allCases) { metric in
                         VStack(spacing: 2) {
-                            Label(metric.name, systemImage: metric.symbol).font(.system(size: 9)).foregroundStyle(.secondary)
+                            HStack(spacing: 3) {
+                                Image(systemName: metric.symbol)
+                                Text(metric.name).accessibilityIdentifier("watch-preview-title-\(metric.id)")
+                            }
+                            .font(.system(size: 9)).foregroundStyle(.secondary)
+                            .lineLimit(1).fixedSize(horizontal: true, vertical: false)
                             Text(app.health.latest(metric).map { $0.value.formatted(.number.precision(.fractionLength(0))) } ?? "—")
                                 .font(.system(size: 18, weight: .medium, design: .rounded))
                                 .monospacedDigit().minimumScaleFactor(0.6).lineLimit(1)
@@ -248,13 +264,15 @@ struct PrivacyView: View {
                 Text("小晴空不要求注册，不展示广告，不将健康数据和日记上传至服务器。应用没有云端 AI 或广告分析服务。")
                 Text("健康数据保留在 Apple 健康中，小晴空读取你允许的数据。手表开始舒缓呼吸或安静陪伴时，单独申请体能训练权限以持续采集心率，结束后丢弃训练，不保存训练记录；本次最后有效心率随陪伴记录保存在手表本机，用于结果页与陪伴回顾，不上传或跨端同步。心情、日记和偏好保存在本机；配对设备通过 Apple WatchConnectivity 同步心情与偏好。")
                 Text("iPhone 与手表会在各自本地共享容器保存最少量的健康摘要及最近心情档位、时间，供屏幕或表盘组件显示；不包含日记或压力评分。原始健康记录不通过小晴空跨设备传送。")
+                Text("手表电量、充电状态和采样时间仅在配对手表与 iPhone 之间同步，保存在本机共享容器供锁屏电量环显示；超过 30 分钟未更新显示空环，系统刷新不保证实时。")
+                Text("同一 Apple ID 的设备通过 iCloud 私有空间同步随机连接凭据，首次需要网络与系统权限；个人内容不进入 iCloud。音乐接力后手机和手表遥控 Mac，锁屏不主动断开。报表仅由你在手机前台主动发送最近 38 天汇总，不传日记正文、健康原始记录或陪伴心率。Mac 缓存可在 Mac 清除；手机删除后的汇总在下次主动同步替换，离线 Mac 不会立即收到删除。")
             }
             Section("权限与删除") {
                 Text("你可以在「健康」App 中调整数据访问，在「心情日记」中删除记录。删除标记会在配对设备恢复连接后同步，防止旧记录再次出现。")
                 Text("健康提醒在 iPhone 本地分析你允许读取的 HRV、心率及血氧；各类开关默认开启，系统通知仍需你授权。提醒账本只保留必要时间，不上传健康数据，通知不包含具体健康值或日记。可在个性化中关闭提醒，并在系统设置中调整通知和专注规则。")
                 Text("保存壁纸时仅请求向照片添加图片的权限。小晴空不读取你的照片库。")
                 Text("系统备份是否包含本地应用数据由你的设备备份设置决定。小晴空不建立自己的云端副本。")
-                Text("睡眠记录在你主动连接后单独请求读取，只在本机生成概览与周回顾。你可以在 Apple 健康管理睡眠访问与源记录。练习、时间线摘要和睡前方案可在对应页面删除。")
+                Text("睡眠记录在你主动连接后单独请求读取，在本机生成概览与周回顾；你在手机前台主动同步到 Mac 时可发送每日睡眠时长汇总。你可以在 Apple 健康管理睡眠访问与源记录。练习、时间线摘要和睡前方案可在对应页面删除。")
                 Text("团子动作只在本机保存点头、摇摆是否解锁的两个标记，不保留对应记录内容、不跨端同步。删除记录不会收回已解锁动作；清除该设备应用数据会清除标记。")
             }
             Section("公共内容与网络") {

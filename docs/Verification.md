@@ -639,3 +639,286 @@ Watch scheme 已恢复仓库原格式。**原 iPhone scheme 当时存在未提�
 - 按用户要求结束透明背景排查，撤销实验性背景改动：健康指标恢复 `AccessoryWidgetBackground` 与原有透明容器，团子恢复原有 Watch 系统辅助背景；移除染色诊断 View 和模式／背景测试文字。独立 HRV／心率／血氧入口、正式隐私标记与跳转、手机团子音乐组件均保留。此前全新编译及重启的诊断版仍显示 `fullColor`、背景保留，截图为 `artifacts/watch-stack-accent-diagnostic.png`；不把该结果认定为已实现玻璃效果。后续安装和提交使用恢复后的正式组件。
 
 - 撤销排查后的提交前复核：共享核心 119 项通过（`artifacts/test-core-before-commit.log`）；手机／嵌入 Watch／组件通用设备构建及 Watch 模拟器构建通过（`artifacts/build-device-before-commit.log`、`artifacts/build-watch-before-commit.log`）。后台使用既有 Python 3.12 环境执行 73 项测试，72 项通过、1 项 Linux 专用测试跳过（`artifacts/test-backend-before-commit-final.log`）；最初系统 Python 缺依赖及受限环境不能监听本地测试端口的失败记录不计通过。官网与后台编辑脚本语法检查通过。已保留数据覆盖安装恢复后的 Watch 正式组件，并正常关闭用户原手表模拟器；未删除用户设备、未上传 TestFlight。提交不包含本地营销素材、索引缓存、构建产物或环境凭据。
+
+
+## iPhone 桌面图标快捷菜单（2026-11-24）
+
+- 在 iPhone 安装包静态配置「陪我缓一缓／当前趋势／记录此刻／听听音乐」四个入口，分别进入现有练习准备页、趋势页、心情记录页和助眠播放器；不自动开始练习、记录心情或播放声音。
+- 通过 SwiftUI 的应用代理适配器接入 scene 冷启动与运行中快捷动作回调，待 RootView 就绪后消费；首次健康连接说明期间保留动作，关闭说明后继续。个性化／提醒弹层先退出，再处理明确选择；重建目标页导航以避免停在旧详情页。源码与工程生成器的现有文件收集方式保持一致，已重新生成工程，并保留原工作区构建号 16。
+- 专项检查 `sh scripts/check_home_screen_quick_actions.sh` 通过：四项菜单名称／顺序／图标与路由一致，覆盖普通启动无动作、延后消费、消费一次、重复选择、未知动作不覆盖，以及待处理选择被新选择替代。该检查直接编译实际动作接收实现，不使用模拟器、真机或网络。
+- 完整 iPhone／嵌入 Watch／两类组件通用设备 Debug 构建通过，见 `artifacts/build-home-screen-quick-actions.log`；实际产物 Info.plist 的四个入口与源配置完全一致。共享逻辑 121 项测试通过（119 Swift Testing＋2 XCTest），见 `artifacts/test-core-home-screen-quick-actions.log`。初次构建发现导航帮助方法的局部参数遮蔽页面状态，改名后完整构建通过。
+- 尚未安装设备、上传 TestFlight 或发布。真实桌面长按菜单、冷启动／后台返回、重复选择、首次连接说明后跳转及已有 URL／组件入口回归尚待真机验收；编译与动作接收检查不替代这些运行验收。
+
+## Mac 伴侣端与锁屏手表电量环（2026-11-24，首版记录）
+
+此节记录早期临时配对码版本；连接与音乐行为已被下节「三端音乐接力」替代，131 项是当时测试数。电量环的实现与待验收范围继续有效。
+
+- Mac 新增原生报表／音乐／设备连接窗口、QingkongMac target/scheme、macOS 14 配置和沿用现有图案的 Mac 图标。报表仅同步最近38个手机本地日的日均、睡眠时长、心情/压力计数及陪伴次数/时长，不传日记正文、健康原始记录、心电图或陪伴采集心率；缺失留空。Mac本机缓存支持清除，损坏缓存也可通过界面清除。
+- iPhone 个性化加入用户主动开启的 Mac 配对，离开页面或应用前台即关闭；高熵随机码仅驻留内存，以 TLS PSK 加密传输，有限报文/请求/连接与超时。报表演示模式不提供同步，未开启时不监听。Mac音乐接续校验目录版本/授权、HTTPS及文件完整性，实际恢复进度并开始播放后请求手机确认；手机核验源、操作版本、时限及双方实际进度后才暂停。迟到的取消任务不能停止新接播，失败停止Mac未确认播放；确认回执丢失可能导致两端暂停，不宣称原子交接。在线临时文件保留实际格式后缀，并在自然结束/停止/换源/正常退出清理；异常退出残留由系统临时目录管理。
+- iPhone独立锁屏「手表电量」组件按用户最终要求只显示圆环，充电时环上叠闪电，没有可见百分比。VoiceOver保留电量及采样时间；未知值不补零，真实零保留，超过30分钟显示淡色空环。Watch在应用前台及可连接时提供电量；iPhone缓存绑定当前配对手表，并拒绝旧会话主动请求的迟到回执。系统调度和进程挂起限制刷新，不承诺实时电量监测。
+- 全部共享逻辑 **131项通过**（129 Swift Testing＋2 XCTest），包含7项日报测试（DST含两组参数）和3项电量测试，覆盖日历边界、删除、无值、隐私序列化、未知/零/过期/未来读数。日志 `artifacts/test-core-desktop-battery.log`。电量模型加入前已实际观察缺失接口失败，加入后通过。
+- `sh scripts/check_local_peer_connection.sh` 最终通过，日志 `artifacts/check-local-peer-final.log`：仅在127.0.0.1/lo0进行真实Network连接，核实协商TLS1.2 / PSK AES-128-GCM；正确码双向传输、错误码握手失败、拆包/粘包、1MiB边界、非法长度、截断断开、重复关闭及12秒握手超时。该验证不等于跨设备局域网和Bonjour验收。
+- 最终完整iPhone／内嵌Watch／两类组件通用设备构建通过（`artifacts/build-desktop-battery-ios.log`）；Mac本地临时签名构建通过（`artifacts/build-mac.log`）。实际包检查保留构建号16、四个图标快捷菜单与本地网络声明，Mac包含三份内置WAV，最低macOS14。工程生成器重复执行未改变最终工程；`git diff --check`与三个新增/相关plist校验通过。四个图标菜单专项检查再次通过，见 `artifacts/check-home-screen-final.log`。
+- `./script/build_and_run.sh --verify` 已本地启动Mac应用并确认进程（`artifacts/run-mac-verification.log`），原生界面实际观察报表空状态、音乐和设备连接三页；当时未连接iPhone，没有添加演示汇总。后续接播/缓存修正完成编译，未以UI观察代替音频运行验收。未播放本机声音或声称线上接播成功。
+- 独立复核发现并修正换表缓存、取消重试归属、真实接播进度、损坏缓存清除及临时文件清理问题。媒体对照实测同一已有MP3使用`.audio`后缀会导致AVPlayerItem失败（-11828），`.mp3`正常ready；下载路径已按URL/MIME保留受支持后缀，最终构建包含修正。
+- 后续Mac知识库、完整曲库、本机心情、统一时间线/导出、菜单栏与主题列入 `plans/2026-11-24-mac-companion.md`，尚未实施。隐私说明与网站源文件已同步本轮实际行为，**没有部署网站**。未操作或安装手机/Watch设备、未添加手机模拟器组件、未上传TestFlight。真实双设备配对/系统权限/重连/播放交接、锁屏电量环外观与充电闪电仍待用户真机验收。
+
+
+## Mac 独立播放与三端音乐接力（2026-11-24）
+
+- Mac 默认独立播放；iPhone 主动选择设备后通过静默 prepare / 最新进度 commit 交接。Mac 权威会话提供完整队列、三种循环、采样进度、音量、播放／缓冲状态及绝对停止时间。重复命令去重、旧会话回执拒绝；释放回执携带暂停前播放意图。切回手机先准备解码器并完成精确定位，收到 Mac 暂停确认后再按实际意图恢复；失败保留可重试的暂停会话。
+- iPhone 播放器、迷你条、系统命令、音乐组件及 Watch 路由到当前设备。手机支持进度预览／松手提交及专用 Mac app 音量滑块；Watch 显示 Mac、进度、倒计时、循环和数码表冠／控件音量，保留手表本机入口。睡前方案的定时及音乐组件命令等待 Mac 回执。
+- CloudKit 私有记录只保存 32 字节随机信任凭据，Keychain 账号隔离；并发创建使用服务器胜出记录，账号变化立即撤销连接和过期异步结果。确认账号切换／退出时清除旧受控队列、解码器、回执与报表；普通断线保留暂停队列，Mac 独立播放不受账号变化影响。Bonjour 服务由 Mac 提供；iPhone 后台仅停止主动状态订阅，不主动断开，不以应用心跳缺失暂停。确切连接关闭／通信确认失败暂停 Mac，重新连接先暂停并同步实际状态，不自动播放、不补发未确认命令。Mac 睡眠撤销未完成交接、暂停受控会话，唤醒检查绝对截止。
+- 报表只允许手机前台、用户主动发送真实汇总；个人健康、日记及播放状态不通过 CloudKit。Mac 不加入「陪我缓一缓」或呼吸练习，保留汇总历史；完整曲库／知识库／日记等后续分期不在本轮实现。说明、隐私源文件与本地网络用途文字已更新。
+
+实际自动验证：
+
+1. **共享核心 140 项通过**：138 项 Swift Testing + 2 项 XCTest，0 失败，`artifacts/test-core-music-session.log`。新增覆盖队列与来源校验、v2 消息、严格命令参数、绝对定时、跨时钟进度推算／失联冻结、后台取消订阅及释放前播放意图。
+2. **真实 TLS 本机回环通过**：`artifacts/check-account-transport.log`。同一 256 位凭据可通信，不同凭据及错误长度拒绝；保留 TLS1.2 PSK AES-128-GCM、拆包／粘包、非法长度、断开和握手超时检查。这不能替代不同 Apple ID 的 CloudKit 验收。
+3. **真实 Mac 解码器静默检查通过**：`sh scripts/check_mac_music_player.sh`，日志 `artifacts/check-mac-music-player.log`。在独立测试 bundle 使用内置 WAV，始终 playing=false；覆盖不提前接管、最新进度、保留 Mac 音量与绝对截止、暂停定位、三种循环、加载中停止、睡眠撤销待交接、释放后会话保留及错会话拒绝。另覆盖 Mac 本机换曲保留受控会话、手机仍可操作／释放，以及账号失效后不能从本机恢复旧会话。共 **7 组通过**；先实际复现加载中停止、睡眠未撤销交接及 Mac 换曲后旧会话拒绝问题，失败证据为 `check-mac-music-player-red.log`、`check-mac-music-player-sleep-red.log`、`check-mac-selection-red.log`；账号废弃接口添加前编译失败见 `check-mac-account-reset-red.log`。没有启动真实 App 或播放声音。
+4. **完整 iPhone / 内嵌 Watch / 两端组件通用设备构建通过**：`artifacts/build-ios-music-session.log`；**Mac 双架构构建通过**：`artifacts/build-mac-music-session.log`。Watch App 与组件的 arm64_32、arm64 源码检查通过（`artifacts/check-watch-music-session.log`），不替代资源、安装或运行验收。前者原有 MPVolumeView 路由按钮弃用警告、后者未依赖 AppIntents 的元数据跳过提示仍存在，不影响构建。旧的四个桌面快捷入口专项检查通过：`artifacts/check-home-screen-music-session.log`。
+5. 工程生成器重复执行结果一致；iPhone / Mac 最终包保留构建号 **16**、Bonjour 声明，四份相关 plist / entitlements 校验通过；`git diff --check` 通过。首次受限环境下 Xcode / Swift 缓存和宏插件无法访问，允许相应本机编译访问后执行成功；没有以受限失败当作功能验证结果。
+
+未完成的前置与实际设备验收：
+
+- 本轮只读查询时 iPhone 17、iPhone 13 mini 不可用，不能执行锁屏后 Watch 唤起手机、后台转发 Mac 并收到回执的前置验收。代码与自动构建已经完成，但后台可用性、锁屏不误暂停尚未得到真机证据。
+- 未创建或部署 CloudKit 容器／schema，未修改开发者门户／描述文件，也未发起 CloudKit 请求。联调仍需确认两个 App ID 使用同一容器的权限、有效签名及 `DesktopLocalTrust.credential` 加密字段。首次同账号／并发创建／切换账号／离线缓存仅实现并静态检查，尚未实际联网验证。
+- 三端真实播放、进度拖动、连续切歌、Mac app 音量、循环、睡前／截止定时、Wi-Fi 中断、Mac 退出／睡眠、重连保持暂停、强退／关机遥控失败、旧版提示更新，以及真实局域网报表路径仍待可用配对设备逐项记录；本机回环不记为真实局域网验收。
+- 本轮未启动或停止用户当前 Mac App，未安装手机／Watch，未操作模拟器组件，未提交、上传 TestFlight、发布或部署网站。变更仍在本地工作区，不能宣称整体真机验收完成。
+
+后续联调准备：用户确认手机已更新后，只读检查 Mac 进程未在运行；旧运行包不含当前 CloudKit／服务端网络权限。尝试使用本机既有开发签名构建新版（未允许创建或更新描述文件），因缺少 `cn.geckoai.qingkong.mac` 的 Mac App Development provisioning profile 失败，见 `artifacts/build-mac-signed-run.log`。未启动临时签名版本代替正式账号联调，也未修改开发者门户。需先配置包含共同 iCloud 容器权限的 Mac 开发描述文件。
+
+用户随后明确允许生成 Mac 开发描述文件。首次自动签名提示开发者账号没有可用于 Mac 描述文件的设备；为当前 Mac 允许设备登记后，开发签名构建通过（`artifacts/build-mac-signed-run.log`）。产物与描述文件均包含 `iCloud.cn.geckoai.qingkong`、CloudKit 和客户端／服务端网络权限；运行脚本已改为使用正式开发签名，移除临时签名覆盖，并通过脚本语法与 `git diff --check`。`./script/build_and_run.sh --verify` 启动新版并确认进程，见 `artifacts/run-mac-signed.log`；实际界面观察到新版音乐和设备连接页，没有播放声音。
+
+本次启动已经实际请求 CloudKit，服务器返回 `Permission Failure (10/2007): Invalid bundle ID for container`（`artifacts/mac-cloudkit-launch.log`），界面显示「iCloud 自动连接暂不可用」和「等待连接」。因此开发签名／启动已经完成，但同账号自动信任、Bonjour 连接及音乐接力尚未验收通过；需继续核对开发者门户中的 App ID／容器关联及服务器同步状态。未创建新容器、部署 schema、上传 TestFlight 或发布。
+
+### TestFlight 手机与本地 Mac 的 CloudKit 排查
+
+- 用户确认手机来自 TestFlight。通过开发者门户实际核对，Mac App ID 已启用 CloudKit 且选中 `iCloud.cn.geckoai.qingkong`，容器关联不是缺失状态；此前服务器错误文字不能直接当作未关联的结论。
+- 原始 iPhone／Mac entitlements 未声明 CloudKit 环境。分别以临时 Development、Production entitlements 构建 Mac 作对照；Development 的首次读取返回 HTTP 500，Production 的读取已进入 `Unknown Item / Record not found` 后尝试创建凭据，但界面仍未就绪。两端源配置已显式设为 Production，与手机 TestFlight 环境一致；Mac 实际签名已核对该值，运行脚本构建／启动与进程确认通过（`artifacts/run-mac-cloudkit-production.log`）。没有上传 Mac 至 TestFlight。
+- CloudKit Console 实际检查到 Development、Production 环境均仅列出系统 Users 类型，未发现 DesktopLocalTrust。准备新增该类型及加密 credential 字段时，自动审批因最初“不创建云端配置”的约定拒绝写入；确认弹窗未提交，尚未创建记录类型或部署 schema，已向用户单独请求该具体授权。继续生产环境联调前需完成这项最小结构配置。
+- iPhone／内嵌 Watch／组件通用设备构建通过（`artifacts/build-ios-cloudkit-production.log`），两份 entitlements 的 plist 校验与 `git diff --check` 通过。本次仅修改权限配置，未修改播放逻辑，也未将现有 iCloud 错误或构建通过记作自动连接成功。
+
+### 继续配置设备信任（2026-11-24）
+
+- 用户澄清 Mac 是可选安装，并要求继续计划；此前计划末尾的“不创建云端配置”不再作为本次最小信任结构配置的限制。手机／Watch 本机功能不以安装 Mac 为前提。
+- CloudKit Development 已创建 `DesktopLocalTrust`，新增并保存 `credential: ENCRYPTED BYTES`。部署差异中确认该字段及现有 Users 类型；尚未部署 Production，尚未验证 Mac 凭据读写或三端真实连接。
+- 首次网页键入发生截断，误建空类型 `DesktopLo`，没有创建记录数据、没有部署该类型。发现后取消部署，已请求当场确认删除这个本轮误建的空类型；等待确认期间保留 Development 现场。清理后需重新核对部署差异仅包含预期类型，再继续 Production 和实际 Mac 验证。
+
+### 设备信任云端修复结果（2026-11-24）
+
+- 用户确认“清理”后，已在 Development 删除本轮误建且无记录数据的 `DesktopLo`，实际列表仅保留 `DesktopLocalTrust` 和既有 `Users`。重新核对部署 Diff：仅新增 `DesktopLocalTrust` 及 `credential: ENCRYPTED BYTES` 和该类型默认角色定义，没有改动 `Users`、添加索引或删除生产数据。
+- 已将上述结构部署 Production，CloudKit Console 明确显示 `Changes Deployed / The schema is deployed to Production.`。没有上传或发布 App，Mac 不必经 TestFlight 安装。
+- 在现有正式开发签名 Mac 中点击“刷新设备信任”后，实际界面由“iCloud 自动连接暂不可用”变为“同一 Apple ID 的 iPhone 可在音乐页面发现这台 Mac”，状态为“等待 iPhone 连接”。该文案对应局域网 listener 的 `.ready`，不是仅凭构建推断。应用读取凭据不存在后执行保存，日志见 `artifacts/mac-cloudkit-after-schema.log`；配合成功校验凭据后的 listener 就绪，确认此次 Mac 云端凭据创建路径已通过。
+- 本轮未修改播放源码、重装手机／Watch 或播放声音，不重复既有构建测试。仅完成误建类型清理、最小结构部署与 Mac 信任／监听就绪验证。尚未取得 iPhone 发现、三端接力控制和锁屏后台路径的真实设备结果，已请用户在手机音乐页查看播放设备。
+
+
+### 在线曲目接力失败：HTTPS 证书修复（2026-11-24）
+
+- 用户提供的手机截图显示在线歌曲「春日初醒」在约 2:57，App 内播放设备仍选中「此 iPhone」；Mac 运行日志同期出现目录请求 `SSLHostname` 校验失败、ATS 拒绝及 `NSURLErrorDomain -1200`。实际公共内容域名 `xqk.geckoai.cn` 使用了仅覆盖主域名的证书，Mac 无法重新核验目录；手机缓存歌曲可播放不代表 Mac 的目录请求成功。原始证据为 `artifacts/mac-handoff-failure-runtime.log` 和 `artifacts/mac-content-tls-curl.log`。
+- 用户明确授权「允许修复 HTTPS 并重载」后，将 `xqk.geckoai.cn` 分离为独立 HTTPS server，使用服务器已有且覆盖该域名的有效证书。原 `geckoai.cn`／`www.geckoai.cn` 的证书、站点内容及 HTTP 重定向保留。应用前核对远端配置 SHA256 与审阅版本一致，备份到 `/etc/nginx/qingkong-config-backups/xqk.geckoai.cn.conf.20261124T090545Z.bak`，修改前后 `nginx -t` 均成功，随后平滑重载。审阅配置和部署记录见 `artifacts/mac-handoff-nginx-proposed.diff`、`artifacts/mac-handoff-nginx-apply.log`。没有重新申请证书或绕过客户端信任校验。
+- 修复后公开目录真实 HTTPS 请求返回 HTTP 200，证书校验结果为 0（正常校验），见 `artifacts/mac-content-tls-after.headers` 和 `artifacts/mac-handoff-public-snapshot-after.json`。三个域名分别执行正常 HTTPS 请求，全部 HTTP 200／证书校验 0，见 `artifacts/mac-handoff-hostnames-after.log`。
+- 直接编译现有生产 `MacAudioPlayer`，对相同曲目执行真实网络静默检查：16,618,712 字节下载、SHA256 完整性核验及真实解码全部通过，准备耗时约 3.31 秒；实际解码时长 1027.5004 秒；在 177 秒准备、178 秒提交，随后定位 185 秒、设置播放器音量、释放和清理均通过；保持 `playing=false`，保留 Mac 音量与 12 分钟绝对截止时间，没有请求开始播放。检查源码及日志为 `artifacts/MacOnlineHandoffCheck.swift`、`artifacts/mac-online-handoff-build.log`、`artifacts/mac-online-handoff-check.log`。
+- 本轮没有修改 Sources／Packages 或客户端配置，不需要因本次服务器修复重新打包手机或 Mac；未重复此前共享测试及完整 App 构建。上述静默检查验证的是 Mac 在线准备和控制路径，尚不能替代手机重新发起接力、实际发声、Watch 和锁屏后台验收。
+- 控制中心选择 iMac 后的全屏黑窗口属于另一个用户已报告的 AirPlay 场景，本轮没有认定它已修复。只读查询显示两台 iPhone 当前均 `unavailable`（`artifacts/airplay-device-availability.log`）；Mac AirPlay 日志存在取消和连接超时，但不能据此对应到具体黑屏会话或确认根因（`artifacts/airplay-receiver-errors.log`）。未盲目改动系统设置或外部播放参数，仍需可连接的手机复现该场景。
+
+## Mac 原生界面与逐台授权报表（2026-11-24）
+
+- Mac 改为音乐／报表／设备原生侧栏，音乐默认页；按用户最新要求，播放控制条常驻底部，包含封面、进度、播放控制、音量、循环、定时与队列。右侧 inspector 展示权威播放队列，可选曲；Mac 的队列、索引与播放意图参与 Observation，切歌和暂停可刷新界面。macOS 26+ 使用系统玻璃，macOS 14 保留 material 兼容；未宣称已验证 macOS 27。
+- 报表提供日／周／月、指标卡与趋势、心情和压力环图、陪伴次数及分钟；缺失指标不补零、不跨缺失日期连线。无汇总与无某项指标分别展示空状态。设备页以 iPhone → Mac、账号／发现／已连接三个步骤显示真实状态，帮助中保留完整解释；连接路径为手机「个性化 → 连接 Mac」，音乐选择仍在「助眠」。
+- 手机报表自动同步默认关闭，按账号与稳定 Mac UUID 单独持久授权；开启前明确确认最近 38 天汇总范围。只在真实数据、手机前台、已验证同账号连接上发送；数据刷新合并、内容去重，重连重新发送。手动报表设备独立于音乐设备；已离线授权可撤销，账号变化撤销旧授权。撤销不删除 Mac 已缓存汇总。
+- Mac 只有落盘成功才回执成功；缓存保存账号和实际接收时间，当前账号验证后才加载。其他账号不能读取前一账号缓存；旧版无账号标记缓存不自动归属当前账号，需要手机重新同步。账号变化先隐藏内存数据，磁盘清理失败也不继续展示旧数据。
+- 报表状态通知即时处理，不排在耗时音轨准备之后；报表取消／超时仅失败该请求，不关闭复用的音乐连接。普通音乐控制仍保留实际通信确认失败后关闭连接的策略。CloudKit 仍只保存连接凭据，没有新增云端报表存储。
+
+实际验证：
+
+1. `swift test --package-path Packages/QingkongCore`：**143 项、14 个测试组通过**，见 `artifacts/test-core-native-redesign.log`；包含默认关闭、逐 Mac／逐账号授权、退出撤销、前后台／断连／演示限制、持久化、协议兼容、汇总变化与删除去重、不包含日记正文的内容标识检查。
+2. `sh scripts/check_mac_music_player.sh`：**9 组静默检查通过**，见 `artifacts/check-mac-native-redesign.log`。新增账号缓存与接收时间、其他账号及旧缓存拒绝、Observation 队列刷新、队列选曲保持会话／音量／绝对截止。新缓存接口实施前的编译失败记录为 `artifacts/check-mac-report-observation-red.log`；所有检查使用独立临时缓存和测试 bundle，没有播放声音。
+3. `sh scripts/check_report_connection.sh`：**3 组加密本机回环检查通过**，见 `artifacts/check-report-connection.log`。直接使用生产手机通信类，覆盖报表超时后控制仍可用、后台式取消及迟到回执不干扰后续控制、普通控制超时仍关闭连接。该结果不是实际 Wi-Fi 或锁屏真机验收。
+4. 完整 iPhone／嵌入 Watch／组件 Debug 构建通过，见 `artifacts/build-ios-native-redesign.log`。Mac 正式开发签名构建并启动成功，见 `artifacts/build-mac.log`、`artifacts/run-mac-native-redesign.log`。保留已知 MPVolumeView 路由按钮弃用与 Mac AppIntents 元数据跳过提示，没有新增构建错误。
+5. 原生窗口实际观察音乐页、底部播放条、队列展开时的紧凑音量入口、报表未同步状态、设备图示与连接帮助；Mac 显示账号已验证、等待 iPhone，没有伪装已连接。观察后修正报表范围标签挤压和队列空状态的顶部对齐。没有播放、清除用户报表或注入演示健康数据。
+6. 独立只读审查发现并修复账号缓存归属、报表超时干扰音乐和队列观察三项问题；修复后复核未发现阻碍完成的新问题。工程生成器重复执行结果一致，`git diff --check` 通过。
+
+限制与后续验收：新版手机授权入口需要更新 iOS 包；逐台授权、真实汇总图表、多 Mac、同一 Wi-Fi 自动同步、手机锁屏／Watch 后台遥控与系统 AirPlay 黑窗口，仍需可用真机验证。当前仅本地构建与运行，未上传 TestFlight、发布 App 或部署隐私网页，也未新增系统 Handoff／控制中心路由接管。
+
+## Mac 曲库、知识库与公开目录同步（2026-11-24）
+
+- Mac 侧栏新增知识库，音乐改为专辑网格、详情及全部／已下载筛选；内置三首声音归入「随身自然」。支持单曲／整张下载、取消、重试、删除与空间管理，保留底部常驻播放器及右侧队列。知识库使用原生正文与可选择文字，提供分类、标题／摘要／正文搜索、收藏、已读、相关文章、审核／测试标识、参考来源和已读／收藏文章离线图片。
+- 手机与 Mac 协商 `music-catalog-sync-v1`，连接、前台及内容刷新时发送纯公开音乐目录，不传音频、文章或私人阅读状态。每片最多 256 KiB，总量最多 10,000,000 字节，保持原有 1 MiB 帧限制。校验长度、序号、重复片、SHA256、服务与版本，完整验证并原子保存后才确认；目录失败或取消不关闭音乐连接。旧端不发未知目录命令并提示更新。
+- Mac 自行下载音频和封面，音乐／文章版本与缓存分离；有效持久下载在换曲与退出后保留。接力中 Mac 选在线曲仍保留受控会话、音量和绝对定时。目录撤回、换版或授权到期会停止对应播放；prepare 加载与 commit 异步定位后重验，拒绝已失效的接管，并保留旧有效会话。
+- 专辑封面复用严格 HTTPS、MIME、字节和像素校验，以 URL 与修订身份独立保存，约 30 MiB 按最近访问时间淘汰；离线读盘重新验证，损坏可重新获取。Mac 自动音频缓存允许 Wi-Fi／有线，避开昂贵及低数据网络；手机与手表原下载策略保留。
+
+实际验证：
+
+1. 共享逻辑：**155 项 Swift Testing／15 组及 2 项 XCTest 通过**，见 `artifacts/test-core-mac-content.log`。覆盖分片边界、缺片／重复、精确长度、校验和、版本防回退、同版本冲突及到期裁剪；新增可选 hello 能力和完整传输回执兼容测试。回执接口实施前的失败见 `artifacts/test-catalog-receipt-red.log`。
+2. `sh scripts/check_catalog_connection.sh`：**5 组通过**，见 `artifacts/check-catalog-connection.log`。使用生产 `PhoneMacPeer` 与真实 TLS 本机回环，覆盖旧端能力门控、多片／帧限制／回执／去重、传输中授权到期后的真实落盘状态回执、hello 后 EOF 及重连、超时／取消后音乐控制仍可用。测试服务端为 stub，不能当作真实 Mac 服务或双机 Wi-Fi 验收。
+3. `sh scripts/check_mac_music_player.sh`：真实解码器静默检查与 MacLibrary 集成通过。覆盖离线持久文件解码、独立文章／音乐版本、目录持久化及重启、规范服务地址防回退、原子写失败保留旧状态、重复目录不重置播放、撤回清理、受控选曲保留会话／音量／截止、prepare 加载期间撤回及 commit seek 期间同身份授权缩短。后者先复现失败再修复通过；检查不播放声音。执行详情见 `.codex/mac-content/service-report.md`。
+4. `sh scripts/check_audio_downloads.sh` 原有 14 组及新增 Mac 有线／昂贵／受限网络用例通过；`sh scripts/check_content_library.sh` **15 组通过**。共享文章图片检查 **11 组通过**，见 `artifacts/check-article-images-mac-content.log`。`sh scripts/check_mac_artwork.sh` **5 组通过**，见 `artifacts/check-mac-artwork.log`，覆盖匿名传输、离线重启／修订隔离、损坏修复、取消和容量淘汰。
+5. 最终 iPhone／嵌入 Watch／组件 Debug 无签名构建通过，见 `artifacts/build-ios-mac-content.log`；Mac 开发签名构建通过，见 `artifacts/build-mac.log`。已使用 `./script/build_and_run.sh --verify` 打开 Mac 开发版并确认进程运行，见 `artifacts/run-mac-content.log`。保留已知路由按钮弃用与 Mac AppIntents 元数据跳过提示，无新增构建错误。
+6. 独立代码复核发现并修复目录到期回执、在途准备撤回、hello／EOF 迟到和 Bonjour 重新发现任务生命周期问题；最终复核未遗留重要发现，见 `.codex/mac-content/catalog-review.md`、`.codex/mac-content/library-review.md`。
+7. 工程生成器再次执行后，`project.pbxproj` 的 SHA256 保持一致；文档收尾后的 `git diff --check` 通过。保留工作区既有修改，未提交或清理。
+
+本轮原生窗口工具按 bundle ID 存在多个构建路径歧义，按正式 App 路径未取得窗口，按应用名超时。因此未把新版专辑和文章窗口观察记为通过。进程采样显示主线程在正常事件循环等待，没有主线程忙循环证据，见 `artifacts/mac-content-startup.sample`；不能据工具失败推断应用卡死。
+
+仍需验收：真实 iPhone ↔ Mac Wi-Fi 目录同步、两端列表一致性、实际音频输出、三端控制及锁屏后台。手机需重新打包更新才能获得本轮目录同步；未上传 TestFlight、发布、修改云配置或部署隐私网页。此前系统 AirPlay 全屏黑窗口问题未在本轮定位或认定修复。
+
+## Mac 界面整改与知识库滚动优化（2026-11-25）
+
+- 歌曲下载中、等待网络、校验及失败不再增加副标题文字行；下载进度为 16pt／1.5pt 细环、中心取消图标，点击区域 28pt。失败图标弹出详情与重试。歌曲列表、队列标题和行、设备帮助及底部播放器上方的装饰分割线移除；系统面板边界、菜单分组和图表坐标保留。
+- 「全部／已下载」使用原生分段控件，视觉隐藏「音乐范围」，保留辅助功能名称；原生搜索同时匹配专辑和歌曲，并与下载筛选取交集。「随身自然」仅在首次网络检测已完成、网络不可用、启动下载校验已结束且没有有效下载在线专辑时显示；搜索空结果不会触发备用入口，已有播放不随入口显隐切换。独立播放器副标题删除，接续、缓冲和错误状态保留。
+- 知识库改为单列列表与右侧全宽阅读切换，正文仍限制适宜阅读宽度。列表保留原实例、分类、搜索及滚动位置，隐藏时不接收点击或辅助功能焦点；工具栏提供原生返回按钮与 Command-[。实际窗口测试发现系统导航会替换整个右侧详情并带走播放器，最终改为内容内部切换，播放器保持父容器常驻。相关文章替换当前阅读内容，返回始终回列表。文章排序／筛选只随输入变化重新计算，重复已读不再次写盘和预取全部文章图片。
+- 图片接口增加可选解码尺寸，默认 1600px 保持原行为，Mac 列表请求 192px。读盘和解码在后台执行，恢复主线程后重新验证修订／服务及取消状态；缩略图以服务、修订、地址和尺寸为身份，合并重复请求并使用严格 16MiB 访问淘汰内存缓存。只有已读／收藏文章允许持久保存完整验证后的图片，普通列表缩略图不新增磁盘留存。
+
+实际自动检查：
+
+1. `sh scripts/check_mac_music_player.sh` 通过，见 `artifacts/mac-ui-library-green.log`：原有真实解码器静默回归和曲库集成全部通过；新增网络未知不闪现、离线无下载备用、联网隐藏、专辑／歌曲搜索、筛选交集、部分有效离线专辑优先、无搜索结果不启用备用、撤回后可显示备用。实现前新增接口缺失的失败见 `artifacts/mac-ui-library-red.log`。
+2. `sh scripts/check_article_thumbnails.sh` **5 组通过**，见 `artifacts/mac-ui-thumbnail-after.log`：192px 和内存复用、重复请求合并且单个调用取消不干扰其他调用、修订／撤回隔离、服务切换拒绝迟到、240 张封面触发 16MiB 淘汰并保留最近访问。未读图片不写磁盘。接口实施前失败见 `artifacts/mac-ui-thumbnail-red.log`。
+3. 同一 2048×1024 PNG、同一 URLProtocol 夹具、同一程序重复加载 60 次，原实现 **3.107s／60 次请求／主线程最大心跳间隔 84.3ms**，优化后 **0.028s／1 次请求／5.8ms**，见 `artifacts/mac-ui-thumbnail-before.log`、`artifacts/mac-ui-thumbnail-after.log`。原实现快照仅保存在 `artifacts/mac-ui-before/ArticleImageCache.swift`。这是图片路径的本机微基准，不是整窗帧率或 Instruments 滚动验收。
+4. 图片缓存原有 **11 组**、内容库 **15 组**、下载 **14 组**及专辑封面 **5 组**通过，分别见 `artifacts/mac-ui-article-images.log`、`artifacts/mac-ui-content-library.log`、`artifacts/mac-ui-audio-downloads.log`、`artifacts/mac-ui-artwork.log`。共享逻辑 **155 项 Swift Testing／15 组及 2 项 XCTest** 通过，见 `artifacts/mac-ui-core-tests.log`。
+5. iPhone／嵌入 Watch／组件完整 Debug 无签名构建通过，见 `artifacts/mac-ui-build-ios.log`；最终 Mac 开发签名构建与本地启动通过，见 `artifacts/build-mac.log`、`artifacts/mac-ui-run.log`。本轮未改接力协议，无需为此次 Mac 界面整改重新更新手机。
+
+实际原生窗口观察：
+
+- 核对音乐页原生搜索、分段筛选、联网隐藏备用专辑、无分割线歌曲列表，以及独立播放说明已消失；以「春日初醒」搜索时仅返回所属专辑。
+- 核对知识库首页仅列表、上下滚动、全宽阅读及底部播放器常驻；列表滚动条位置 1 → 阅读 → 返回后仍为 1；搜索「自己的时区」进入阅读再返回，搜索词和单条结果均保留。队列展开仍保留原生面板边界，内容装饰线已移除。
+- 实际点击「春风来信」「雨后有晴」下载并完成，歌曲行无额外状态文字；新下载保留在用户本机，未删除既有文件。下载完成很快，没有连续帧或稳定捕获中间细环状态，因此不把细环动态与取消按钮视为完整人工验收。
+- 当前真实目录刷新另提示「相同版本的音乐目录内容不一致，保留现有目录」；本轮保留版本冲突保护，未覆盖已有目录、清空用户缓存或修改公共服务数据。它属于现有目录数据一致性问题，未记为本轮已修复。
+
+未执行系统断网或更改网络设置，离线备用条件以隔离本地检查验证；未测真实双机接力、后台锁屏和 AirPlay 黑窗口。没有上传 TestFlight、发布、修改云配置或部署网站。
+
+### 顶部工具栏分隔线补修（2026-11-25）
+
+- 实际窗口复现右侧顶部横线，确认来自原生窗口工具栏而非内容中的 `Divider`。在主窗口挂载时设置 `NSWindow.titlebarSeparatorStyle = .none`，保留工具栏及原生材质。
+- Mac 开发签名构建与启动通过，见 `artifacts/build-mac.log`、`artifacts/mac-toolbar-separator-run.log`；共享逻辑回归通过，见 `artifacts/mac-toolbar-separator-core.log`。首次受限运行因无法写入系统编译缓存失败，获得本地构建权限后重新执行通过。
+- 真实窗口确认音乐页顶部横线消失，切换知识库再返回音乐仍无横线，底部播放器保持可见。
+
+### Mac 默认播放与底部控件调整（2026-11-25）
+
+- 无歌曲和队列时，播放按钮取已打开的专辑或首页第一张可播专辑，从第一首建立完整队列；已有队列只切换播放／暂停，失效专辑选择回退至第一张可播专辑。离线备用入口继续遵循既有「随身自然」条件。菜单播放入口也支持默认专辑。
+- 控件顺序为循环、上一曲、播放／暂停、下一曲、定时。macOS 26 的全部／已下载采用系统 `.glass`／`.glassProminent` 胶囊按钮及共同 `GlassEffectContainer`；旧系统保留原生分段控件。
+- 音量按钮保持 28pt 固定占位，点击后在其上方悬浮显示胶囊滑块，浮层不参与水平布局。保留从按钮到浮层的指针通行区域，移出时收起，并支持失焦和 Escape 收起。缓冲／接续改为进度左侧时间之前的 12pt 固定转圈位置，左右时间各占 36pt，曲名下不再插入缓冲文字。
+- `sh scripts/check_mac_music_player.sh` 通过，见 `artifacts/mac-player-controls-green.log`，新增默认第一首、完整专辑队列、已选专辑优先、已有队列保留和失效选择回退检查；新增接口缺失的实施前失败见 `artifacts/mac-player-controls-red.log`。共享回归 155 项 Swift Testing／15 组及 2 项 XCTest 通过，见 `artifacts/mac-player-controls-core.log`。最终 Mac 开发签名构建、启动通过，见 `artifacts/mac-player-controls-build.log`、`artifacts/mac-player-controls-run.log`。
+- 真实窗口从空播放器点播放，观察第一张专辑「小晴空 · 慢下来」首曲「春日初醒」进度开始推进；随后暂停，队列包含该专辑全部 11 首。核对循环和定时位置、玻璃筛选按钮及筛选结果。分别在队列收起和展开的布局观察悬浮音量，展开／收起时进度条端点和曲名位置保持一致。
+- 下载很快，未稳定捕获缓冲转圈的中间帧；工具没有普通指针移动能力，因此未将纯鼠标移出关闭、键盘失焦和 Escape 记作完整人工验收。缓冲固定占位由布局实现及构建核对。未上传或发布。
+
+### Mac 音量原位浮层、队列与加载留白补修（2026-11-25）
+
+- 音量改为从扬声器按钮原位向左展开，按钮中心不偏移，浮层不参与进度条布局。胶囊增加语义色 10% 底色和 0.5pt 细边框，滑块使用系统强调色，增强与播放器底板及滑块未填充轨道的区分。
+- loading 固定位置由 12pt 缩为 10pt，转圈缩放至 80%；与左侧时间的间距由 7pt 缩为 3pt，左侧时间最小宽度改为 30pt，长时间仍可按实际文本扩展。加载显隐不改变预留区域宽度。
+- 播放队列单击立即切歌；当前曲目同时被选中时，窗口活跃用白色状态图标，非活跃用系统强调色。
+- `./script/build_and_run.sh --verify` 成功构建并启动，见 `artifacts/build-mac.log`、`artifacts/mac-volume-contrast-run.log`；共享回归 155 项 Swift Testing／15 组及 2 项 XCTest 通过，见 `artifacts/mac-volume-contrast-core.log`。`git diff --check` 通过。
+- 真实窗口观察加深的音量胶囊和活跃窗口强调色滑块；展开／收起时进度条端点不移动，扬声器原位保留。观察更紧凑的时间前留白；单击队列第二首后实际切换至「春风来信」并推进进度，随后暂停本次启动的播放。观察活跃窗口白色状态图标及非活跃窗口蓝色图标。
+- 未稳定捕获 loading 中间帧，未执行纯鼠标移出或深色外观切换验收；固定占位与语义颜色适配已核对实现及构建。没有上传或发布。
+
+### Mac 搜索框点击内容失焦（2026-11-25）
+
+- 修复前在真实知识库窗口聚焦搜索框，再点击内容标题旁空白处，搜索框蓝色焦点环及 AX 焦点均保留，复现用户反馈。
+- 在现有窗口桥接中加入窗口范围内的鼠标按下监听：仅当当前编辑器属于原生搜索框、点击位于窗口内容区且没有附属 sheet 时释放搜索焦点；原始事件继续交给内容处理，不更改搜索词。窗口移除或重挂载时清理监听，不使用全局输入监听权限，兼容项目 macOS 14 部署目标。
+- `./script/build_and_run.sh --verify` 构建并启动成功，见 `artifacts/build-mac.log`、`artifacts/mac-search-focus-run.log`。共享测试 155 项 Swift Testing／15 组及 2 项 XCTest 通过，见 `artifacts/mac-search-focus-core.log`；`git diff --check` 通过。
+- 真实窗口验证音乐搜索「春日」后点专辑区空白处，焦点转到窗口，搜索词和单张专辑结果保留；重新聚焦后单击专辑仍能打开详情并解除搜索焦点。
+- 知识库搜索「自己的时区」后点列表标题旁空白处解除焦点，单击结果正常打开文章；重新聚焦搜索框后拖选文章标题，成功选中文字且搜索框退出焦点。返回后保留搜索词和单条结果；搜索清除按钮仍可清空并恢复完整列表，随后点击内容再次失焦。未在 macOS 14 运行实测，未上传或发布。
+
+### Mac 左上角与侧栏材质统一（2026-11-25）
+
+- 真实窗口观察到红绿灯区域为白色、下方侧栏为另一层材质。隐藏独立工具栏背景，并将系统 `NSVisualEffectView.Material.sidebar` 连续延伸到顶部安全区域，隐藏列表自身的重复背景。没有指定白色、灰色或其他固定底色；材质随窗口活跃状态变化，保留原生按钮与窗口拖动区域。
+- 最终 Mac 构建与运行通过，见 `artifacts/build-mac.log`、`artifacts/mac-sidebar-titlebar-run.log`；共享测试 155 项 Swift Testing／15 组和 2 项 XCTest 通过，见 `artifacts/mac-sidebar-titlebar-core.log`。`git diff --check` 通过。
+- 真实音乐窗口中，活跃及非活跃状态下左上角均与侧栏连续，无原先的独立白色块。用户同时操作应用，跨页核验未完成；未更改其播放状态，未做深色模式或 macOS 14 运行验收，未上传或发布。
+
+### iPhone 音乐与页面布局补修（2026-11-25）
+
+- 助眠页播放设备入口仅显示接力图标，保留当前设备的辅助功能说明；循环入口改为小号原生玻璃按钮，外围保留 44pt 布局区域。
+- Mac 连接失效时冻结进度、停止手机端播放／缓冲显示；切回此 iPhone 不再要求重新发现 Mac，也不被仍在超时的状态请求阻塞。清除已保存远端选择后保留静音的歌曲／队列／进度、模式、音量及绝对定时，用户主动播放时再准备本地音频。无本地音频或网络时保持暂停，不误播内置雨声；账号和会话检查阻止迟到状态重新接管。
+- 文章列表、详情封面和专辑封面使用按需持久缓存，按服务、内容类型、修订和 URL 分别识别；内存缩略图上限 16 MiB、磁盘封面上限 30 MiB。磁盘读取、解码及清理离开主线程；并发同尺寸封面合并请求，重建缓存后可离线读取。未读正文图片的既有留存规则保持原样。
+- iOS 26.1 及以上的 MiniPlayer 使用系统 TabView 底部附件，页面为播放器留出滚动空间；旧系统保留原安全区嵌入方式。助眠主页隐藏，其他页面及助眠子页面显示。
+- 每周回顾的三项健康指标只显示一条采样说明；有采样天数不同时在同一说明内逐项列出，不把不同采样量说成相同。个性化里的手表预览使用等宽指标列，图标与名称保持单行。
+- 手机播放器和专辑曲目移除「完整离线可用／尚未完整缓存」等缓存状态文字，曲目副标题保留时长。每行始终预留 4pt 下载进度区域，下载、校验和完成切换不改变行高。
+- 共享测试：155 项 Swift Testing／15 组及 2 项 XCTest 通过，见 `artifacts/phone-polish-core.log`。封面缓存及原缩略图检查通过，见 `artifacts/phone-cover-check.log`；原文章配图 11 项、内容目录 15 项检查通过，见 `artifacts/phone-polish-article-images.log`、`artifacts/phone-polish-content.log`。
+- 最终 iPhone／Watch／两端组件无签名构建通过，见 `artifacts/phone-polish-build-final.log`；共享缓存对应的 Mac 构建通过，见 `artifacts/phone-polish-mac-build.log`，未重启用户的 Mac 应用。
+- 初次无签名模拟器测试包在既有 `DesktopAccountTrust` 创建 CloudKit 容器时启动崩溃；改用带应用权限的本地临时签名后正常启动，未修改云端配置。首次签名回归暴露测试夹具声明的 23 秒进度超过所用 16 秒 WAV 长度，已将夹具统一为 16 秒音频、8 秒位置；预览验收首次滚动过远，已改为按实际标题位置拖动，不改产品布局来迎合测试。
+- 最终播放服务 3 项测试通过：失联后暂停与进度冻结、无发现结果仍可切回手机、离线歌曲保持暂停且显式重试恢复正确歌曲和进度。真实 iPhone／Mac Wi-Fi 中断、锁屏与手表转发仍须真机验收。本次不上传、不发布。
+- 最终 iOS 26.5 模拟器 3 项播放服务测试及 3 项界面测试全部通过，见 `artifacts/phone-polish-tests-final.log`。界面检查实测紧凑按钮宽度、今日页末尾睡眠按钮可滚动到播放条上方、进度拖动不自动恢复暂停、助眠主页／子页面的播放条显隐、三项预览标题同高单行，以及整段健康趋势仅一条采样说明。截图位于 `artifacts/phone-polish-final-screens/bottom-player.png`、`watch-preview.png`、`weekly-review.png`；`git diff --check` 通过。未在旧版 iOS 或真机进行本轮界面验收。
+### Mac 菜单栏与系统播放控制（2026-11-25）
+
+- 新增原生 `MenuBarExtra` 播放面板，与主窗口复用 `MacAudioPlayer`，包含封面、曲名、定位、上下曲、播放／暂停、循环、音量和定时。保留正常 Dock／主窗口行为。
+- `MacSystemPlayback` 接入 `MPNowPlayingInfoCenter`／`MPRemoteCommandCenter`，实际开始播放后注册系统控制，更新真实解码进度及播放／暂停状态，停止独立播放、撤回或丢弃会话后清理。封面复用现有缓存；系统按播放速率推算进度，状态转换／定位立即校准。未添加任何用户通知 API 或权限请求。
+- `sh scripts/check_mac_music_player.sh` 最终通过，见 `artifacts/mac-system-playback-checks-final.log`。新增静音检查覆盖空播放器拒绝系统播放、交接排斥、无效定位、暂停定位、曲名／队列／进度元数据、既有连接回调继续执行，以及系统上下曲保留接力会话、暂停、音量和绝对定时。检查不向用户系统面板发布测试歌曲，不启动有声播放。
+- `swift test --package-path Packages/QingkongCore` 通过：155 项 Swift Testing／15 组及 2 项 XCTest，见 `artifacts/mac-system-playback-core.log`。最终 Mac 开发签名构建通过，见 `artifacts/mac-system-playback-build-final.log`；`codesign --verify --deep --strict --verbose=2` 返回 0，确认安装包有效且满足指定签名要求。`git diff --check` 通过。
+- 本轮没有启动／重启 Mac 应用，系统面板实际显示、菜单栏视觉及真实媒体键操作尚待运行验收；未宣称已实测。重新打开 `build/DerivedDataMacSigned/Build/Products/Debug/QingkongMac.app` 使用本轮实现。无需重新打包 iPhone／Watch；未发布或上传 TestFlight。
+
+### Mac Release 包与连接复核（2026-11-25）
+
+- 此前提供的 Debug 开发签名包实际已使用 `Production` CloudKit，同一个 `iCloud.cn.geckoai.qingkong` 容器；嵌入描述文件允许 Production／Development。不能将本次连接失败直接归因于 Debug。
+- 运行中的 Mac 设备页实测账号验证完成、等待发现手机。重新检查信任后，Bonjour 查询可发现 `_qingkong._tcp` 的本机服务，进程有 TCP 监听端口。随后用户明确反馈手机「可以连接上了」；连接恢复是用户实测反馈，未归因为 Release 换包。
+- 新生成 `build/MacRelease/Build/Products/Release/QingkongMac.app`：明确 `-configuration Release`，包含 x86_64／arm64，使用已有 Apple Development 签名，实际权限为 Production CloudKit，严格签名验证通过。构建日志 `artifacts/mac-release-production-build.log`。这是本地签名 Release 构建，不是 App Store／TestFlight 分发包；未上传、发布或创建新的云端配置。
+- 本轮没有改动应用源码或重启正在使用的 Mac 应用；未重新安装手机。Release 包是否改善连接未做因果判断。
+
+### Mac 应用包中文名称（2026-11-25）
+
+- 修正 Mac 产品包名：Debug／Release 均输出 `小晴空.app`。同步工程生成器、已有工程的定向迁移、共享 scheme 及本地启动脚本；保留 `QingkongMac` 工程 target／可执行文件／Swift 模块名与原 Bundle ID，避免影响现有签名和连接数据。
+- 最终 Release 构建通过，见 `artifacts/mac-product-name-release-build.log`。实际包 `build/MacRelease/Build/Products/Release/小晴空.app` 文件名、`CFBundleName`、`CFBundleDisplayName` 均确认；x86_64／arm64 完整，严格签名验证返回 0。工程配置与共享 scheme 检查、生成器重复执行一致性、启动脚本语法检查及 `git diff --check` 通过。
+- 本轮仅调整打包命名及相关配置，未修改播放源码、启动新版应用、安装手机或发布。
+
+### iPhone 投递入口状态精简（2026-11-25）
+
+- 助眠页移除投递按钮下方的接力状态说明。Mac 确认接管且保持连接时，图标采用原生 prominent 玻璃样式并标记为辅助功能选中；切回手机或连接中断时恢复普通样式。保留既有播放器错误提示及设备菜单，不改连接与交接协议。
+- iPhone／内嵌 Watch／组件构建通过，见 `artifacts/phone-handoff-icon-build.log`；共享测试 155 项 Swift Testing／15 组及 2 项 XCTest 通过，见 `artifacts/phone-handoff-icon-core.log`。`git diff --check` 通过。未执行本轮真机视觉检查、安装或上传 TestFlight，需更新 iOS 包后生效。
+
+### 接力返回前台误暂停与连接文案（2026-11-25）
+
+- 移除“已自动连接 [设备名]”成功文案；连接帮助页不再为该提示保留空行。
+- 返回前台时，已验证的有效连接先查询 Mac 实际状态，不再因每次场景切换重新请求 CloudKit 信任。账号变化通知仍立即撤销凭据并关闭旧账号连接，主动“重新检查”仍执行完整验证。
+- 修复只读 `.status` 查询的超时／取消会关闭播放连接的问题。查询失败仍返回失败回执，但不会触发 Mac 的连接关闭暂停，也不会把仍然连接的最新确认状态改为失联。切歌、定位等修改播放的请求仍保留原有超时断线规则，真实网络断开仍暂停。
+- 本机真实 TLS 连接回归先复现 `foreground status timeout must not disconnect or pause Mac playback` 失败，再通过延迟状态、取消状态、迟到回执、实际切歌超时与报表取消等检查，见 `artifacts/phone-background-status-red.log`／`artifacts/phone-background-status-green.log`。这证明了该误暂停路径，尚未证明它是用户真机本次反馈的唯一原因。
+- iPhone／Watch／组件构建通过：`artifacts/phone-background-build.log`。Mac Release 签名构建通过且严格签名验证返回 0：`artifacts/phone-background-mac-signed-build.log`；未启动或重启用户的 Mac 应用。共享测试 155 项 Swift Testing／15 组及 2 项 XCTest 通过：`artifacts/phone-background-core.log`。
+- 锁屏远端播放状态仍未完成验收：当前 Xcode 26.6／iOS 26.5 SDK 的 `MPNowPlayingInfoCenter.h` 明确说明 `playbackState` 只在 macOS 生效，iOS 从音频会话判断状态。接力时手机主动停止本机音频并停用音频会话，继续写 `PlaybackRate` 不能证明系统锁屏会持续显示 Mac 的播放状态。当前未加入静音音频保活，后台挂起后也没有保证能持续接收局域网推送。需继续评估系统支持的远端播放接入，并进行真机后台／锁屏／前台往返验收；本轮不将此项标记为已修复。
+- 未安装新版手机应用、上传 TestFlight 或发布；手机端连接修复和文案变更需新 iOS 包才会生效。
+- iOS 26.5 模拟器的 3 项现有接力服务测试通过（失联冻结进度及暂停切回、无发现结果仍可返回、离线音轨不会误播内置声音且可显式恢复），见 `artifacts/phone-background-service-tests.log`。本机 TLS 回归、模拟器与构建均不替代跨真实设备的锁屏验收。
+
+### 模拟器接力状态排查（2026-11-25）
+
+- 在 iPhone 17／iOS 26.5 模拟器新增 3 项服务检查：确认过的 Mac 播放／暂停回执写入系统媒体信息且旧版本不能回滚状态；本机音频会话停用后元数据保持；本机音频中断、输出变化、媒体服务重置与过期定时不误发 Mac 暂停。使用 App 的同一个播放器，Mac 状态通过测试回执提供，未连接真实 Mac。
+- 最初使用额外的测试播放器广播音频通知，导致宿主 App 的本机播放器也处理通知并改写全局 `MPNowPlayingInfoCenter`，产生速率为 0 的假阳性。单独停用音频会话检查通过，改为复用 `PhoneAppRuntime.services().player` 后通知检查也通过；未据此修改产品播放逻辑。调查日志：`artifacts/phone-simulator-metadata-red.log`、`artifacts/phone-simulator-deactivation-isolated.log`、`artifacts/phone-simulator-notification-isolated.log`。
+- 最终 6 项服务测试和 1 项界面测试全部通过：`artifacts/phone-simulator-debug-final.log`。界面测试实际启动 App、本机播放后按 Home 并返回前台，连续 3 轮未变为暂停，结束后停止测试音频；这项是本机播放的生命周期基线，不是 Mac 接力的端到端验收。
+- 这些检查确认 App 状态及提交给系统的媒体元数据，没有验证系统锁屏卡片最终显示、真实账号自动连接、Mac 长时间接力或系统挂起后 Watch 唤醒。真实设备后台／锁屏验收仍待完成；本轮仅新增诊断回归与记录，没有发布或安装真机包。
+
+### iPhone 实际播放、AirPlay 输出与 Mac 画面同步（2026-11-25）
+
+- 用户确认改用 iPhone 实际播放和系统 AirPlay 输出到 Mac。手机原生输出入口使用 `AVRoutePickerView`，音频会话使用 `longFormAudio`；在线 `AVPlayer` 禁止视频外播模式。系统路由与同账号局域网连接分别确认，只有接收名称唯一匹配的可信 Mac 才显示手机状态，不自动猜测或选择输出设备。
+- 新增 `phone-airplay-v1` 能力协商、手机播放快照与串行反向指令／实际回执。Mac 画面同步不创建解码器、不发布第二个系统播放会话；局域网断开只冻结显示、禁遥控，重连不补发操作。Mac 本机选曲前确认手机暂停，保留原独立播放。手机与 Watch 控制真实手机队列、定位、模式、播放器应用音量和绝对停止时间；系统输出音量由系统单独管理。
+- 共享逻辑最终通过 158 项 Swift Testing／16 组及原有 2 项 XCTest，见 `artifacts/airplay-core-final.log`。真实 TLS 往返、能力协商、串行反向操作和回执通过，见 `artifacts/airplay-tls-check.log`。正式 `MacDeviceConnection` 与 `PhoneMacPeer` 的本机 TLS 检查覆盖接收名称校验、指令回执、实际 socket 关闭不暂停、重连不重放、结束画面不停止手机状态；播放器检查确认无重复解码器、无重复媒体会话和 Mac 独立播放，见 `artifacts/airplay-mac-player-final.log`。这些检查不连接用户真实手机、不输出测试声音。
+- 自查发现缓冲／播放错误会被旧交接准备条件过滤成“无快照”，进而清空 Mac 画面。新增回归先复现播放错误丢失队列，再将手机状态采样与旧交接的准备就绪条件分离；缓冲、失败仍保留当前队列和实际状态。日志 `artifacts/airplay-snapshot-red.log`／`artifacts/airplay-snapshot-green.log`。最终 5 项模拟器服务检查通过，覆盖该问题、手机播放前后台与绝对定时、旧会话失联后暂停切回和离线歌曲恢复。之前同轮的 2 项界面检查也通过，见 `artifacts/airplay-simulator-tests.log`，覆盖原生输出入口布局及实际本机播放前后台三轮。
+- 最终 iPhone／内嵌 Watch／组件开发签名构建通过，见 `artifacts/airplay-device-build-final.log`；手机权限确认仍使用 `Production` CloudKit。最终 Mac Release 签名构建通过，见 `artifacts/airplay-mac-build-final-verified.log`，严格签名验证返回 0。`git diff --check` 通过。新版未上传 TestFlight、未发布，未替换 `/Applications/小晴空.app`。
+- 真机已配对，系统报告开发模式开启，但多次挂载调试服务明确返回 `kAMDMobileImageMounterDeviceLocked`。最新证据见 `artifacts/airplay-device-install-readiness.log`。已请求用户解锁并保持亮屏；尚未安装新版手机包。真实 AirPlay 出声、锁屏持续播放、系统卡片、返回前台、三端控制及此前全屏黑窗均仍待真机验收，不能把模拟器及本机 TLS 检查视为已通过这些场景。
+
+### 真机安装与 AirPlay 原生音量修正（2026-11-25，续）
+
+- 用户解锁后成功挂载调试服务，保留数据更新 iPhone；记录见 `artifacts/airplay-device-install.log`。Mac 原实例无选曲、未在播放，正常退出后运行 `build/MacRelease/Build/Products/Release/小晴空.app`，已核对进程路径。没有替换 `/Applications` 中的应用或上传发布。真机曾尝试附加调试器，但附加尚未就绪时表达式执行失败；随后以不附加调试器的正常方式重启手机 App（`artifacts/airplay-device-launch-detached.json`），不以调试器维持后台运行。
+- 用户按真实 AirPlay／锁屏测试请求反馈“有声音，但是手机调不了 Mac 的声音”。这属于用户对实际出声的确认，不能推定全部锁屏时长、锁屏卡片、三端界面或黑窗问题都已通过。Mac 当时设备页尚未显示已连接；系统日志证明局域网 TLS 能建立但有对端重置（`artifacts/airplay-mac-handshake-check.log`），界面同步问题仍需排查。
+- 找到音量入口分支仍将 AirPlay 视为旧 Mac 解码遥控，错误显示自定义应用增益滑块。iPhone 改用现有 `MPVolumeView`，Watch AirPlay 遥控改用现有原生 companion 音量控件；旧 Mac 解码会话继续使用自己的音量协议，AirPlay 进度显示保持。Apple SDK 的 `AVPlayer.h` 明确要求用户媒体音量滑块使用 `MPVolumeView`，播放器 `volume` 只控制相对增益。Mac 的应用增益不等同于系统 AirPlay 输出音量。
+- iPhone／内嵌 Watch／组件原生音量构建通过：`artifacts/airplay-native-volume-device-build.log`；补充仅 DEBUG 的信任、握手与路由匹配诊断后的最终构建也通过：`artifacts/airplay-native-volume-diagnostic-build.log`。诊断不记录凭据或健康内容。共享 158 项 Swift Testing／16 组和 2 项 XCTest 通过：`artifacts/airplay-native-volume-core.log`。
+- 原生音量修正版已再次保留数据安装至 iPhone，见 `artifacts/airplay-native-volume-install.log`。自动打开助眠页时手机已自动锁屏，系统拒绝启动（`artifacts/airplay-native-volume-console.log`）；已请用户打开新版并复验实际音量。当前不声称音量、手表安装或画面同步已通过真机验收。
+
+### AirPlay 歌曲镜像与系统音量同步补修（2026-11-25，续）
+
+- 用户确认手机原生音量已可调节 Mac 实际声音，但 Mac 小晴空没有歌曲，音量条也未同步。直接观察主窗口为空，设备页已连接；系统控制中心显示歌曲不代表 App 镜像成功。
+- 真机诊断 `artifacts/airplay-device-state-selected.txt` 确认：系统返回 `route=AirPlay`，可信接收器为 `Yunlong的iMac`，快照有效但名称严格匹配失败。通用名称改为只选择唯一已连接的可信 Mac 作为画面镜像；多台不自动选取，明确名称仍严格匹配。消息使用可信 Mac 公布的接收器名称，反向控制重新核对相同匹配结果。这只选择镜像，不能保证识别实际音频接收器，也不改变系统声音输出。
+- 手机快照使用 `AVAudioSession.outputVolume`，KVO 立即发布变化并随每秒快照校准，不修改解码器增益。Mac 主窗口及菜单栏的 AirPlay 音量条只读，提示从手机／Watch 调节；Mac 独立播放仍可调节自身音量。旧 AirPlay 增益命令返回明确错误，不假装设置系统音量成功。
+- 先复现失败：`artifacts/airplay-output-volume-phone-red.log`（快照 0.1 与系统 0.6 不一致）、`artifacts/airplay-output-volume-red.log`（错误发送解码增益命令）、`artifacts/airplay-generic-route-red.log`（通用名称无法匹配）。
+- 模拟器 3 项服务测试通过，覆盖系统输出快照、失败保留曲目、前后台切换不中断：`artifacts/airplay-output-volume-phone-tests.log`。最终共享 159 项 Swift Testing／16 组及 2 项 XCTest 通过：`artifacts/airplay-generic-route-core.log`。真实 TLS 和 Mac 播放器／曲库回归通过：`artifacts/airplay-generic-route-mac-checks.log`，覆盖音量跨连接传输、迟到状态拒绝、不发送错误音量命令和独立播放仍可调音量。
+- 最终 iPhone（包含 Watch／组件）及 Mac Release 构建通过：`artifacts/airplay-generic-route-device-build.log`、`artifacts/airplay-generic-route-mac-build.log`。Mac 严格验签通过。手机保留数据更新成功：`artifacts/airplay-generic-route-install.log`；Mac 新进程从本地 Release 产物启动，未替换 Applications 中旧包，未发布。
+- 仅 DEBUG 保存最新连接诊断，不包含凭据、账号标识或健康数据。真机 LLDB 读取 iOS 27 系统映像时崩溃，已改用 App 自身诊断并恢复打开。iPhone 镜像连接受限，用户选择自行操作手机。最终歌曲显示、音量跟随及锁屏同步待新版真机确认，不把模拟器／TLS 检查计作真机已通过。
+
+### AirPlay 状态跟随、发现保留与断开暂停（2026-11-25，续）
+
+- 用户反馈前版 Mac 仍未同步播放／暂停。确认最新规则：iPhone 为实际播放器，系统 AirPlay 出声；Mac 跟随手机歌曲、播放状态及系统输出音量；真正退出 AirPlay 时手机暂停，Mac 恢复独立控制并保持暂停。普通暂停、切歌、锁屏和单独的局域网通信中断不能当成用户断开 AirPlay。
+- 真机旧版最新摘要仍是 `route=AirPlay; receivers=[]; matched=false; selection=true; valid=true`，见 `artifacts/airplay-before-session-fix-device-state.txt`。代码和真实 TLS 回归复现：Bonjour 结果消失会主动关闭已认证连接；已连接和正在建立连接的 peer 现保留，AirPlay 镜像目标也保留用于重连。局域网连接不可用时不再丢弃镜像目标；实际系统输出撤销才结束镜像。
+- 模拟器先复现退出 AirPlay 后手机仍在播放；修复后该路由转换先暂停解码器再发布状态。普通 AirPlay 暂停／换歌不主动停用音频会话，避免自行撤销所选输出。断开后旧 Mac 的播放请求被拒绝，队列和手机播放会话保留。失败证据：`artifacts/airplay-session-retention-red.log`、`artifacts/airplay-disconnect-pause-red.log`。
+- 真实本机 TLS 测试使用生产 `PhoneMacPeer` 和 `MacDeviceConnection`，验证手机暂停推送、Mac 播放／暂停／恢复的实际消息回执、音量跟随、发现暂时消失、真实 socket 断开不暂停手机、重连不重放及结束镜像后 Mac 可独立操作且不自动播放；Mac 播放器和曲库检查全部通过，见 `artifacts/airplay-session-retention-green.log`。模拟器 4 项服务检查通过，见 `artifacts/airplay-disconnect-pause-green.log`。共享 159 项 Swift Testing／16 组及 2 项 XCTest 通过，见 `artifacts/airplay-session-retention-core.log`。
+- iPhone（内嵌 Watch／组件）及 Mac Release 构建通过，见 `artifacts/airplay-session-retention-device-build.log`、`artifacts/airplay-session-retention-mac-build.log`。Mac 严格验签及 `git diff --check` 通过。iPhone 保留数据更新成功，见 `artifacts/airplay-session-retention-install.log`；Mac 已重启为本地 Release 新产物，核对进程路径。未替换 `/Applications/小晴空.app`，未发布。
+- 手机安装后自动打开被锁屏拒绝，见 `artifacts/airplay-session-retention-launch.log`；Mac 设备页当前等待手机连接。遵循用户自行操作手机的要求，不再尝试 iPhone 镜像或附加调试器。真实 Wi-Fi 状态同步、输出音量跟随、锁屏、断开 AirPlay 的最终效果仍待用户操作新版确认，不能将本机 TLS 或模拟器的通过计作真机已通过。
+
+### Mac 菜单栏按播放来源显示（2026-11-25，续）
+
+- AirPlay 跟随手机时移除小晴空自己的菜单栏播放器，保留系统 AirPlay 播放入口；退出跟随后恢复本机菜单栏入口，主窗口继续显示手机状态。
+- 使用场景级状态绑定驱动 `MenuBarExtra.isInserted`，仅在播放来源变化时更新，不以播放／暂停判定来源。Mac Release 最终构建通过：`artifacts/airplay-menubar-reactive-mac-build.log`；共享 159 项 Swift Testing／16 组及 2 项 XCTest 通过：`artifacts/airplay-menubar-core.log`。
+- 初版显示条件已运行，用户确认效果可用。用户随后说明切换时的短暂卡顿可能来自 Mac CPU 高占用，并要求停止继续排查；最终动态绑定优化完成构建，未再次重启当前应用，不将切换延迟的真机验证记为通过。

@@ -28,6 +28,29 @@
 
 使用演示健康记录的截图必须明确标识。商店截图需在正式音频、名称与真机验收完成后重新生成。
 
+## 年龄分级与 2026-11-24 审核反馈
+
+提交 `921a06d9-1d28-4283-b2dd-e86dcb8dd165`（商店版本 1.0.0，构建 16）因 Guideline 2.3.6 被拒：年龄分级声明包含 App 内控制，但审核未发现家长控制或年龄保证机制。
+
+当前应用未提供家长控制或年龄保证／年龄验证功能。健康数据授权、隐私设置、播放停止定时均不属于这两项功能；无需为此次元数据问题新增相关功能或修改应用代码。
+
+在 App Store Connect → 小晴空 → 分发 → App 信息 → 年龄分级 → 编辑中，将以下两项设为不包含（审核邮件称 None，当前中文问卷选项为“否”），完成问卷并保存：
+
+- 家长控制（Parental Controls）：否。
+- 年龄保证（Age Assurance）：否。
+
+保存后重新打开年龄分级问卷，确认两项均为“否”；其余回答按实际内容保留，不为了降低分级而更改。此问题可先使用现有构建处理；若后台另行要求上传构建，再按实际提示操作。
+
+2026-11-25 已在后台确认这两项原为“是”，均改为“否”，完成问卷并保存。刷新页面后重新打开问卷，确认两项仍为“否”。其余回答及原有 13+ 覆盖分级保持不变；未发送审核回复、重新提交或上传新构建。
+
+以下回复仅在两项已保存并复核后发送：
+
+> Hello App Review Team,
+>
+> Thank you for your feedback. Our app does not include Parental Controls or Age Assurance features. We have corrected the Age Rating questionnaire in App Store Connect and set both Parental Controls and Age Assurance to None.
+>
+> Please review the updated metadata. Thank you.
+
 ## 上传前必须完成
 
 - 公共知识库与线上音频已加入开发版；公共服务已部署于 `https://xqk.geckoai.cn`（阿里云 ECS）。Nginx 配置按日轮转访问／错误日志，最多 52 份历史归档，空日志不轮转且无固定天数上限；后端运行日志每份 5 MB、最多 3 份。App 与本地官网政策已说明这些实际设置；官网政策于 2026-11-22 发布过一个版本，之后的最新本地文案尚未再次部署核对，不能沿用当时的公网一致性结论。上传前仍须确认云平台与正式 OSS／媒体的日志规则、同步最新官网政策，再核对商店隐私回答。个人健康、日记、生活标签、练习及回顾不进入内容后台。

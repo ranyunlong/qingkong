@@ -18,6 +18,7 @@ final class AppServices {
     #if os(iOS)
     let reminders: RelaxationReminderService
     let sleepHealth: SleepHealthService
+    let desktopSync: PhoneDesktopSync
     var musicWidgetError: String?
     var healthIntroductionActive = false
     var needsHealthIntroduction: Bool {
@@ -51,6 +52,10 @@ final class AppServices {
         #endif
         player = AudioPlayer()
         link = Connectivity(store: store, player: player)
+        #if os(iOS)
+        desktopSync = PhoneDesktopSync(store: store, health: health, companion: companion,
+            sleepHealth: sleepHealth, player: player, content: content)
+        #endif
         player.albumArtworkURLProvider = { [weak self] track in
             self?.content.albums.first(where: { $0.id == track.albumID })?.coverURL
         }
@@ -68,6 +73,7 @@ final class AppServices {
         content.didRefresh = { [weak self] snapshot in
             self?.player.reconcileOnlineCatalog(snapshot.tracks)
             self?.downloads.reconcile(with: snapshot.tracks)
+            self?.desktopSync.catalogDataChanged()
         }
         content.didChangeService = { [weak self] in
             self?.player.reconcileOnlineCatalog([])
@@ -96,12 +102,20 @@ final class AppServices {
         }
         #endif
         store.didChange = { [weak self] in self?.link.flush() }
-        store.didChangeRecords = { [weak self] in self?.writeMoodSnapshot() }
+        store.didChangeRecords = { [weak self] in
+            self?.writeMoodSnapshot()
+            #if os(iOS)
+            self?.desktopSync.reportDataChanged()
+            #endif
+        }
         store.didChangePreferences = { [weak self] in self?.link.flush(); self?.writeSnapshot() }
         health.didRefresh = { [weak self] in
             guard let self else { return }
             self.writeSnapshot()
             if !self.health.isDemo { self.companion.captureHealthSummary(self.health.readings) }
+            #if os(iOS)
+            self.desktopSync.reportDataChanged()
+            #endif
         }
         health.didUpdateForReminders = { [weak self] readings in
             guard let self else { return }
@@ -112,6 +126,8 @@ final class AppServices {
             #endif
         }
         #if os(iOS)
+        companion.didChangePractices = { [weak self] in self?.desktopSync.reportDataChanged() }
+        sleepHealth.didRefresh = { [weak self] in self?.desktopSync.reportDataChanged() }
         reminders.didSubmit = { [weak self] id, date, sampleDate, title in
             do {
                 try self?.companion.saveEvent(.init(id: id, date: date, title: title,
@@ -144,7 +160,12 @@ final class AppServices {
         #endif
         link.preferencesReceived = { [weak self] in self?.writeSnapshot() }
         // Activate at process launch so background transfers do not depend on a visible screen.
-        if !testing { link.start() }
+        if !testing {
+            link.start()
+            #if os(iOS)
+            Task { [weak self] in await self?.desktopSync.start() }
+            #endif
+        }
         #if os(iOS)
         let publishPhoneState = player.didChangeState
         player.didChangeState = { [weak self] state in
@@ -192,6 +213,10 @@ final class AppServices {
     }
 
     func playOnline(_ track: PublicAudioTrack, queue: [PublicAudioTrack], allowCellular: Bool) async {
+        if player.isDesktopControlled {
+            await player.selectOnline(track, queue: queue, url: track.audioURL, allowCellular: false)
+            return
+        }
         do {
             let url = try downloads.playbackURL(for: track, allowCellular: allowCellular)
             await player.selectOnline(track, queue: queue, url: url, allowCellular: allowCellular)

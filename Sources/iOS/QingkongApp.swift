@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct QingkongApp: App {
+    @UIApplicationDelegateAdaptor(QuickActionAppDelegate.self) private var appDelegate
     @State private var services: AppServices? = try? PhoneAppRuntime.services()
     var body: some Scene {
         WindowGroup {

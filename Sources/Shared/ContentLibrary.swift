@@ -15,6 +15,7 @@ final class ContentLibrary {
     private(set) var lastPlayedAlbumID: String?
     var didRefresh: ((PublicContentSnapshot) -> Void)?
     var didChangeService: (() -> Void)?
+    let coverImages: PublicCoverCache
     let articleImages: ArticleImageCache
     @ObservationIgnored private let testing: Bool
     @ObservationIgnored private let defaults: UserDefaults
@@ -67,6 +68,8 @@ final class ContentLibrary {
         let defaults = defaultsOverride ?? (testing ? UserDefaults(suiteName: "QingkongPublicContentUITesting")! : .standard)
         self.defaults = defaults
         let directory = directoryOverride ?? (testing ? URL.temporaryDirectory : URL.applicationSupportDirectory).appending(path: testing ? "QingkongPublicContentUITesting" : "PublicContent", directoryHint: .isDirectory)
+        coverImages = PublicCoverCache(directory: directory.appending(path: "Covers", directoryHint: .isDirectory),
+                                       configuration: sessionOverride?.configuration, networkEnabled: !testing)
         articleImages = ArticleImageCache(directory: directory.appending(path: "ArticleImages", directoryHint: .isDirectory),
                                           configuration: sessionOverride?.configuration, networkEnabled: !testing)
         if testing && reset {
@@ -144,7 +147,10 @@ final class ContentLibrary {
         if !favoriteIDs.insert(id).inserted { favoriteIDs.remove(id) }
         save()
     }
-    func markRead(_ id: String) { readIDs.insert(id); save() }
+    func markRead(_ id: String) {
+        guard readIDs.insert(id).inserted else { return }
+        save()
+    }
 
     private func save() {
         guard let snapshot, let lastCheckedAt else { return }

@@ -40,6 +40,7 @@ final class CompanionStore {
     var bedtimePlans: [BedtimePlan] { archive.bedtimePlans }
     var calmHome: Bool { archive.calmHome }
     var error: String?
+    @ObservationIgnored var didChangePractices: (() -> Void)?
 
     init(url: URL? = nil, testing: Bool = false, reset: Bool = false, defaultsOverride: UserDefaults? = nil) throws {
         defaults = defaultsOverride ?? (testing ? UserDefaults(suiteName: "cn.geckoai.qingkong.uitests")! : .standard)
@@ -59,9 +60,13 @@ final class CompanionStore {
             value.practices.append(record)
         }
         CompanionActionMemory.remember(practices: [record], defaults: defaults)
+        didChangePractices?()
     }
 
-    func deletePractice(_ id: UUID) throws { try edit { $0.practices.removeAll { $0.id == id } } }
+    func deletePractice(_ id: UUID) throws {
+        try edit { $0.practices.removeAll { $0.id == id } }
+        didChangePractices?()
+    }
     func setCalmHome(_ enabled: Bool) throws { try edit { $0.calmHome = enabled } }
     func savePlan(_ plan: BedtimePlan) throws {
         try edit { value in

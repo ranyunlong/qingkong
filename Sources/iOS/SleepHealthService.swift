@@ -9,6 +9,7 @@ final class SleepHealthService {
     private(set) var requested: Bool
     private(set) var loading = false
     private(set) var error: String?
+    @ObservationIgnored var didRefresh: (() -> Void)?
     @ObservationIgnored private let healthStore = HKHealthStore()
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let testing: Bool
@@ -70,6 +71,7 @@ final class SleepHealthService {
             samples.removeAll { replacingIDs.contains($0.id) }
             samples += updated
             error = nil
+            didRefresh?()
         } catch { self.error = "暂时无法更新睡眠记录。" }
     }
 }

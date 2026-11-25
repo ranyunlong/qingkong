@@ -71,6 +71,7 @@ struct WeeklyReviewView: View {
     }
     var body: some View {
         let review = WeeklyCompanionReview(weekStarting: week, moods: app.store.records, practices: app.companion.practices)
+        let summaries = healthSummaries
         List {
             Section {
                 HStack {
@@ -94,15 +95,13 @@ struct WeeklyReviewView: View {
             }
             Section("有数据的健康趋势") {
                 Text("健康趋势依据当前已读取的最近38天记录；更早或仅部分覆盖的周不代表完整健康历史。").font(.caption).foregroundStyle(.secondary)
-                ForEach(HealthMetric.allCases) { metric in
-                    let end = Calendar.current.date(byAdding: .day, value: 7, to: week) ?? .now
-                    let readings = app.health.readings.filter { $0.metric == metric && $0.isValid && $0.date >= week && $0.date < end && $0.date <= .now }
-                    let days = Set(readings.map { Calendar.current.startOfDay(for: $0.date) })
-                    let means = days.compactMap { HealthMath.dailyMean(readings, metric: metric, day: $0) }
-                    if !means.isEmpty {
-                        LabeledContent("\(metric.name) 日均的平均", value: "\((means.reduce(0, +) / Double(means.count)).formatted(.number.precision(.fractionLength(0...1)))) \(metric.unit)")
-                        Text("依据 \(means.count) 个有采样日；缺失日期不参与计算。").font(.caption).foregroundStyle(.secondary)
-                    } else { Text("\(metric.name)：本周暂无可读取记录").foregroundStyle(.secondary) }
+                ForEach(summaries, id: \.metric) { summary in
+                    if let mean = summary.mean {
+                        LabeledContent("\(summary.metric.name) 日均的平均", value: "\(mean.formatted(.number.precision(.fractionLength(0...1)))) \(summary.metric.unit)")
+                    } else { Text("\(summary.metric.name)：本周暂无可读取记录").foregroundStyle(.secondary) }
+                }
+                if summaries.contains(where: { $0.count > 0 }) {
+                    Text(samplingNote(summaries)).font(.caption).foregroundStyle(.secondary)
                 }
             }
             SleepReviewSection(weekStarting: week)
@@ -110,4 +109,22 @@ struct WeeklyReviewView: View {
         }.navigationTitle("每周回顾")
             .task(id: week) { await app.sleepHealth.refresh(weekStarting: week) }
     }
+    private var healthSummaries: [(metric: HealthMetric, mean: Double?, count: Int)] {
+        let end = Calendar.current.date(byAdding: .day, value: 7, to: week) ?? .now
+        return HealthMetric.allCases.map { metric in
+            let readings = app.health.readings.filter { $0.metric == metric && $0.isValid && $0.date >= week && $0.date < end && $0.date <= .now }
+            let days = Set(readings.map { Calendar.current.startOfDay(for: $0.date) })
+            let means = days.compactMap { HealthMath.dailyMean(readings, metric: metric, day: $0) }
+            return (metric, means.isEmpty ? nil : means.reduce(0, +) / Double(means.count), means.count)
+        }
+    }
+
+    private func samplingNote(_ summaries: [(metric: HealthMetric, mean: Double?, count: Int)]) -> String {
+        let available = summaries.filter { $0.count > 0 }
+        if Set(available.map(\.count)).count == 1, let count = available.first?.count {
+            return "依据 \(count) 个有采样日；缺失日期不参与计算。"
+        }
+        return available.map { "\($0.metric.name) \($0.count) 天" }.joined(separator: " · ") + "；缺失日期不参与计算。"
+    }
+
 }

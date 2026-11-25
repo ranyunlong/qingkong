@@ -8,6 +8,9 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var tab: AppTab = .today
+    @State private var quickActions = HomeScreenQuickActions.shared
+    @State private var navigationIDs: [AppTab: UUID] = [:]
+    @State private var quickRelaxation = false
     @State private var sleepRootVisible = true
     @State private var mood = 3
     @State private var settings = false
@@ -23,12 +26,13 @@ struct RootView: View {
                 Task { await app.reminders.requestPermissionIfNeeded(); presentReminderDestination() }
             }) { HealthConnectionIntroductionView().environment(app) }
             .sheet(isPresented: $settings, onDismiss: presentReminderDestination) { NavigationStack { PersonalizationView() }.environment(app) }
-            .sheet(item: $reminderSheet) { _ in
+            .sheet(item: $reminderSheet, onDismiss: presentReminderDestination) { _ in
                 NavigationStack {
                     RelaxationAdviceView(inSheet: true, openSounds: { reminderSheet = nil; tab = .sleep })
                 }.environment(app)
             }
             .onChange(of: app.reminders.destination) { _, _ in presentReminderDestination() }
+            .onChange(of: quickActions.pendingAction, initial: true) { _, _ in presentReminderDestination() }
             .task {
                 healthIntroduction = app.needsHealthIntroduction
                 app.healthIntroductionActive = healthIntroduction
@@ -41,13 +45,15 @@ struct RootView: View {
                     app.updateClock()
                 }
             }
-            .onChange(of: scenePhase) { _, phase in
+            .onChange(of: scenePhase, initial: true) { _, phase in
+                app.desktopSync.setForeground(phase == .active)
                 if phase == .active { Task { await app.activate() } }
             }
             .onOpenURL { url in
                 guard url.scheme == "qingkong" else { return }
                 if url.host == "dumpling" { tab = .mood }
                 else if url.host == "music" { tab = .sleep }
+                else if url.host == "watch-battery" { settings = true }
                 else if url.host == "trend", let metric = HealthMetric(rawValue: url.lastPathComponent) {
                     trendMetric = metric; tab = .trends
                 }
@@ -55,7 +61,23 @@ struct RootView: View {
     }
 
     private func presentReminderDestination() {
-        guard !healthIntroduction else { return }
+        guard !healthIntroduction, !app.needsHealthIntroduction else { return }
+        if quickActions.pendingAction != nil {
+            if settings { settings = false; return }
+            if reminderSheet != nil { reminderSheet = nil; return }
+            guard let action = quickActions.takePendingAction() else { return }
+            app.reminders.destination = nil
+            quickRelaxation = action == .relaxation
+            switch action {
+            case .relaxation: tab = .today
+            case .trends: tab = .trends
+            case .recordMood: tab = .mood
+            case .music: tab = .sleep
+            }
+            // A quick action opens the destination even if this tab was left on a detail page.
+            navigationIDs[tab] = UUID()
+            return
+        }
         guard let destination = app.reminders.destination else { return }
         if settings { settings = false; return }
         app.reminders.destination = nil
@@ -67,17 +89,28 @@ struct RootView: View {
         }
     }
 
-    private var tabShell: some View { tabs }
+    @ViewBuilder private var tabShell: some View {
+        if #available(iOS 26.1, *) {
+            tabs.tabViewBottomAccessory(isEnabled: miniPlayerVisible) {
+                MiniPlayer(usesSystemSurface: true) { tab = .sleep }
+            }
+        } else {
+            tabs
+        }
+    }
 
     private var tabs: some View {
         TabView(selection: $tab) {
-            navigation("今日") { TodayView(selectedMood: $mood, openMood: { tab = .mood }) }
+            navigation("今日", tab: .today) {
+                TodayView(selectedMood: $mood, openMood: { tab = .mood })
+                    .navigationDestination(isPresented: $quickRelaxation) { RelaxationView() }
+            }
                 .tabItem { tabLabel("今日", systemImage: "sun.max") }.tag(AppTab.today)
-            navigation("趋势") { TrendsView(metric: $trendMetric) }
+            navigation("趋势", tab: .trends) { TrendsView(metric: $trendMetric) }
                 .tabItem { tabLabel("趋势", systemImage: "chart.bar") }.tag(AppTab.trends)
-            navigation("心情") { MoodView(selectedMood: $mood) }
+            navigation("心情", tab: .mood) { MoodView(selectedMood: $mood) }
                 .tabItem { tabLabel("心情", systemImage: "face.smiling") }.tag(AppTab.mood)
-            navigation("助眠") {
+            navigation("助眠", tab: .sleep) {
                 SleepView()
                     .onAppear { sleepRootVisible = true }
                     .onDisappear { sleepRootVisible = false }
@@ -92,7 +125,7 @@ struct RootView: View {
             .environment(\.symbolVariants, .none)
     }
 
-    private func navigation<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+    private func navigation<Content: View>(_ title: String, tab targetTab: AppTab, @ViewBuilder content: () -> Content) -> some View {
         NavigationStack {
             content()
                 .navigationTitle(title)
@@ -106,15 +139,21 @@ struct RootView: View {
                     }
                 }
         }
-        .safeAreaInset(edge: .bottom, spacing: 8) {
+        .id(navigationIDs[targetTab])
+        .safeAreaInset(edge: .bottom, spacing: usesLegacyMiniPlayer && miniPlayerVisible ? 8 : 0) {
             VStack(spacing: 0) {
-                if miniPlayerVisible {
+                if usesLegacyMiniPlayer && miniPlayerVisible {
                     MiniPlayer { tab = .sleep }.padding(.horizontal, 22).padding(.bottom, 8)
                         .transition(reduceMotion ? .opacity : .scale(scale: 0.08, anchor: .bottom).combined(with: .opacity))
                 }
             }
             .animation(.easeInOut(duration: 0.25), value: miniPlayerVisible)
         }
+    }
+
+    private var usesLegacyMiniPlayer: Bool {
+        if #available(iOS 26.1, *) { return false }
+        return true
     }
 
     private var miniPlayerVisible: Bool {
@@ -156,9 +195,11 @@ private struct HealthConnectionIntroductionView: View {
 
 struct MiniPlayer: View {
     @Environment(AppServices.self) private var app
+    var usesSystemSurface = false
     let open: () -> Void
     @ViewBuilder var body: some View {
-        if #available(iOS 26, *) { controls.glassEffect(.regular, in: .capsule) }
+        if usesSystemSurface { controls }
+        else if #available(iOS 26, *) { controls.glassEffect(.regular, in: .capsule) }
         else { controls.background(.bar, in: .capsule) }
     }
 
@@ -166,10 +207,10 @@ struct MiniPlayer: View {
         HStack(spacing: 12) {
             Button(action: open) {
                 HStack(spacing: 10) {
-                    AudioArtworkView(state: app.player.state).frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12))
+                    AudioArtworkView(state: app.player.state).frame(width: usesSystemSurface ? 36 : 48, height: usesSystemSurface ? 36 : 48).clipShape(RoundedRectangle(cornerRadius: 10))
                     VStack(alignment: .leading, spacing: 2) {
                         Text(app.player.state.displayTitle).font(.subheadline.weight(.medium)).lineLimit(1)
-                        Text(app.player.buffering ? "正在加载 · 点按展开" : (app.player.state.playing ? "正在播放 · 点按展开" : "已暂停 · 点按展开"))
+                        Text(app.player.playbackDeviceName.map { "\($0) · " } .map { $0 + (app.player.desktopConnected ? "点按遥控" : "连接中断") } ?? (app.player.buffering ? "正在加载 · 点按展开" : (app.player.state.playing ? "正在播放 · 点按展开" : "已暂停 · 点按展开")))
                             .font(.caption2).foregroundStyle(Color.readableSecondary).lineLimit(1)
                     }
                     Spacer(minLength: 0)
@@ -185,8 +226,8 @@ struct MiniPlayer: View {
             .accessibilityIdentifier("mini-player-toggle")
         }
         .buttonStyle(.plain)
-        .padding(.horizontal, 16).padding(.vertical, 14)
-        .frame(minHeight: 76)
+        .padding(.horizontal, 16).padding(.vertical, usesSystemSurface ? 4 : 14)
+        .frame(minHeight: usesSystemSurface ? 56 : 76)
         .background {
             Capsule().fill(.clear).contentShape(Capsule()).onTapGesture(perform: open).accessibilityHidden(true)
         }

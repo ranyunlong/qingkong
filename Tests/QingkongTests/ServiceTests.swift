@@ -2,10 +2,272 @@ import XCTest
 import UserNotifications
 import WatchConnectivity
 import Observation
+import AVFoundation
+import MediaPlayer
 import QingkongCore
 @testable import Qingkong
 
 final class ServiceTests: XCTestCase {
+    @MainActor
+    func testLeavingAirPlayPausesPhoneAndKeepsItsQueue() async throws {
+        let player = AudioPlayer()
+        defer { player.pause() }
+        await player.select(.rain, autoplay: false)
+        player.setVolume(0)
+        await player.play()
+        XCTAssertTrue(player.state.playing)
+        player.updateAirPlayRoute(name: "AirPlay", id: "test-output")
+        let before = try XCTUnwrap(player.phonePlaybackSnapshot())
+        player.pause()
+        XCTAssertEqual(player.airPlayRouteID, "test-output", "普通暂停必须保留 AirPlay 输出")
+        XCTAssertFalse(try XCTUnwrap(player.phonePlaybackSnapshot()).playing)
+        let resumed = await player.handlePhonePlayback(.init(sessionID: before.sessionID, action: .play))
+        XCTAssertTrue(resumed.success)
+        XCTAssertTrue(resumed.snapshot?.playing == true, "暂停后 Mac 仍可请求手机恢复播放")
+        player.updateAirPlayRoute(name: nil, id: nil)
+        let after = try XCTUnwrap(player.phonePlaybackSnapshot())
+        XCTAssertFalse(player.state.playing, "断开 AirPlay 后手机必须暂停，不能继续从手机出声")
+        XCTAssertNil(player.airPlayRouteID)
+        XCTAssertEqual(after.queue, before.queue)
+        XCTAssertEqual(after.sessionID, before.sessionID)
+        let stalePlay = await player.handlePhonePlayback(.init(sessionID: before.sessionID, action: .play))
+        XCTAssertFalse(stalePlay.success, "AirPlay 断开后旧 Mac 指令不能让手机出声")
+        XCTAssertFalse(player.state.playing)
+    }
+
+    @MainActor
+    func testPhonePlaybackSnapshotUsesSystemOutputVolumeInsteadOfDecoderGain() async throws {
+        let player = AudioPlayer()
+        await player.select(.rain, autoplay: false)
+        defer { player.pause() }
+        let output = AVAudioSession.sharedInstance().outputVolume
+        let gain: Float = output > 0.5 ? 0.1 : 0.9
+        player.setVolume(gain)
+        let snapshot = try XCTUnwrap(player.phonePlaybackSnapshot())
+        XCTAssertEqual(snapshot.volume, AVAudioSession.sharedInstance().outputVolume, accuracy: 0.001)
+        XCTAssertEqual(player.state.volume, gain, "同步系统输出音量不能改变解码器增益")
+    }
+
+    @MainActor
+    func testPhonePlaybackSnapshotRetainsQueueAfterPlaybackFailure() async throws {
+        let player = try PhoneAppRuntime.services().player
+        defer { player.clearDesktopSelection() }
+        player.clearDesktopSelection()
+        await player.select(.ocean)
+        let before = try XCTUnwrap(player.phonePlaybackSnapshot())
+        player.reportPlaybackError("测试播放失败")
+        let failed = try XCTUnwrap(player.phonePlaybackSnapshot(), "播放错误应保留暂停的曲目，不能让 Mac 画面消失")
+        XCTAssertEqual(failed.sessionID, before.sessionID)
+        XCTAssertEqual(failed.queue, before.queue)
+        XCTAssertEqual(failed.index, before.index)
+        XCTAssertFalse(failed.playing)
+        XCTAssertTrue(failed.isValid)
+    }
+
+    @MainActor
+    func testPhonePlaybackOwnsItsSessionWhileMacDisplayIsBackgrounded() async throws {
+        let services = try PhoneAppRuntime.services()
+        let player = services.player
+        defer { player.setTimer(minutes: 0); player.clearDesktopSelection(); services.desktopSync.setForeground(true) }
+        player.clearDesktopSelection()
+        await player.select(.rain, autoplay: false)
+        player.setVolume(0)
+        await player.play()
+        XCTAssertNil(player.error)
+        XCTAssertTrue(player.state.playing)
+        XCTAssertFalse(player.isDesktopControlled)
+        XCTAssertEqual(AVAudioSession.sharedInstance().routeSharingPolicy, .longFormAudio)
+        player.setTimer(minutes: 15)
+        let deadline = player.state.deadline
+        let before = try XCTUnwrap(player.phonePlaybackSnapshot())
+        XCTAssertTrue(before.playing)
+        XCTAssertTrue(before.isValid)
+        services.desktopSync.setForeground(false)
+        try await Task.sleep(for: .milliseconds(250))
+        services.desktopSync.setForeground(true)
+        let after = try XCTUnwrap(player.phonePlaybackSnapshot())
+        XCTAssertTrue(after.playing, "画面同步的前后台切换不能暂停手机真实播放器")
+        XCTAssertEqual(after.sessionID, before.sessionID)
+        XCTAssertEqual(after.deadline, deadline)
+        XCTAssertGreaterThan(after.position, before.position)
+        XCTAssertGreaterThan(after.revision, before.revision)
+        XCTAssertEqual(MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 1)
+        let refused = await player.handlePhonePlayback(.init(sessionID: UUID(), action: .next))
+        XCTAssertFalse(refused.success, "过期或无 AirPlay 路由的 Mac 操作不能改变本机队列")
+        XCTAssertEqual(player.state.track, .rain)
+        player.setTimer(minutes: 0)
+    }
+
+    @MainActor
+    func testMacMetadataSurvivesLocalOutputDeactivation() async throws {
+        let player = try PhoneAppRuntime.services().player
+        defer { player.clearDesktopSelection() }
+        let snapshot = DesktopPlaybackSnapshot(sessionID: UUID(), revision: 4,
+            queue: [.init(track: .ocean)], index: 0, position: 12, duration: 120,
+            playing: true, mode: .sequence, volume: 0.4, deadline: nil)
+        player.applyDesktop(snapshot, connected: true)
+        try await Task.sleep(for: .milliseconds(300))
+        XCTAssertTrue(player.state.playing)
+        XCTAssertTrue(player.desktopConnected)
+        XCTAssertEqual(MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 1,
+            "停用本机音频会话后仍应保留 Mac 的已确认播放信息")
+    }
+
+    @MainActor
+    func testConfirmedMacStateUpdatesSystemMetadataAndRejectsStaleSnapshots() throws {
+        let player = try PhoneAppRuntime.services().player
+        defer { player.clearDesktopSelection() }
+        var snapshot = DesktopPlaybackSnapshot(sessionID: UUID(), revision: 4,
+            queue: [.init(track: .ocean)], index: 0, position: 12, duration: 120,
+            playing: true, mode: .sequence, volume: 0.4, deadline: nil)
+        player.applyDesktop(snapshot, connected: true)
+        let playing = try XCTUnwrap(MPNowPlayingInfoCenter.default().nowPlayingInfo)
+        XCTAssertEqual(playing[MPMediaItemPropertyTitle] as? String, "慢慢听海")
+        XCTAssertEqual(playing[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 1)
+        XCTAssertEqual(playing[MPMediaItemPropertyPlaybackDuration] as? Double, 120)
+        XCTAssertEqual(try XCTUnwrap(playing[MPNowPlayingInfoPropertyElapsedPlaybackTime] as? Double), 12, accuracy: 0.2)
+
+        let stalePlaying = snapshot
+        snapshot.revision = 5; snapshot.position = 18; snapshot.playing = false
+        player.applyDesktop(snapshot, connected: true)
+        player.applyDesktop(stalePlaying, connected: true)
+        let paused = try XCTUnwrap(MPNowPlayingInfoCenter.default().nowPlayingInfo)
+        XCTAssertFalse(player.state.playing)
+        XCTAssertEqual(paused[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 0)
+        XCTAssertEqual(paused[MPNowPlayingInfoPropertyElapsedPlaybackTime] as? Double, 18)
+
+        snapshot.revision = 6; snapshot.playing = true
+        player.applyDesktop(snapshot, connected: true)
+        XCTAssertTrue(player.state.playing)
+        XCTAssertEqual(MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 1)
+        player.desktopConnectionLost("连接中断")
+        XCTAssertEqual(MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 0)
+    }
+
+    @MainActor
+    func testLocalAudioNotificationsAndDeadlineDoNotPauseMac() async throws {
+        // Exercise the app's single owner of the system audio session. A second
+        // player would receive the same notifications and overwrite its metadata.
+        let player = try PhoneAppRuntime.services().player
+        let previousHandler = player.desktopHandler
+        defer { player.desktopHandler = previousHandler; player.clearDesktopSelection() }
+        var actions: [AudioCommand.Action] = []
+        player.desktopHandler = { command in
+            actions.append(command.action)
+            return AudioReply(id: command.id, state: player.state, error: "测试未连接真实 Mac")
+        }
+        let snapshot = DesktopPlaybackSnapshot(sessionID: UUID(), revision: 4,
+            queue: [.init(track: .ocean)], index: 0, position: 12, duration: 120,
+            playing: true, mode: .sequence, volume: 0.4,
+            deadline: SleepDeadline(minutes: 15, now: .now.addingTimeInterval(-1800)))
+        player.applyDesktop(snapshot, connected: true)
+        try await Task.sleep(for: .milliseconds(300))
+        XCTAssertEqual(MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 1, "通知前的 Mac 状态")
+        let center = NotificationCenter.default
+        center.post(name: AVAudioSession.interruptionNotification, object: nil,
+            userInfo: [AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.began.rawValue])
+        try await Task.sleep(for: .milliseconds(100))
+        XCTAssertEqual(MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 1, "手机音频中断后应保留 Mac 状态")
+        center.post(name: AVAudioSession.routeChangeNotification, object: nil,
+            userInfo: [AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue])
+        try await Task.sleep(for: .milliseconds(100))
+        XCTAssertEqual(MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 1, "手机输出变化后应保留 Mac 状态")
+        center.post(name: AVAudioSession.mediaServicesWereResetNotification, object: nil)
+        player.reconcileDeadline()
+        try await Task.sleep(for: .milliseconds(100))
+        XCTAssertTrue(actions.isEmpty, "本机音频事件及过期定时不能向权威 Mac 播放器发送暂停")
+        XCTAssertTrue(player.state.playing)
+        XCTAssertTrue(player.desktopConnected)
+        XCTAssertNil(player.error)
+        XCTAssertEqual(MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 1)
+    }
+
+    @MainActor
+    func testMacDisconnectionFreezesProgressAndAllowsPausedPhoneReturn() async throws {
+        let player = AudioPlayer()
+        defer { player.pause() }
+        let snapshot = DesktopPlaybackSnapshot(sessionID: UUID(), revision: 4,
+            queue: [.init(track: .rain), .init(track: .ocean)], index: 1,
+            position: 12, duration: 120, playing: true, buffering: true,
+            mode: .shuffle, volume: 0.3, deadline: nil)
+        player.applyDesktop(snapshot, connected: true)
+        player.desktopConnectionLost("连接中断")
+        XCTAssertFalse(player.state.playing)
+        XCTAssertFalse(player.buffering)
+        XCTAssertFalse(player.desktopConnected)
+        let position = player.playbackPosition
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertEqual(player.playbackPosition, position)
+        player.returnToPhonePaused(player.desktopSnapshot!)
+        XCTAssertFalse(player.isDesktopControlled)
+        XCTAssertFalse(player.state.playing)
+        XCTAssertFalse(player.buffering)
+        XCTAssertNil(player.state.playbackDevice)
+        XCTAssertTrue(player.hasSelection)
+        XCTAssertEqual(player.state.track, .ocean)
+        XCTAssertEqual(player.playbackPosition, position)
+        XCTAssertEqual(player.playbackMode, .shuffle)
+        XCTAssertEqual(player.state.volume, 0.3)
+        XCTAssertEqual(player.desktopStart(serviceAddress: "https://example.invalid")?.queue, snapshot.queue)
+        await player.select(.rain)
+        XCTAssertEqual(player.state.track, .rain)
+        XCTAssertEqual(player.playbackPosition, 0, accuracy: 0.1)
+    }
+
+    @MainActor
+    func testUnavailableOnlinePhoneReturnStaysPausedAndNeverFallsBackToRain() async throws {
+        let object: [String: Any] = ["id": "return-song", "albumID": "album", "title": "接力歌曲",
+            "audioURL": "https://example.invalid/audio.wav", "durationSeconds": 16,
+            "fileVersion": "1", "byteSize": 100, "sha256": String(repeating: "0", count: 64),
+            "copyright": ["owner": "Test", "source": "Fixture", "license": "Test only"],
+            "updatedAt": "2026-11-21T00:00:00Z", "publishedAt": "2026-11-21T00:00:00Z", "revision": 1, "sortOrder": 0]
+        let track = try PublicContentSnapshot.decoder().decode(PublicAudioTrack.self, from: JSONSerialization.data(withJSONObject: object))
+        let player = AudioPlayer()
+        defer { player.pause() }
+        let snapshot = DesktopPlaybackSnapshot(sessionID: UUID(), revision: 2,
+            queue: [.init(onlineTrack: track)], index: 0, position: 8, duration: 16,
+            playing: true, mode: .sequence, volume: 0.4, deadline: nil)
+        player.applyDesktop(snapshot, connected: false)
+        player.returnToPhonePaused(player.desktopSnapshot!)
+        XCTAssertFalse(player.isDesktopControlled)
+        XCTAssertEqual(player.state.onlineTitle, "接力歌曲")
+        XCTAssertEqual(player.playbackPosition, 8)
+        XCTAssertFalse(player.state.playing)
+        player.onlineURLProvider = { _, _ in throw URLError(.notConnectedToInternet) }
+        await player.play()
+        XCTAssertFalse(player.state.playing)
+        XCTAssertFalse(player.activating)
+        XCTAssertFalse(player.buffering)
+        XCTAssertNotNil(player.error)
+        XCTAssertEqual(player.state.onlineTrackID, track.id)
+        XCTAssertEqual(player.playbackPosition, 8)
+        // Explicit retry prepares the chosen song silently and seeks before playing.
+        player.onlineURLProvider = { _, _ in try XCTUnwrap(Bundle.main.url(forResource: "rain", withExtension: "wav")) }
+        await player.play()
+        XCTAssertNil(player.error)
+        XCTAssertEqual(player.state.onlineTrackID, track.id)
+        XCTAssertEqual(player.playbackPosition, 8, accuracy: 0.5)
+    }
+
+    @MainActor
+    func testReturnToPhoneDoesNotRequireRediscoveringOfflineMac() async throws {
+        let services = try AppServices()
+        defer { services.player.pause() }
+        let snapshot = DesktopPlaybackSnapshot(sessionID: UUID(), revision: 2,
+            queue: [.init(track: .night)], index: 0, position: 8, duration: 120,
+            playing: true, mode: .single, volume: 0.4, deadline: nil)
+        services.player.applyDesktop(snapshot, connected: false)
+        await services.desktopSync.usePhone()
+        XCTAssertFalse(services.player.isDesktopControlled)
+        XCTAssertFalse(services.player.state.playing)
+        XCTAssertFalse(services.player.buffering)
+        XCTAssertEqual(services.player.state.track, .night)
+        XCTAssertEqual(services.player.playbackPosition, 8)
+        XCTAssertNil(services.desktopSync.selectedDeviceID)
+        XCTAssertNil(UserDefaults.standard.data(forKey: "qingkong.desktop.music-session.v2"))
+        XCTAssertFalse(services.desktopSync.isTransferring)
+    }
+
     @MainActor
     func testPlaybackActivationLetsPendingUIWorkRun() async throws {
         let player = AudioPlayer()

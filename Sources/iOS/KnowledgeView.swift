@@ -92,7 +92,9 @@ private struct KnowledgeArticleRow: View {
         HStack(alignment: .top, spacing: 14) {
             Group {
                 if let url = article.coverURL, PublicContentURL.isHTTPS(url) {
-                    KnowledgeArticleImage(content: content, articleID: article.id, url: url, alt: "文章封面", contentMode: .fill, fallbackAsset: app.scene.image)
+                    CachedPublicCoverImage(content: content, url: url,
+                        identity: "article|\(article.id)|\(article.revision)|\(article.updatedAt.timeIntervalSince1970)",
+                        maximumPixelSize: 288) { Image(app.scene.image).resizable().scaledToFill() }
                 } else { Image(app.scene.image).resizable().scaledToFill() }
             }.frame(width: 80, height: 92).clipped().clipShape(RoundedRectangle(cornerRadius: 14)).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 7) {
@@ -119,7 +121,10 @@ private struct KnowledgeArticleView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         Text(article.title).font(.largeTitle.bold())
                         if let url = article.coverURL, PublicContentURL.isHTTPS(url) {
-                            KnowledgeArticleImage(content: content, articleID: article.id, url: url, alt: "文章封面", contentMode: .fill)
+                            CachedPublicCoverImage(content: content, url: url,
+                                identity: "article|\(article.id)|\(article.revision)|\(article.updatedAt.timeIntervalSince1970)",
+                                maximumPixelSize: 960) { Color.secondary.opacity(0.08) }
+                                .accessibilityLabel("文章封面")
                                 .frame(height: 200).clipped().clipShape(RoundedRectangle(cornerRadius: 20)).accessibilityHidden(true)
                         }
                         Text(article.summary).font(.title3).foregroundStyle(.secondary)

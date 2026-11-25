@@ -53,8 +53,9 @@ struct BedtimeView: View {
                             Task {
                                 app.store.updatePreferences { $0.selectScene(plan.scene) }
                                 await app.player.select(plan.track, autoplay: true)
-                                app.player.setTimer(minutes: plan.stopAfterMinutes)
-                                if app.player.state.playing { dismiss() } else { error = app.player.error }
+                                let receipt = await app.player.handle(AudioCommand(action: .timer, amount: Double(plan.stopAfterMinutes)))
+                                if let message = receipt.error { error = message }
+                                else if app.player.state.playing { dismiss() } else { error = app.player.error }
                             }
                         } label: {
                             VStack(alignment: .leading, spacing: 4) {
@@ -80,8 +81,9 @@ struct BedtimeView: View {
             if savePlan { try app.companion.savePlan(.init(id: planID, name: name.isEmpty ? "我的睡前方案" : name, track: track, scene: scene, stopAfterMinutes: minutes)) }
             app.store.updatePreferences { $0.selectScene(scene) }
             await app.player.select(track, autoplay: true)
-            app.player.setTimer(minutes: minutes)
-            if app.player.state.playing { dismiss() } else { error = app.player.error }
+            let receipt = await app.player.handle(AudioCommand(action: .timer, amount: Double(minutes)))
+            if let message = receipt.error { error = message }
+            else if app.player.state.playing { dismiss() } else { error = app.player.error }
         } catch { self.error = "记录或方案暂未保存，请重试。" }
     }
 }

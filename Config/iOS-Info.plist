@@ -42,6 +42,41 @@
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 	</dict>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>cn.geckoai.qingkong.relaxation</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>陪我缓一缓</string>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>leaf</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>cn.geckoai.qingkong.trends</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>当前趋势</string>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>chart.xyaxis.line</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>cn.geckoai.qingkong.record-mood</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>记录此刻</string>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>square.and.pencil</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>cn.geckoai.qingkong.music</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>听听音乐</string>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>music.note</string>
+		</dict>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
@@ -51,6 +86,12 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>发现并加密连接同一 Apple ID、同一 Wi-Fi 的 Mac，用于音乐接力与遥控，以及你在手机前台主动发送的汇总报表；个人内容不上传到内容服务。</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_qingkong._tcp</string>
 	</array>
 </dict>
 </plist>

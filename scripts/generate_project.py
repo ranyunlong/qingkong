@@ -68,6 +68,7 @@ package=add('package','XCLocalSwiftPackageReference',relativePath='Packages/Qing
 products=[]
 targets={}
 specs=[
+    ('QingkongMac','Mac','macosx','macosx','','cn.geckoai.qingkong.mac','com.apple.product-type.application',['Resources/PrivacyInfo.xcprivacy','Resources/Assets.xcassets','Resources/Mac/Assets.xcassets']+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Resources/Audio').glob('*.wav'))]),
     ('Qingkong','iOS','iphoneos','iphoneos iphonesimulator','1','cn.geckoai.qingkong','com.apple.product-type.application',resources+['Resources/iOS/Assets.xcassets']),
     ('QingkongWatch','Watch','watchos','watchos watchsimulator','4','cn.geckoai.qingkong.watchapp','com.apple.product-type.application',resources+['Resources/Watch/Assets.xcassets']),
     ('QingkongWidgets','Widgets','watchos','watchos watchsimulator','4','cn.geckoai.qingkong.watchapp.widgets','com.apple.product-type.app-extension',['Resources/PrivacyInfo.xcprivacy','Resources/Assets.xcassets']),
@@ -77,19 +78,23 @@ specs=[
 ]
 for name,folder,sdk,platforms,family,bundle,product_type,assets in specs:
     is_test = folder in ('Tests', 'UnitTests')
+    product_name = '小晴空' if folder == 'Mac' else name
     suffix='.appex' if folder in ('Widgets', 'iOSWidgets') else '.xctest' if is_test else '.app'
-    product=add(name+'.product','PBXFileReference',explicitFileType='wrapper.app-extension' if suffix=='.appex' else 'wrapper.cfbundle' if suffix=='.xctest' else 'wrapper.application',includeInIndex=0,path=name+suffix,sourceTree='BUILT_PRODUCTS_DIR')
+    product=add(name+'.product','PBXFileReference',explicitFileType='wrapper.app-extension' if suffix=='.appex' else 'wrapper.cfbundle' if suffix=='.xctest' else 'wrapper.application',includeInIndex=0,path=product_name+suffix,sourceTree='BUILT_PRODUCTS_DIR')
     products.append(product)
     if is_test:
         sources=[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/f'Tests/{name}').glob('*.swift'))]
     elif folder=='Widgets':
         sources=['Sources/Shared/SnapshotStorage.swift','Sources/Shared/Appearance.swift']+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/Widgets').glob('*.swift'))]+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/WidgetShared').glob('*.swift'))]
     elif folder=='iOSWidgets':
-        sources=['Sources/Shared/SnapshotStorage.swift','Sources/Shared/WidgetAudioStorage.swift']+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/iOSWidgets').glob('*.swift'))]+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/WidgetShared').glob('*.swift'))]
+        sources=['Sources/Shared/SnapshotStorage.swift','Sources/Shared/WidgetAudioStorage.swift','Sources/Shared/WatchBatteryStorage.swift']+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/iOSWidgets').glob('*.swift'))]+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/WidgetShared').glob('*.swift'))]
+    elif folder=='Mac':
+        sources=['Sources/Shared/ContentLibrary.swift','Sources/Shared/AudioDownloads.swift','Sources/Shared/ArticleImageCache.swift']+[p.relative_to(ROOT).as_posix() for folder_path in ['Sources/Mac','Sources/DesktopShared'] for p in sorted((ROOT/folder_path).rglob('*.swift'))]
     else:
         sources=common+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/f'Sources/{folder}').glob('*.swift'))]
         if folder == 'iOS':
             sources += ['Sources/Watch/DumplingArtwork.swift','Sources/WidgetShared/MusicPlaybackIntent.swift']
+            sources += [p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'Sources/DesktopShared').glob('*.swift'))]
     if ECG_INTERACTION and folder == 'iOS':
         sources = [s for s in sources if s != 'Sources/iOS/QingkongApp.swift'] + ['Tests/InteractionFixtures/ECGFixtureApp.swift']
     if ECG_INTERACTION and folder == 'Tests':
@@ -108,17 +113,22 @@ for name,folder,sdk,platforms,family,bundle,product_type,assets in specs:
         settings.update(INFOPLIST_FILE=f'Config/{folder}-Info.plist',CODE_SIGN_ENTITLEMENTS=f'Config/{folder}.entitlements')
         settings['INFOPLIST_KEY_CFBundleDisplayName']='小晴空'
     if folder == 'iOS': settings['INFOPLIST_KEY_LSApplicationCategoryType']='public.app-category.utilities'
+    if folder == 'Mac':
+        for key in ('TARGETED_DEVICE_FAMILY','IPHONEOS_DEPLOYMENT_TARGET','WATCHOS_DEPLOYMENT_TARGET'):
+            settings.pop(key, None)
+        settings.update(MACOSX_DEPLOYMENT_TARGET='14.0',ENABLE_APP_SANDBOX='YES',ENABLE_HARDENED_RUNTIME='YES',
+                        PRODUCT_NAME=product_name,EXECUTABLE_NAME='$(TARGET_NAME)',PRODUCT_MODULE_NAME='$(TARGET_NAME:c99extidentifier)')
     settings['DEVELOPMENT_TEAM']='9S743LF4C7'
     for setting in ('CURRENT_PROJECT_VERSION', 'MARKETING_VERSION'):
         if not is_test and setting in version_settings: settings[setting] = version_settings[setting]
-    if folder in ('iOS','Watch'):
+    if folder in ('iOS','Watch','Mac'):
         settings['ASSETCATALOG_COMPILER_APPICON_NAME']='AppIcon'
     if folder=='Watch': settings.update(SKIP_INSTALL='YES',WK_APPLICATION='YES')
     if folder in ('Widgets', 'iOSWidgets'):
         settings.update(SKIP_INSTALL='YES',APPLICATION_EXTENSION_API_ONLY='YES',LD_RUNPATH_SEARCH_PATHS=['$(inherited)','@executable_path/Frameworks','@executable_path/../../Frameworks'])
     if folder=='Tests': settings.update(GENERATE_INFOPLIST_FILE='YES',TEST_TARGET_NAME='Qingkong',SKIP_INSTALL='YES')
     if folder=='UnitTests': settings.update(GENERATE_INFOPLIST_FILE='YES',TEST_HOST='$(BUILT_PRODUCTS_DIR)/Qingkong.app/Qingkong',BUNDLE_LOADER='$(TEST_HOST)',SKIP_INSTALL='YES')
-    target=add(name,'PBXNativeTarget',name=name,productName=name,productReference=product,productType=product_type,buildConfigurationList=configs(name,settings),buildPhases=[source_phase,framework_phase,resource_phase],buildRules=[],dependencies=[],packageProductDependencies=dependencies)
+    target=add(name,'PBXNativeTarget',name=name,productName=product_name,productReference=product,productType=product_type,buildConfigurationList=configs(name,settings),buildPhases=[source_phase,framework_phase,resource_phase],buildRules=[],dependencies=[],packageProductDependencies=dependencies)
     targets[name]=target
 
 def dependency(parent, child):
@@ -157,6 +167,19 @@ if existing:
             additions.setdefault(generated['isa'], []).append((identifier, generated))
             continue
         changed = False
+        # Migrate only the Mac product name; preserve user-managed signing and other settings.
+        if identifier == uid('QingkongMac.product') and old.get('path') != generated['path']:
+            old['path'] = generated['path']
+            changed = True
+        if identifier == uid('QingkongMac') and old.get('productName') != generated['productName']:
+            old['productName'] = generated['productName']
+            changed = True
+        if identifier in (uid('QingkongMac.Debug'), uid('QingkongMac.Release')):
+            for key in ('PRODUCT_NAME', 'EXECUTABLE_NAME', 'PRODUCT_MODULE_NAME'):
+                value = generated['buildSettings'][key]
+                if old['buildSettings'].get(key) != value:
+                    old['buildSettings'][key] = value
+                    changed = True
         for key in ('children', 'targets', 'buildPhases', 'dependencies', 'files', 'packageProductDependencies'):
             if key not in generated: continue
             for value in generated[key]:
@@ -181,9 +204,14 @@ else:
     text='// !$*UTF8*$!\n'+encode({'archiveVersion':1,'classes':{},'objectVersion':60,'objects':{Ref(k):v for k,v in objects.items()},'rootObject':project_id})+'\n'
 (project/'project.pbxproj').write_text(text)
 schemes=project/'xcshareddata/xcschemes'; schemes.mkdir(parents=True,exist_ok=True)
-for name in ['Qingkong','QingkongWatch']:
-    if UPDATE_EXISTING and (schemes/f'{name}.xcscheme').exists(): continue
-    ref=f'<BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{targets[name]}" BuildableName="{name}.app" BlueprintName="{name}" ReferencedContainer="container:{PROJECT_NAME}.xcodeproj"/>'
+for name in ['Qingkong','QingkongWatch','QingkongMac']:
+    if UPDATE_EXISTING and (schemes/f'{name}.xcscheme').exists():
+        if name == 'QingkongMac':
+            scheme = schemes/f'{name}.xcscheme'
+            scheme.write_text(scheme.read_text().replace('BuildableName="QingkongMac.app"', 'BuildableName="小晴空.app"'))
+        continue
+    product_name = '小晴空' if name == 'QingkongMac' else name
+    ref=f'<BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{targets[name]}" BuildableName="{product_name}.app" BlueprintName="{name}" ReferencedContainer="container:{PROJECT_NAME}.xcodeproj"/>'
     testref=f'<BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{targets["QingkongUITests"]}" BuildableName="QingkongUITests.xctest" BlueprintName="QingkongUITests" ReferencedContainer="container:{PROJECT_NAME}.xcodeproj"/>'
     unitref=f'<BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{targets["QingkongTests"]}" BuildableName="QingkongTests.xctest" BlueprintName="QingkongTests" ReferencedContainer="container:{PROJECT_NAME}.xcodeproj"/>'
     testables=f'<TestableReference skipped="NO">{unitref}</TestableReference><TestableReference skipped="NO">{testref}</TestableReference>' if name=='Qingkong' else ''
@@ -198,4 +226,4 @@ for name in ['Qingkong','QingkongWatch']:
 <AnalyzeAction buildConfiguration="Debug"/><ArchiveAction buildConfiguration="Release" revealArchiveInOrganizer="YES"/>
 </Scheme>
 ''')
-print(f'Generated {PROJECT_NAME}.xcodeproj ({len(specs)} targets, 2 shared schemes, local QingkongCore package).')
+print(f'Generated {PROJECT_NAME}.xcodeproj ({len(specs)} targets, 3 shared schemes, local QingkongCore package).')

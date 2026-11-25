@@ -151,6 +151,14 @@ public struct AudioState: Codable, Equatable, Sendable {
     public var onlineTitle: String?
     public var onlineArtworkURL: URL?
     public var buffering: Bool?
+    public var playbackDevice: String?
+    public var playbackSessionID: UUID?
+    public var playbackPosition: TimeInterval?
+    public var playbackDuration: TimeInterval?
+    public var playbackMode: AudioPlaybackMode?
+    public var sampledAt: Date?
+    public var remoteConnected: Bool?
+    public var airPlayRouteName: String?
     public var displayTitle: String { onlineTitle ?? track.name }
     public var artwork: AudioArtwork {
         guard onlineTrackID != nil else { return .bundled(track.image) }
@@ -161,12 +169,15 @@ public struct AudioState: Codable, Equatable, Sendable {
 }
 
 public struct AudioCommand: Codable, Equatable, Sendable {
-    public enum Action: String, Codable, Sendable { case status, playPause, pause, previous, next, volume, timer, select }
+    public enum Action: String, Codable, Sendable { case status, play, playPause, pause, previous, next, volume, timer, select, seek, mode }
     public var id: UUID = UUID()
     public var action: Action
     public var amount: Double?
     public var track: Track?
-    public init(action: Action, amount: Double? = nil, track: Track? = nil) { self.action = action; self.amount = amount; self.track = track }
+    public var playbackMode: AudioPlaybackMode?
+    public init(action: Action, amount: Double? = nil, track: Track? = nil, playbackMode: AudioPlaybackMode? = nil) {
+        self.action = action; self.amount = amount; self.track = track; self.playbackMode = playbackMode
+    }
 }
 
 public struct AudioReply: Codable, Sendable {

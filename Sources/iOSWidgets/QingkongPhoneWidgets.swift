@@ -6,5 +6,6 @@ struct QingkongPhoneWidgets: WidgetBundle {
     var body: some Widget {
         DumplingWidget()
         DumplingMusicWidget()
+        WatchBatteryWidget()
     }
 }

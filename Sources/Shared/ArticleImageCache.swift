@@ -22,6 +22,24 @@ final class ArticleImageCache {
     private var resources: [String: [URL: Resource]] = [:]
     private var retainedKeys: Set<String> = []
     @ObservationIgnored private var prefetch: Task<Void, Never>?
+    @ObservationIgnored private var thumbnails: [String: Thumbnail] = [:]
+    @ObservationIgnored private var thumbnailRequests: [String: ThumbnailRequest] = [:]
+    @ObservationIgnored private var thumbnailAccess: UInt64 = 0
+    private let thumbnailByteLimit = 16 * 1_024 * 1_024
+
+    private struct Thumbnail {
+        let image: CGImage
+        let resourceKey: String
+        var accessed: UInt64
+        var cost: Int { image.bytesPerRow * image.height }
+    }
+    private struct ThumbnailRequest {
+        let id: UUID
+        let resourceKey: String
+        let task: Task<CGImage, Error>
+    }
+
+    var thumbnailCacheBytes: Int { thumbnails.values.reduce(0) { $0 + $1.cost } }
 
     init(directory: URL, configuration: URLSessionConfiguration? = nil, networkEnabled: Bool = true) {
         self.directory = directory
@@ -41,6 +59,9 @@ final class ArticleImageCache {
     func reconcile(serviceAddress: String, articles: [PublicArticle], retainedIDs: Set<String>) {
         if self.serviceAddress != serviceAddress {
             generation = UUID()
+            thumbnails.removeAll()
+            thumbnailRequests.values.forEach { $0.task.cancel() }
+            thumbnailRequests.removeAll()
             self.serviceAddress = serviceAddress
             serviceDirectory = directory.appending(path: Self.digest(serviceAddress), directoryHint: .isDirectory)
         }
@@ -54,6 +75,12 @@ final class ArticleImageCache {
                 next[article.id, default: [:]][url] = Resource(articleID: article.id, url: url, key: key)
                 if retainedIDs.contains(article.id) { nextRetained.insert(key) }
             }
+        }
+        let validKeys = Set(next.values.flatMap { $0.values.map(\.key) })
+        thumbnails = thumbnails.filter { validKeys.contains($0.value.resourceKey) }
+        for (key, request) in thumbnailRequests where !validKeys.contains(request.resourceKey) {
+            request.task.cancel()
+            thumbnailRequests.removeValue(forKey: key)
         }
         resources = next
         retainedKeys = nextRetained
@@ -76,30 +103,80 @@ final class ArticleImageCache {
 
     func waitForPendingImages() async { await prefetch?.value }
 
-    func image(for url: URL, articleID: String) async throws -> CGImage {
+    func image(for url: URL, articleID: String, maximumPixelSize: Int = 1600) async throws -> CGImage {
+        try Task.checkCancellation()
         guard let resource = resources[articleID]?[url], let serviceDirectory,
               PublicContentURL.articleResourceURL(from: url.absoluteString) != nil else { throw URLError(.resourceUnavailable) }
         let requestGeneration = generation
-        let destination = serviceDirectory.appending(path: resource.key)
-        if retainedKeys.contains(resource.key), FileManager.default.fileExists(atPath: destination.path) {
-            do {
-                let size = try destination.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
-                guard size > 0, size <= ArticleImageTransfer.maximumBytes else { throw URLError(.dataLengthExceedsMaximum) }
-                let data = try Data(contentsOf: destination, options: .mappedIfSafe)
-                let image = try ArticleImageTransfer.decode(data)
+        let pixelSize = min(1600, max(1, maximumPixelSize))
+        // Body images retain the existing disk policy. Only small, transient rasters use memory.
+        guard pixelSize < 1600 else {
+            return try await loadImage(resource, directory: serviceDirectory, generation: requestGeneration, pixelSize: pixelSize)
+        }
+        let key = serviceDirectory.lastPathComponent + resource.key + "|\(pixelSize)"
+        thumbnailAccess &+= 1
+        if var cached = thumbnails[key] {
+            cached.accessed = thumbnailAccess
+            thumbnails[key] = cached
+            return cached.image
+        }
+        let request: ThumbnailRequest
+        if let pending = thumbnailRequests[key] {
+            request = pending
+        } else {
+            let task = Task { try await self.loadImage(resource, directory: serviceDirectory, generation: requestGeneration, pixelSize: pixelSize) }
+            request = ThumbnailRequest(id: UUID(), resourceKey: resource.key, task: task)
+            thumbnailRequests[key] = request
+        }
+        defer { if thumbnailRequests[key]?.id == request.id { thumbnailRequests.removeValue(forKey: key) } }
+        let image = try await request.task.value
+        try Task.checkCancellation()
+        guard isCurrent(resource, generation: requestGeneration) else { throw URLError(.cancelled) }
+        thumbnailAccess &+= 1
+        thumbnails[key] = Thumbnail(image: image, resourceKey: resource.key, accessed: thumbnailAccess)
+        while thumbnailCacheBytes > thumbnailByteLimit,
+              let oldest = thumbnails.min(by: { $0.value.accessed < $1.value.accessed })?.key {
+            thumbnails.removeValue(forKey: oldest)
+        }
+        return image
+    }
+
+    private func isCurrent(_ resource: Resource, generation: UUID) -> Bool {
+        self.generation == generation && resources[resource.articleID]?[resource.url]?.key == resource.key
+    }
+
+    private func loadImage(_ resource: Resource, directory: URL, generation: UUID, pixelSize: Int) async throws -> CGImage {
+        try Task.checkCancellation()
+        let destination = directory.appending(path: resource.key)
+        if retainedKeys.contains(resource.key) {
+            // File inspection and raster decoding must not run on the UI actor.
+            let read = Task.detached(priority: .utility) { () throws -> CGImage? in
                 try Task.checkCancellation()
-                return image
-            } catch is CancellationError { throw CancellationError() }
-            catch { try? FileManager.default.removeItem(at: destination) }
+                guard FileManager.default.fileExists(atPath: destination.path) else { return nil }
+                do {
+                    let size = try destination.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+                    guard size > 0, size <= ArticleImageTransfer.maximumBytes else { throw URLError(.dataLengthExceedsMaximum) }
+                    let data = try Data(contentsOf: destination, options: .mappedIfSafe)
+                    return try ArticleImageTransfer.decode(data, maximumPixelSize: pixelSize)
+                } catch {
+                    try? FileManager.default.removeItem(at: destination)
+                    return nil
+                }
+            }
+            let stored = try await withTaskCancellationHandler(operation: { try await read.value }, onCancel: { read.cancel() })
+            try Task.checkCancellation()
+            guard isCurrent(resource, generation: generation) else { throw URLError(.cancelled) }
+            if let stored { return stored }
         }
         guard networkEnabled else { throw URLError(.notConnectedToInternet) }
-        let data = try await ArticleImageTransfer.load(url, configuration: configuration)
-        let image = try ArticleImageTransfer.decode(data)
+        let data = try await ArticleImageTransfer.load(resource.url, configuration: configuration)
+        let decode = Task.detached(priority: .utility) { try ArticleImageTransfer.decode(data, maximumPixelSize: pixelSize) }
+        let image = try await withTaskCancellationHandler(operation: { try await decode.value }, onCancel: { decode.cancel() })
         try Task.checkCancellation()
-        guard generation == requestGeneration, resources[articleID]?[url]?.key == resource.key else { throw URLError(.cancelled) }
+        guard isCurrent(resource, generation: generation) else { throw URLError(.cancelled) }
         if retainedKeys.contains(resource.key) {
-            try FileManager.default.createDirectory(at: serviceDirectory, withIntermediateDirectories: true)
-            // No index entry or final file exists until complete bytes have passed decoding.
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            // Only retained, fully validated images may be committed to the persistent cache.
             try data.write(to: destination, options: .atomic)
         }
         return image
@@ -122,7 +199,7 @@ final class ArticleImageCache {
 }
 
 /// Anonymous public image transport; both streaming bytes and decoded pixels are bounded.
-private enum ArticleImageTransfer {
+enum ArticleImageTransfer {
     static let maximumBytes = 8 * 1_024 * 1_024
 
     static func load(_ url: URL, configuration: URLSessionConfiguration) async throws -> Data {
@@ -145,7 +222,7 @@ private enum ArticleImageTransfer {
         return data
     }
 
-    static func decode(_ data: Data) throws -> CGImage {
+    static func decode(_ data: Data, maximumPixelSize: Int = 1600) throws -> CGImage {
         guard !data.isEmpty, data.count <= maximumBytes,
               let source = CGImageSourceCreateWithData(data as CFData, [kCGImageSourceShouldCache: false] as CFDictionary),
               let type = CGImageSourceGetType(source) as String?,
@@ -158,7 +235,7 @@ private enum ArticleImageTransfer {
               let thumbnail = CGImageSourceCreateThumbnailAtIndex(source, 0, [
                   kCGImageSourceCreateThumbnailFromImageAlways: true,
                   kCGImageSourceCreateThumbnailWithTransform: true,
-                  kCGImageSourceThumbnailMaxPixelSize: 1_600,
+                  kCGImageSourceThumbnailMaxPixelSize: min(1600, max(1, maximumPixelSize)),
                   kCGImageSourceShouldCacheImmediately: true
               ] as CFDictionary) else { throw URLError(.cannotDecodeContentData) }
         return thumbnail
@@ -172,5 +249,110 @@ private final class ArticleImageRedirects: NSObject, URLSessionTaskDelegate {
             completionHandler(nil); return
         }
         completionHandler(URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20))
+    }
+}
+
+/// Public list covers are disposable cache data, separate from saved article bodies.
+/// Identity includes service, content kind and revision; startup never needs a full catalog.
+@MainActor
+final class PublicCoverCache {
+    private let directory: URL
+    private let configuration: URLSessionConfiguration
+    private let networkEnabled: Bool
+    private let memory = NSCache<NSString, CGImage>()
+    private var requests: [String: Task<CGImage, Error>] = [:]
+    private let diskLimit = 30 * 1_024 * 1_024
+
+    init(directory: URL, configuration: URLSessionConfiguration? = nil, networkEnabled: Bool = true) {
+        self.directory = directory
+        self.networkEnabled = networkEnabled
+        let config = (configuration?.copy() as? URLSessionConfiguration) ?? .ephemeral
+        config.urlCache = nil
+        config.httpCookieStorage = nil
+        config.httpShouldSetCookies = false
+        config.urlCredentialStorage = nil
+        config.httpAdditionalHeaders = nil
+        config.timeoutIntervalForRequest = 20
+        config.timeoutIntervalForResource = 60
+        self.configuration = config
+        memory.totalCostLimit = 16 * 1_024 * 1_024
+    }
+
+    func cachedImage(for url: URL, identity: String, maximumPixelSize: Int) -> CGImage? {
+        memory.object(forKey: memoryKey(url, identity, maximumPixelSize) as NSString)
+    }
+
+    func image(for url: URL, identity: String, maximumPixelSize: Int) async throws -> CGImage {
+        guard PublicContentURL.articleResourceURL(from: url.absoluteString) != nil else { throw URLError(.unsupportedURL) }
+        try Task.checkCancellation()
+        let key = memoryKey(url, identity, maximumPixelSize)
+        if let image = memory.object(forKey: key as NSString) { return image }
+        if let request = requests[key] {
+            let image = try await request.value
+            try Task.checkCancellation()
+            return image
+        }
+        let destination = directory.appending(path: diskKey(url, identity))
+        let pixelSize = min(1600, max(1, maximumPixelSize))
+        let config = configuration
+        let enabled = networkEnabled
+        let limit = diskLimit
+        let cacheDirectory = directory
+        let request = Task<CGImage, Error> {
+            // Reading, decoding and disk eviction never run on the UI actor.
+            let cached = await Task.detached(priority: .utility) { () -> CGImage? in
+                guard FileManager.default.fileExists(atPath: destination.path) else { return nil }
+                do {
+                    let values = try destination.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey, .isSymbolicLinkKey])
+                    guard values.isRegularFile == true, values.isSymbolicLink != true,
+                          let size = values.fileSize, size > 0, size <= ArticleImageTransfer.maximumBytes else { throw URLError(.cannotDecodeContentData) }
+                    let image = try ArticleImageTransfer.decode(Data(contentsOf: destination), maximumPixelSize: pixelSize)
+                    try? FileManager.default.setAttributes([.modificationDate: Date()], ofItemAtPath: destination.path)
+                    return image
+                } catch {
+                    try? FileManager.default.removeItem(at: destination)
+                    return nil
+                }
+            }.value
+            if let cached { return cached }
+            guard enabled else { throw URLError(.notConnectedToInternet) }
+            let data = try await ArticleImageTransfer.load(url, configuration: config)
+            return try await Task.detached(priority: .utility) {
+                let image = try ArticleImageTransfer.decode(data, maximumPixelSize: pixelSize)
+                // A full disk or a cache write failure must not prevent display.
+                try? FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+                try? data.write(to: destination, options: .atomic)
+                Self.trim(cacheDirectory, limit: limit)
+                return image
+            }.value
+        }
+        requests[key] = request
+        defer { requests[key] = nil }
+        let image = try await request.value
+        memory.setObject(image, forKey: key as NSString, cost: image.bytesPerRow * image.height)
+        try Task.checkCancellation()
+        return image
+    }
+
+    private func diskKey(_ url: URL, _ identity: String) -> String {
+        SHA256.hash(data: Data((identity + "|" + url.absoluteString).utf8)).map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func memoryKey(_ url: URL, _ identity: String, _ pixelSize: Int) -> String {
+        diskKey(url, identity) + "|\(min(1600, max(1, pixelSize)))"
+    }
+
+    nonisolated private static func trim(_ directory: URL, limit: Int) {
+        let keys: Set<URLResourceKey> = [.fileSizeKey, .contentModificationDateKey, .isRegularFileKey, .isSymbolicLinkKey]
+        guard let files = try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: Array(keys), options: .skipsHiddenFiles) else { return }
+        let entries = files.compactMap { url -> (URL, Int, Date)? in
+            guard let values = try? url.resourceValues(forKeys: keys), values.isRegularFile == true,
+                  values.isSymbolicLink != true, let size = values.fileSize else { return nil }
+            return (url, size, values.contentModificationDate ?? .distantPast)
+        }
+        var total = entries.reduce(0) { $0 + $1.1 }
+        for (url, size, _) in entries.sorted(by: { $0.2 < $1.2 }) where total > limit {
+            if (try? FileManager.default.removeItem(at: url)) != nil { total -= size }
+        }
     }
 }

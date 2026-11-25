@@ -4,6 +4,9 @@ import WatchConnectivity
 import QingkongCore
 #if os(iOS)
 import AVFoundation
+import WidgetKit
+#else
+import WatchKit
 #endif
 
 @MainActor
@@ -18,8 +21,10 @@ extension WCSession: MoodMessageSession {}
 final class Connectivity: NSObject, WCSessionDelegate {
     private(set) var reachable = false
     private(set) var remoteState: AudioState?
+    private(set) var remoteStateReceivedAt: Date?
     private(set) var remoteBusy = false
     private(set) var remoteVolumeRevision: UInt = 0
+    private(set) var batterySyncError: String?
     var error: String?
     var syncMessage = "等待设备连接"
     @ObservationIgnored private let store: LocalStore
@@ -69,7 +74,7 @@ final class Connectivity: NSObject, WCSessionDelegate {
     private func sendAudioState(_ state: AudioState) {
         #if os(iOS)
         guard let session, session.activationState == .activated, session.isReachable,
-              let data = try? JSONEncoder().encode(AudioReply(id: UUID(), state: state)) else { return }
+              let data = try? JSONEncoder().encode(AudioReply(id: UUID(), state: player.companionState)) else { return }
         // Playback status is ephemeral. Never queue old play/pause states for later delivery.
         session.sendMessage(["audioState": data], replyHandler: nil, errorHandler: { _ in })
         #endif
@@ -79,6 +84,7 @@ final class Connectivity: NSObject, WCSessionDelegate {
         if let previous = remoteStateUpdatedAt, (reply.updatedAt ?? .distantPast) < previous { return }
         remoteStateUpdatedAt = reply.updatedAt
         remoteState = reply.state
+        remoteStateReceivedAt = .now
     }
 
     func start() {
@@ -119,15 +125,76 @@ final class Connectivity: NSObject, WCSessionDelegate {
             #else
             if let watchReminderReportData { context["watchReminderReport"] = watchReminderReportData }
             if let watchReadyData { context["reminderReady"] = watchReadyData }
+            if let battery = currentWatchBattery(), let data = try? JSONEncoder().encode(battery) {
+                context["watchBattery"] = data
+            }
             flushReminderSignals(session)
             #endif
             try session.updateApplicationContext(context)
             if session.isReachable {
                 let reminderContext = context.filter { $0.key != "preferences" && $0.key != "publicContentAddress" }
                 if !reminderContext.isEmpty { session.sendMessage(reminderContext, replyHandler: nil, errorHandler: { _ in }) }
+                #if os(iOS)
+                requestWatchBattery()
+                #endif
             }
         } catch { self.error = "同步暂未完成，记录已保存在本机，将在下次连接时重试。" }
     }
+
+    #if os(watchOS)
+    private func currentWatchBattery() -> WatchBatterySnapshot? {
+        let device = WKInterfaceDevice.current()
+        device.isBatteryMonitoringEnabled = true
+        let value = WatchBatterySnapshot(level: Double(device.batteryLevel),
+            charging: device.batteryState == .charging || device.batteryState == .full)
+        return value.percentage() == nil ? nil : value
+    }
+    #else
+    private var watchBatteryRequestAt: Date?
+    private var batterySessionGeneration = UUID()
+
+    private func reconcileBatteryWatch() {
+        let key = "qingkong.battery-watch.v1"
+        let identity = session?.watchDirectoryURL?.absoluteString
+        if UserDefaults.standard.string(forKey: key) != identity {
+            clearWatchBattery()
+            UserDefaults.standard.set(identity, forKey: key)
+        }
+    }
+
+    private func requestWatchBattery() {
+        guard let session, session.isReachable,
+              watchBatteryRequestAt.map({ Date.now.timeIntervalSince($0) >= 60 }) ?? true else { return }
+        watchBatteryRequestAt = .now
+        let generation = batterySessionGeneration
+        session.sendMessage(["watchBatteryRequest": true], replyHandler: { [weak self] payload in
+            Task { @MainActor in
+                guard let self, self.batterySessionGeneration == generation else { return }
+                self.reconcileBatteryWatch()
+                guard self.batterySessionGeneration == generation else { return }
+                self.receiveWatchBattery(payload)
+            }
+        }, errorHandler: { _ in })
+    }
+
+    private func receiveWatchBattery(_ payload: [String: Any]) {
+        guard let session, session.isPaired, session.isWatchAppInstalled,
+              let data = payload["watchBattery"] as? Data, data.count <= 1024,
+              let value = try? JSONDecoder().decode(WatchBatterySnapshot.self, from: data) else { return }
+        do {
+            if try WatchBatteryStorage.save(value) { WidgetCenter.shared.reloadTimelines(ofKind: WatchBatteryStorage.kind) }
+            batterySyncError = nil
+        } catch { batterySyncError = "手表电量暂未保存，请重新打开两端的小晴空。" }
+    }
+
+    private func clearWatchBattery() {
+        batterySessionGeneration = UUID()
+        do { try WatchBatteryStorage.clear(); batterySyncError = nil }
+        catch { batterySyncError = "旧手表电量暂未清除，请重新打开小晴空。" }
+        watchBatteryRequestAt = nil
+        WidgetCenter.shared.reloadTimelines(ofKind: WatchBatteryStorage.kind)
+    }
+    #endif
 
     func publishReminderConfiguration(_ configuration: ReminderRelayConfiguration) {
         reminderConfigurationData = try? JSONEncoder().encode(configuration)
@@ -281,22 +348,22 @@ final class Connectivity: NSObject, WCSessionDelegate {
     }
 
     @discardableResult
-    func command(_ action: AudioCommand.Action, amount: Double? = nil, track: Track? = nil, timeout: Duration = .seconds(8)) async -> Bool {
+    func command(_ action: AudioCommand.Action, amount: Double? = nil, track: Track? = nil, playbackMode: AudioPlaybackMode? = nil, timeout: Duration = .seconds(8)) async -> Bool {
         guard !remoteBusy else { return false }
         error = nil
         #if os(watchOS)
         // A status probe has no playback side effects and can try to wake iOS.
         // Do not let a stale reachability flag skip the phone confirmation window.
-        let canProbePhone = action == .status
+        let canProbePhone = action == .status || remoteState?.playbackSessionID != nil
         #else
         let canProbePhone = false
         #endif
         guard let session, session.activationState == .activated, session.isReachable || canProbePhone else {
-            remoteState = nil
-            error = "暂时连不到 iPhone，可使用手表内置声音。"
+            markRemoteUnavailable()
+            error = "暂时连不到 iPhone，遥控不可用。可在手表曲库选择本机声音。"
             return false
         }
-        let request = AudioCommand(action: action, amount: amount, track: track)
+        let request = AudioCommand(action: action, amount: amount, track: track, playbackMode: playbackMode)
         remoteBusy = true
         defer { remoteBusy = false }
         do {
@@ -323,10 +390,15 @@ final class Connectivity: NSObject, WCSessionDelegate {
             error = reply.error
             return reply.error == nil
         } catch {
-            remoteState = nil
+            markRemoteUnavailable()
             self.error = "iPhone 未确认操作，请检查连接后重试。"
             return false
         }
+    }
+
+    private func markRemoteUnavailable() {
+        if remoteState?.playbackSessionID != nil { remoteState?.remoteConnected = false }
+        else { remoteState = nil }
     }
 
     private func finish(_ id: UUID, result: Result<AudioReply, Error>) {
@@ -343,6 +415,11 @@ final class Connectivity: NSObject, WCSessionDelegate {
             if let preferences = context["preferences"] as? Data { self.receivePreferences(preferences) }
             self.receiveContentServiceAddress(context)
             self.receiveReminderPayload(context)
+            #if os(iOS)
+            self.reconcileBatteryWatch()
+            if !session.isPaired || !session.isWatchAppInstalled { self.clearWatchBattery() }
+            else { self.receiveWatchBattery(context) }
+            #endif
             if let error { self.error = "设备同步暂不可用：\(error.localizedDescription)" }
             else { self.flush(); self.sendAudioState(self.player.state) }
         }
@@ -363,6 +440,9 @@ final class Connectivity: NSObject, WCSessionDelegate {
             if let data = applicationContext["preferences"] as? Data { self?.receivePreferences(data) }
             self?.receiveContentServiceAddress(applicationContext)
             self?.receiveReminderPayload(applicationContext)
+            #if os(iOS)
+            self?.receiveWatchBattery(applicationContext)
+            #endif
         }
     }
 
@@ -426,7 +506,8 @@ final class Connectivity: NSObject, WCSessionDelegate {
         let data = message["audioState"] as? Data
         let volumeChanged = message["volumeChanged"] as? Bool == true
         let hasReminder = message.keys.contains { $0.hasPrefix("reminder") || $0 == "watchReminderReport" }
-        guard data != nil || volumeChanged || hasReminder else { return }
+        let hasBattery = message["watchBattery"] != nil
+        guard data != nil || volumeChanged || hasReminder || hasBattery else { return }
         Task { @MainActor [weak self] in
             guard let self else { return }
             if let data, let reply = try? JSONDecoder().decode(AudioReply.self, from: data) {
@@ -434,10 +515,24 @@ final class Connectivity: NSObject, WCSessionDelegate {
             }
             if volumeChanged { self.remoteVolumeRevision &+= 1 }
             self.receiveReminderPayload(message)
+            #if os(iOS)
+            self.receiveWatchBattery(message)
+            #endif
         }
     }
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
+        #if os(watchOS)
+        if message["watchBatteryRequest"] as? Bool == true {
+            Task { @MainActor [weak self] in
+                guard let battery = self?.currentWatchBattery(), let data = try? JSONEncoder().encode(battery) else {
+                    replyHandler([:]); return
+                }
+                replyHandler(["watchBattery": data])
+            }
+            return
+        }
+        #endif
         if let value = message["reminderProbe"] as? String, let id = UUID(uuidString: value) {
             Task { @MainActor [weak self] in
                 replyHandler(["accepted": await self?.reminderProbe?(id) ?? false])
@@ -470,9 +565,14 @@ final class Connectivity: NSObject, WCSessionDelegate {
 
     #if os(iOS)
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
-    nonisolated func sessionDidDeactivate(_ session: WCSession) { session.activate() }
+    nonisolated func sessionDidDeactivate(_ session: WCSession) {
+        Task { @MainActor [weak self] in self?.clearWatchBattery(); session.activate() }
+    }
     nonisolated func sessionWatchStateDidChange(_ session: WCSession) {
-        Task { @MainActor [weak self] in self?.flush() }
+        Task { @MainActor [weak self] in
+            if !session.isPaired || !session.isWatchAppInstalled { self?.clearWatchBattery() }
+            self?.flush()
+        }
     }
     #endif
 

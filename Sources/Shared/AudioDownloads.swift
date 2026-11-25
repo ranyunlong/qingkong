@@ -23,7 +23,12 @@ enum AudioDownloadState: Equatable {
     var label: String {
         switch self {
         case .unavailable: "尚未完整缓存"
-        case .waitingForWiFi: "等待 Wi-Fi，可连接后重试"
+        case .waitingForWiFi:
+            #if os(macOS)
+            "等待允许的 Wi-Fi 或有线网络，可连接后重试"
+            #else
+            "等待 Wi-Fi，可连接后重试"
+            #endif
         case .waitingForConnection: "等待允许的网络，可取消后重试"
         case .downloading(let value): "下载中 \(Int(value * 100))%"
         case .verifying: "正在校验完整文件"
@@ -70,6 +75,13 @@ final class AudioDownloads {
     private(set) var states: [String: AudioDownloadState] = [:]
     private(set) var networkAvailable = false
     private(set) var isWiFi = false
+    #if os(macOS)
+    private(set) var hasCheckedNetwork = false
+    private(set) var hasFinishedRestoringDownloads = false
+    private(set) var isWired = false
+    private(set) var isExpensive = false
+    private(set) var isConstrained = false
+    #endif
     var wifiOnlyDownloads: Bool {
         didSet { defaults.set(wifiOnlyDownloads, forKey: "audio-wifi-only"); enforceNetworkPreference() }
     }
@@ -149,16 +161,52 @@ final class AudioDownloads {
         #if !os(watchOS)
         monitor.pathUpdateHandler = { [weak self] path in
             let available = path.status == .satisfied
+            #if os(macOS)
+            let wifi = path.usesInterfaceType(.wifi)
+            let wired = path.usesInterfaceType(.wiredEthernet)
+            let expensive = path.isExpensive
+            let constrained = path.isConstrained
+            Task { @MainActor in
+                self?.updateNetworkAvailability(available: available, wifi: wifi, wired: wired,
+                    expensive: expensive, constrained: constrained)
+            }
+            #else
             let wifi = path.usesInterfaceType(.wifi) && !path.isExpensive
             Task { @MainActor in
                 self?.networkAvailable = available; self?.isWiFi = wifi
                 self?.enforceNetworkPreference()
             }
+            #endif
         }
         if !testing { monitor.start(queue: DispatchQueue(label: "qingkong.audio-network")) }
         #endif
         for identity in records.keys { states[identity] = .verifying }
         Task { await verifyRestoredDownloads() }
+    }
+
+    #if os(macOS)
+    func updateNetworkAvailability(available: Bool, wifi: Bool, wired: Bool, expensive: Bool, constrained: Bool) {
+        hasCheckedNetwork = true
+        networkAvailable = available; isWiFi = wifi; isWired = wired
+        isExpensive = expensive; isConstrained = constrained
+        enforceNetworkPreference()
+    }
+    #endif
+
+    var allowsAutomaticCaching: Bool {
+        #if os(macOS)
+        networkAvailable && (isWiFi || isWired) && !isExpensive && !isConstrained
+        #else
+        isWiFi
+        #endif
+    }
+
+    private var preferredDownloadNetwork: Bool {
+        #if os(macOS)
+        isWiFi || isWired
+        #else
+        isWiFi
+        #endif
     }
 
     var storedRecords: [Record] {
@@ -196,7 +244,11 @@ final class AudioDownloads {
         throw DownloadError.message("请先在手表完整下载并校验这首音轨。手机缓存不能直接在手表离线播放。")
         #else
         guard networkAvailable else { throw DownloadError.message("当前没有网络，音轨尚未完整下载。") }
+        #if os(macOS)
+        guard preferredDownloadNetwork || allowCellular else { throw DownloadError.message("请连接 Wi-Fi 或有线网络后播放。") }
+        #else
         guard isWiFi || allowCellular else { throw DownloadError.message("当前使用蜂窝网络，确认流量使用后可在线播放。") }
+        #endif
         guard PublicContentURL.isHTTPS(track.audioURL) else { throw DownloadError.message("音源地址无效。") }
         return track.audioURL
         #endif
@@ -210,7 +262,7 @@ final class AudioDownloads {
 
     func automaticallyCacheAfterPlaybackStarts(_ track: PublicAudioTrack) {
         #if !os(watchOS)
-        guard isWiFi else { return }
+        guard allowsAutomaticCaching else { return }
         download(track, intent: .automatic)
         #endif
     }
@@ -238,7 +290,13 @@ final class AudioDownloads {
         guard intent == .manual else { return }
         #else
         guard networkAvailable else { states[track.cacheIdentity] = .failed("当前没有网络，请连接后重试。"); return }
+        #if os(macOS)
+        guard intent == .automatic ? allowsAutomaticCaching : (preferredDownloadNetwork || !wifiOnlyDownloads) else {
+            states[track.cacheIdentity] = .waitingForWiFi; return
+        }
+        #else
         guard isWiFi || (intent == .manual && !wifiOnlyDownloads) else { states[track.cacheIdentity] = .waitingForWiFi; return }
+        #endif
         #endif
         guard PublicContentURL.isHTTPS(track.audioURL) else { states[track.cacheIdentity] = .failed("音源地址无效。"); return }
         if let capacity = (try? FileManager.default.attributesOfFileSystem(forPath: directory.path)[.systemFreeSize] as? NSNumber)?.int64Value,
@@ -248,7 +306,10 @@ final class AudioDownloads {
         if states[track.cacheIdentity] == .verifying { return }
         var request = URLRequest(url: track.audioURL, cachePolicy: .reloadIgnoringLocalCacheData)
         request.allowsCellularAccess = intent == .manual && !wifiOnlyDownloads
-        #if os(watchOS)
+        #if os(macOS)
+        request.allowsExpensiveNetworkAccess = intent == .manual
+        request.allowsConstrainedNetworkAccess = intent == .manual
+        #elseif os(watchOS)
         request.allowsExpensiveNetworkAccess = !wifiOnlyDownloads
         request.allowsConstrainedNetworkAccess = !wifiOnlyDownloads
         #endif
@@ -312,6 +373,12 @@ final class AudioDownloads {
         // watchOS URLSession chooses a supported route, including the paired
         // phone's proxy. A low-level path probe cannot establish that route.
         if wifiOnlyDownloads { interruptForegroundDownloads() }
+        #elseif os(macOS)
+        for item in tasks.values where !networkAvailable ||
+            (item.intent == .automatic ? !allowsAutomaticCaching : (wifiOnlyDownloads && !preferredDownloadNetwork)) {
+            item.task.cancel(); tasks.removeValue(forKey: item.task.taskIdentifier)
+            states[item.track.cacheIdentity] = .waitingForWiFi
+        }
         #else
         for item in tasks.values where !isWiFi && (item.intent == .automatic || wifiOnlyDownloads) {
             item.task.cancel(); tasks.removeValue(forKey: item.task.taskIdentifier)
@@ -376,6 +443,9 @@ final class AudioDownloads {
     }
 
     private func verifyRestoredDownloads() async {
+        #if os(macOS)
+        defer { hasFinishedRestoringDownloads = true }
+        #endif
         // A persisted index alone cannot prove that a file is still complete after relaunch.
         for record in records.values {
             let url = directory.appending(path: record.fileName)

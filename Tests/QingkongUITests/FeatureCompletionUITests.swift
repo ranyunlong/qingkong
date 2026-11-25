@@ -98,6 +98,89 @@ final class FeatureCompletionUITests: XCTestCase {
     }
 
     @MainActor
+    func testLocalPlaybackSurvivesBackgroundAndForeground() {
+        let app = launch()
+        app.tabBars.buttons["助眠"].tap()
+        let toggle = app.buttons["player-toggle"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 5))
+        toggle.tap()
+        let playing = NSPredicate(format: "label == %@", "暂停播放")
+        expectation(for: playing, evaluatedWith: toggle)
+        waitForExpectations(timeout: 5)
+        defer { if toggle.isHittable && toggle.label == "暂停播放" { toggle.tap() } }
+        for _ in 0..<3 {
+            XCUIDevice.shared.press(.home)
+            XCTAssertTrue(app.wait(for: .runningBackground, timeout: 5))
+            app.activate()
+            XCTAssertTrue(toggle.waitForExistence(timeout: 5))
+            XCTAssertEqual(toggle.label, "暂停播放", "返回前台不应暂停正在播放的音乐")
+        }
+        capture(app, name: "手机-播放中前后台往返")
+    }
+
+    @MainActor
+    func testPhonePlayerControlsAndBottomContentDoNotOverlap() {
+        let app = launch()
+        app.tabBars.buttons["助眠"].tap()
+        let device = app.descendants(matching: .any).matching(identifier: "playback-device").firstMatch
+        let mode = app.buttons["playback-mode"]
+        XCTAssertTrue(device.waitForExistence(timeout: 5))
+        XCTAssertLessThan(device.frame.width, 70, "接力入口只保留图标")
+        XCTAssertLessThan(mode.frame.width, 60, "循环入口使用紧凑按钮")
+        app.buttons["player-toggle"].tap()
+        app.tabBars.buttons["今日"].tap()
+        let mini = app.buttons["mini-player-toggle"]
+        XCTAssertTrue(mini.waitForExistence(timeout: 5))
+        let refresh = app.buttons.matching(NSPredicate(format: "label == %@ OR label == %@", "刷新睡眠记录", "允许读取睡眠记录")).firstMatch
+        for _ in 0..<8 {
+            if refresh.exists && refresh.frame.maxY < mini.frame.minY { break }
+            app.swipeUp()
+        }
+        XCTAssertTrue(refresh.isHittable)
+        XCTAssertLessThan(refresh.frame.maxY, mini.frame.minY, "最后一个按钮可以完整滚动到播放条上方")
+        capture(app, name: "手机-底部播放条不遮挡睡眠刷新")
+        mini.tap()
+    }
+
+    @MainActor
+    func testWeeklySamplingNoteAndWatchPreviewLayout() {
+        let app = launch(demo: true)
+        app.buttons["open-settings"].tap()
+        let preview = app.staticTexts["手表团子页面预览"]
+        for _ in 0..<10 {
+            if preview.exists && preview.isHittable { break }
+            app.swipeUp()
+        }
+        XCTAssertTrue(preview.isHittable)
+        // Bring the complete preview into view without scrolling past it.
+        let distance = max(0, min(380, preview.frame.minY - 180))
+        if distance > 0 {
+            let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.75))
+            start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -distance)))
+        }
+        let metricTitles = ["hrv", "heartRate", "oxygen"].map { app.staticTexts["watch-preview-title-\($0)"] }
+        for title in metricTitles {
+            XCTAssertTrue(title.exists)
+            XCTAssertLessThan(title.frame.height, 16, "预览指标名称保持单行")
+        }
+        XCTAssertEqual(metricTitles[0].frame.midY, metricTitles[1].frame.midY, accuracy: 1)
+        XCTAssertEqual(metricTitles[1].frame.midY, metricTitles[2].frame.midY, accuracy: 1)
+        capture(app, name: "手机-手表预览三项指标")
+        app.buttons["完成"].tap()
+        app.tabBars.buttons["心情"].tap()
+        let weekly = app.buttons["每周回顾"]
+        reveal(weekly, in: app)
+        weekly.tap()
+        let notes = app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "缺失日期不参与计算"))
+        for _ in 0..<10 {
+            if notes.firstMatch.exists && notes.firstMatch.isHittable { break }
+            app.swipeUp()
+        }
+        XCTAssertEqual(notes.count, 1, "采样说明在整个健康趋势区只显示一条")
+        capture(app, name: "手机-每周回顾采样说明去重")
+    }
+
+    @MainActor
     private func launch(demo: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing", "--ui-reset"] + (demo ? ["--demo-health"] : [])

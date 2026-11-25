@@ -25,6 +25,18 @@ enum WidgetPlaybackError: LocalizedError {
 enum WidgetPlaybackController {
     static func perform(_ action: WidgetAudioAction, on player: AudioPlayer,
                         restoreSelection: () async throws -> Void) async throws {
+        if player.isDesktopControlled {
+            let command: AudioCommand.Action
+            switch action {
+            case .play: command = .play
+            case .pause: command = .pause
+            case .previous: command = .previous
+            case .next: command = .next
+            }
+            let receipt = await player.handle(AudioCommand(action: command))
+            if let error = receipt.error { throw WidgetPlaybackError.unavailable(error) }
+            return
+        }
         if action != .pause && !player.hasSelection { try await restoreSelection() }
         switch action {
         case .play:

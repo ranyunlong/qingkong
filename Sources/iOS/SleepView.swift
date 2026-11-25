@@ -34,11 +34,10 @@ struct SleepView: View {
                 AudioArtworkView(state: displayedState).frame(height: 225).clipShape(RoundedRectangle(cornerRadius: 28))
                 VStack(spacing: 12) {
                     Text(displayedState.displayTitle).font(.title2.weight(.semibold)).accessibilityIdentifier("current-track-title")
-                    if let track = app.player.onlineTrack ?? previewTrack {
-                        Text(app.player.buffering ? "正在加载音轨…" : app.downloads.state(for: track).label).font(.subheadline).foregroundStyle(Color.readableSecondary)
-                    } else {
-                        Text("\(app.player.state.track.subtitle) · 离线可用").font(.subheadline).foregroundStyle(Color.readableSecondary)
+                    if app.player.onlineTrack == nil && previewTrack == nil {
+                        Text(app.player.state.track.subtitle).font(.subheadline).foregroundStyle(Color.readableSecondary)
                     }
+                    playbackDeviceMenu
                     PlaybackProgressView(player: app.player, previewDuration: previewTrack?.durationSeconds)
                         .id(displayedState.onlineTrackID ?? displayedState.track.id)
                     GlassButtonGroup {
@@ -64,13 +63,18 @@ struct SleepView: View {
                                 }
                             }
                         } label: {
-                            Image(systemName: app.player.playbackMode.symbol).font(.system(size: 19, weight: .medium)).frame(width: 44, height: 44)
-                        }.qingkongGlassButton(shape: .circle)
+                            Image(systemName: app.player.playbackMode.symbol).font(.system(size: 16, weight: .medium)).frame(width: 20, height: 20)
+                        }.qingkongGlassButton(shape: .circle).controlSize(.small)
+                            .frame(minWidth: 44, minHeight: 44)
                             .accessibilityLabel("播放模式：\(app.player.playbackMode.title)")
                             .accessibilityHint("选择单曲循环、顺序循环或随机循环")
                             .accessibilityIdentifier("playback-mode")
                         Image(systemName: "speaker.fill")
-                        SystemVolumeControl(tint: app.scene.accent).frame(maxWidth: .infinity).frame(height: 44)
+                        if app.player.isDesktopControlled {
+                            DesktopVolumeSlider(player: app.player)
+                        } else {
+                            SystemVolumeControl(tint: app.scene.accent).frame(maxWidth: .infinity).frame(height: 44)
+                        }
                         Image(systemName: "speaker.wave.3.fill")
                     }.foregroundStyle(Color.readableSecondary)
                 }.frame(maxWidth: .infinity)
@@ -140,6 +144,25 @@ struct SleepView: View {
             let queue = app.content.albums.first { $0.id == track.albumID }.map { app.content.tracks(in: $0) } ?? [track]
             Task { await app.playOnline(track, queue: queue, allowCellular: allowCellular) }
         } catch { app.player.reportPlaybackError(error.localizedDescription) }
+    }
+
+    @ViewBuilder private var playbackDeviceMenu: some View {
+        if app.player.isDesktopControlled {
+            // Migrate an existing v2 Mac decoder before offering system AirPlay,
+            // preserving the existing acknowledgement and paused offline return.
+            Menu {
+                Button("切回 iPhone 并使用 AirPlay", systemImage: "iphone") {
+                    Task { await app.desktopSync.usePhone() }
+                }
+            } label: {
+                Image(systemName: "airplay.audio").frame(width: 22, height: 22)
+            }
+            .qingkongGlassButton(shape: .circle).controlSize(.small)
+            .frame(minWidth: 44, minHeight: 44).disabled(app.desktopSync.isTransferring)
+            .accessibilityLabel("播放设备").accessibilityIdentifier("playback-device")
+        } else {
+            PhoneAudioRoutePicker(tint: app.scene.accent)
+        }
     }
 
     private func countdown(_ deadline: SleepDeadline, at date: Date) -> String {
@@ -225,5 +248,33 @@ private final class CenteredVolumeView: MPVolumeView {
         var rect = super.volumeSliderRect(forBounds: bounds)
         rect.origin.y = bounds.midY - rect.height / 2
         return rect
+    }
+}
+
+private struct DesktopVolumeSlider: View {
+    let player: AudioPlayer
+    @State private var draft: Double?
+    @State private var editing = false
+    @State private var revision = 0
+    var body: some View {
+        Slider(value: Binding(get: { draft ?? Double(player.state.volume) }, set: { value in
+            draft = value
+            if !editing { commit(value) }
+        }), in: 0...1, onEditingChanged: { value in
+            editing = value
+            if !value { commit(draft ?? Double(player.state.volume)) }
+        }).frame(maxWidth: .infinity, minHeight: 44)
+            .disabled(player.isDesktopControlled && !player.desktopConnected)
+            .accessibilityLabel("播放音量")
+            .accessibilityIdentifier("desktop-volume")
+    }
+
+    private func commit(_ value: Double) {
+        revision += 1
+        let requestRevision = revision
+        Task {
+            _ = await player.handle(AudioCommand(action: .volume, amount: value))
+            if revision == requestRevision { draft = nil }
+        }
     }
 }
